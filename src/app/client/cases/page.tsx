@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import ClientLayout, { useActiveCase } from "@/components/client-layout";
 import { Icon } from "@/components/icons";
-import { Avatar, CaseTag } from "@/components/ui";
+import { Avatar } from "@/components/ui";
 import { CASE_STATUS, CASE_TYPES, CLIENT_ATTYS, CLIENT_CASES } from "@/lib/data";
 
 export default function ClientCases() {

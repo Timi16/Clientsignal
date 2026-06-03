@@ -127,7 +127,7 @@ export const CLIENT_CASES: ClientCase[] = [
   },
   {
     id: "CS-4310", type: "family", matter: "Child custody consultation", city: "Austin, TX", opened: "2 months ago",
-    status: "closed", stage: 7, strength: 88, atty: "mitchell", unread: 0,
+    status: "closed", stage: 7, strength: 88, atty: "adams", unread: 0,
     summary: "Sought guidance on a joint-custody arrangement. Matter resolved — representation completed.",
     docs: [
       { name: "Custody agreement", status: "done", file: "custody_final.pdf", req: true },
@@ -138,6 +138,7 @@ export const CLIENT_CASES: ClientCase[] = [
 export const CLIENT_ATTYS: Record<string, { name: string; firm: string; years: number; bar: string; rating: string; responses: string; areas: string[]; bio: string }> = {
   mitchell: { name: "Sarah Mitchell", firm: "Mitchell & Cole LLP", years: 12, bar: "TX #24087", rating: "4.9", responses: "~4 min", areas: ["injury", "employment"], bio: "Board-certified personal-injury attorney with 12 years recovering compensation for accident victims across Central Texas. Mitchell & Cole has settled over $40M in injury claims." },
   okonkwo: { name: "David Okonkwo", firm: "Okonkwo Employment Law", years: 9, bar: "TX #31204", rating: "4.8", responses: "~11 min", areas: ["employment"], bio: "Employee-side litigator focused on wrongful termination, discrimination and wage disputes. Recovered settlements for 300+ Texas workers." },
+  adams: { name: "Renee Adams", firm: "Adams Family Law", years: 11, bar: "GA #559210", rating: "4.9", responses: "~8 min", areas: ["family"], bio: "Family-law attorney focused on custody, divorce, support, and protective-order matters. Adams Family Law is known for practical negotiation and careful court preparation for parents." },
   reyes: { name: "Elena Reyes", firm: "Reyes Immigration Group", years: 15, bar: "TX #19882", rating: "5.0", responses: "~7 min", areas: ["immigration"], bio: "Immigration specialist handling visas, green cards and deportation defense, with a 94% approval rate across 1,200+ cases." },
 };
 

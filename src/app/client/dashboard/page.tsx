@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import ClientLayout, { useActiveCase, ME, buildTimeline } from "@/components/client-layout";
+import ClientLayout, { useActiveCase, ME } from "@/components/client-layout";
 import { Icon } from "@/components/icons";
 import { Avatar, Mark, Verified, ScoreRing, CaseTag } from "@/components/ui";
 import StageTracker from "@/components/stage-tracker";
@@ -13,6 +13,7 @@ export default function ClientDashboard() {
   const st = CASE_STATUS[c.status];
   const atty = c.atty ? CLIENT_ATTYS[c.atty] : null;
   const docsNeeded = c.docs.filter(d => d.status !== "done");
+  const docsDone = c.docs.filter(d => d.status === "done").length;
 
   const nextSteps: { t: string; d: string; icon: string; cta: string; dest: string; hot: boolean }[] = [];
   if (c.unread) nextSteps.push({ t: `Reply to ${atty ? atty.name.split(" ")[0] + "'s" : "your attorney's"} message`, d: "They're waiting to hear back from you", icon: "message", cta: "Reply", dest: "/client/messages", hot: true });
@@ -20,6 +21,7 @@ export default function ClientDashboard() {
   if (c.status === "matched") nextSteps.push({ t: "Book your free consultation", d: "Pick a time that works for you", icon: "clock", cta: "Book", dest: "/client/messages", hot: false });
   if (c.status === "pending") nextSteps.push({ t: "We're finding your attorney", d: "You'll be notified the moment you're matched", icon: "zap", cta: "View", dest: "/client/timeline", hot: true });
   while (nextSteps.length < 2) nextSteps.push({ t: "Add more case details", d: "Stronger detail means a stronger match", icon: "pen", cta: "Edit", dest: "/client/documents", hot: false });
+  const primaryStep = nextSteps[0];
 
   return (
     <ClientLayout title="My Case">
@@ -41,6 +43,52 @@ export default function ClientDashboard() {
           <span className="mono" style={{ fontSize: 12.5, color: "var(--text-3)" }}>Case {c.id} · opened {c.opened}</span>
         </div>
         <StageTracker stage={c.stage} />
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 16, marginBottom: 22 }} className="stat-grid">
+        {[
+          ["Attorney", atty ? atty.name : "Matching", atty ? atty.responses + " reply" : "In progress", "user", "var(--signal)"],
+          ["Documents", `${docsDone}/${c.docs.length} added`, docsNeeded.length ? `${docsNeeded.length} still needed` : "Complete", "doc", docsNeeded.length ? "var(--amber)" : "var(--verified)"],
+          ["Next action", primaryStep.cta, primaryStep.t, primaryStep.icon, primaryStep.hot ? "var(--signal)" : "var(--pine)"],
+          ["Case strength", `${c.strength}%`, c.strength >= 80 ? "Strong details" : "Add more detail", "zap", c.strength >= 80 ? "var(--verified)" : "var(--amber)"],
+        ].map(([label, value, detail, icon, color]) => (
+          <button
+            key={label}
+            className="card"
+            onClick={() => {
+              if (label === "Attorney") router.push("/client/attorney");
+              if (label === "Documents") router.push("/client/documents");
+              if (label === "Next action") router.push(primaryStep.dest);
+              if (label === "Case strength") router.push("/client/documents");
+            }}
+            style={{
+              padding: 20,
+              minHeight: 132,
+              textAlign: "left",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "space-between",
+              transition: "transform .15s, box-shadow .15s",
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.transform = "translateY(-2px)";
+              e.currentTarget.style.boxShadow = "var(--sh-md)";
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.transform = "none";
+              e.currentTarget.style.boxShadow = "none";
+            }}
+          >
+            <div className="row between" style={{ gap: 12 }}>
+              <span className="eyebrow" style={{ fontSize: 10 }}>{label}</span>
+              <span style={{ color }}><Icon name={icon} size={18} /></span>
+            </div>
+            <div className="stack" style={{ gap: 5 }}>
+              <strong style={{ fontSize: 17, color: "var(--ink)" }}>{value}</strong>
+              <span style={{ fontSize: 12.5, color: "var(--text-3)", lineHeight: 1.35 }}>{detail}</span>
+            </div>
+          </button>
+        ))}
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr", gap: 22 }} className="dash-grid">
