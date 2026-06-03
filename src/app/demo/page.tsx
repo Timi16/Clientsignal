@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Logo, Mark, Field, LField, inpStyle } from "@/components/ui";
+import { Logo, Field, LField, inpStyle } from "@/components/ui";
 import { Icon } from "@/components/icons";
 
 const AVAIL_DAYS = [3, 4, 5, 10, 11, 12, 17, 18, 19, 24, 25, 26];
@@ -89,52 +89,16 @@ export default function BookDemo() {
                 position: "relative",
               }}
             >
-              <Mark size={36} live />
-              <div>
-                <p
-                  style={{
-                    fontSize: 12,
-                    fontWeight: 600,
-                    letterSpacing: "0.08em",
-                    textTransform: "uppercase",
-                    color: "var(--gold-soft)",
-                    marginBottom: 6,
-                  }}
-                >
-                  ClientSignal
-                </p>
-                <h2
-                  className="display"
-                  style={{ fontSize: 24, color: "#fff", lineHeight: 1.15 }}
-                >
-                  Platform Demo
-                </h2>
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 14, marginTop: 8 }}>
-                <div className="row" style={{ gap: 10, color: "rgba(234,240,249,0.7)", fontSize: 14 }}>
-                  <Icon name="clock" size={17} color="rgba(234,240,249,0.55)" />
-                  30 minutes
+              <button onClick={() => router.push("/")} style={{ position: "relative", zIndex: 1, marginBottom: 26 }}><Logo light size={24} /></button>
+              <div style={{ position: "relative", zIndex: 1 }}>
+                <span style={{ fontSize: 13.5, color: "rgba(234,240,249,0.6)" }}>ClientSignal Sales</span>
+                <h1 style={{ fontSize: 25, fontWeight: 700, margin: "6px 0 18px", letterSpacing: "-0.01em" }}>Product demo &amp; walkthrough</h1>
+                <div className="stack" style={{ gap: 13 }}>
+                  {[["clock", "30 minutes"], ["phone", "Google Meet (link sent on confirm)"], ["briefcase", "Tailored to your practice area"]].map(([ic, t]) => (
+                    <div key={t} className="row" style={{ gap: 11, fontSize: 14, color: "rgba(234,240,249,0.85)" }}><Icon name={ic} size={17} color="var(--gold-soft)" /> {t}</div>
+                  ))}
                 </div>
-                <div className="row" style={{ gap: 10, color: "rgba(234,240,249,0.7)", fontSize: 14 }}>
-                  <Icon name="phone" size={17} color="rgba(234,240,249,0.55)" />
-                  Video call (Google Meet)
-                </div>
-                <div className="row" style={{ gap: 10, color: "rgba(234,240,249,0.7)", fontSize: 14 }}>
-                  <Icon name="message" size={17} color="rgba(234,240,249,0.55)" />
-                  Q&A with a product specialist
-                </div>
-              </div>
-              <div
-                style={{
-                  marginTop: "auto",
-                  borderTop: "1px solid rgba(255,255,255,0.1)",
-                  paddingTop: 20,
-                  fontSize: 13,
-                  color: "rgba(234,240,249,0.45)",
-                  lineHeight: 1.5,
-                }}
-              >
-                See how ClientSignal routes verified leads to your firm in under 60 seconds. No commitment required.
+                <p style={{ fontSize: 13.5, color: "rgba(234,240,249,0.6)", lineHeight: 1.6, marginTop: 22 }}>See how verified, scored leads land in your inbox — and how fast you can respond and win the case.</p>
               </div>
             </div>
 

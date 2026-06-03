@@ -352,7 +352,7 @@ export default function OnboardPage() {
 
           {/* step 5: billing setup */}
           {step === 5 && (
-            <div className="stack" style={{ gap: 22 }}>
+            <div className="stack rise" style={{ gap: 22 }}>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
                 <div style={{ gridColumn: "1 / -1" }}>
                   <Field label="Card number" placeholder="4242 4242 4242 4242" icon="card" />
