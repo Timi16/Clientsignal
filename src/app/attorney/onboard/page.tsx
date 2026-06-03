@@ -95,12 +95,12 @@ export default function OnboardPage() {
                   fontSize: 14,
                   fontWeight: 600,
                   color: isDone
-                    ? "var(--gold-soft)"
+                    ? "var(--signal-glow)"
                     : isActive
                     ? "#fff"
                     : "rgba(234,240,249,0.3)",
                   background: isActive ? "rgba(255,255,255,0.06)" : "transparent",
-                  border: isActive ? "1.5px solid var(--gold)" : "1.5px solid transparent",
+                  border: isActive ? "1.5px solid var(--signal)" : "1.5px solid transparent",
                   cursor: isFuture ? "default" : "pointer",
                   width: "100%",
                   textAlign: "left",
@@ -113,7 +113,7 @@ export default function OnboardPage() {
                       width: 24,
                       height: 24,
                       borderRadius: "50%",
-                      background: "var(--gold)",
+                      background: "var(--signal)",
                       display: "grid",
                       placeItems: "center",
                       flex: "none",
@@ -127,13 +127,13 @@ export default function OnboardPage() {
                       width: 24,
                       height: 24,
                       borderRadius: "50%",
-                      border: isActive ? "2px solid var(--gold)" : "2px solid rgba(255,255,255,0.12)",
+                      border: isActive ? "2px solid var(--signal)" : "2px solid rgba(255,255,255,0.12)",
                       display: "grid",
                       placeItems: "center",
                       flex: "none",
                       fontSize: 12,
                       fontWeight: 700,
-                      color: isActive ? "var(--gold-soft)" : "rgba(234,240,249,0.25)",
+                      color: isActive ? "var(--signal-glow)" : "rgba(234,240,249,0.25)",
                     }}
                   >
                     {i + 1}

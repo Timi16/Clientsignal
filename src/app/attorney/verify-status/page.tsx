@@ -119,7 +119,7 @@ export default function VerifyStatusPage() {
                     borderRadius: "50%",
                     background:
                       s.status === "done"
-                        ? "var(--gold)"
+                        ? "var(--signal)"
                         : "rgba(255,255,255,0.08)",
                     display: "grid",
                     placeItems: "center",
@@ -142,7 +142,7 @@ export default function VerifyStatusPage() {
                     fontWeight: 600,
                     color:
                       s.status === "done"
-                        ? "var(--gold-soft)"
+                        ? "var(--signal-glow)"
                         : "rgba(234,240,249,0.35)",
                   }}
                 >
@@ -156,7 +156,7 @@ export default function VerifyStatusPage() {
                     height: 2,
                     background:
                       STEPS[i + 1].status === "done"
-                        ? "var(--gold)"
+                        ? "var(--signal)"
                         : "rgba(255,255,255,0.1)",
                     margin: "0 12px",
                     marginBottom: 20,
