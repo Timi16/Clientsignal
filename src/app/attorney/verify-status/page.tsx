@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Icon } from "@/components/icons";
 import { Logo } from "@/components/ui";
@@ -40,9 +41,9 @@ export default function VerifyStatusPage() {
 
       <div style={{ position: "relative", textAlign: "center", maxWidth: 480 }}>
         {/* logo */}
-        <div style={{ display: "flex", justifyContent: "center", marginBottom: 48 }}>
+        <Link href="/" aria-label="Go to home" style={{ display: "flex", justifyContent: "center", marginBottom: 48 }}>
           <Logo light size={30} sub />
-        </div>
+        </Link>
 
         {/* clock icon */}
         <div
@@ -169,7 +170,7 @@ export default function VerifyStatusPage() {
 
         {/* preview button */}
         <button
-          className="btn btn-gold btn-lg"
+          className="btn btn-signal btn-lg"
           onClick={() => router.push("/attorney/dashboard")}
         >
           Preview my dashboard

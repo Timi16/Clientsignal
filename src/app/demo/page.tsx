@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Logo, Field, LField, inpStyle } from "@/components/ui";
 import { Icon } from "@/components/icons";
@@ -64,7 +65,9 @@ export default function BookDemo() {
             gap: 28,
           }}
         >
-          <Logo size={32} />
+          <Link href="/" aria-label="Go to home">
+            <Logo size={32} />
+          </Link>
 
           <div
             className="card cal-grid"
@@ -89,7 +92,7 @@ export default function BookDemo() {
                 position: "relative",
               }}
             >
-              <button onClick={() => router.push("/")} style={{ position: "relative", zIndex: 1, marginBottom: 26 }}><Logo light size={24} /></button>
+              <Link href="/" aria-label="Go to home" style={{ position: "relative", zIndex: 1, marginBottom: 26, display: "flex", alignSelf: "flex-start" }}><Logo light size={24} /></Link>
               <div style={{ position: "relative", zIndex: 1 }}>
                 <span style={{ fontSize: 13.5, color: "rgba(234,240,249,0.6)" }}>ClientSignal Sales</span>
                 <h1 style={{ fontSize: 25, fontWeight: 700, margin: "6px 0 18px", letterSpacing: "-0.01em" }}>Product demo &amp; walkthrough</h1>
@@ -314,7 +317,9 @@ export default function BookDemo() {
           </button>
 
           <div style={{ textAlign: "center" }}>
-            <Logo size={32} />
+            <Link href="/" aria-label="Go to home" style={{ display: "inline-flex" }}>
+              <Logo size={32} />
+            </Link>
             <h2
               className="display"
               style={{ fontSize: 26, color: "var(--ink)", marginTop: 20, marginBottom: 6 }}

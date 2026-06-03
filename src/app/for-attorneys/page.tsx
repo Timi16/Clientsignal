@@ -199,7 +199,7 @@ export default function ForAttorneys() {
                 Whether you need legal help or you&apos;re ready to respond to leads — get matched in minutes.
               </p>
               <div className="row" style={{ gap: 14, flexWrap: "wrap" }}>
-                <button className="btn btn-gold btn-lg" onClick={() => go("/attorney/signup")}>Get started</button>
+                <button className="btn btn-signal btn-lg" onClick={() => go("/attorney/signup")}>Get started</button>
                 <button className="btn btn-ghost-light btn-lg" onClick={() => go("/demo")}>Book a demo</button>
               </div>
             </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Logo, ChooserArt } from "@/components/ui";
 import { Icon } from "@/components/icons";
@@ -30,7 +31,9 @@ export default function GetStarted() {
         }}
       >
         {/* Logo */}
-        <Logo size={32} />
+        <Link href="/" aria-label="Go to home">
+          <Logo size={32} />
+        </Link>
 
         {/* Heading */}
         <div style={{ textAlign: "center" }}>
@@ -152,13 +155,13 @@ export default function GetStarted() {
                 width: 40,
                 height: 40,
                 borderRadius: "50%",
-                background: "var(--gold-tint)",
+                background: "var(--signal-tint)",
                 display: "grid",
                 placeItems: "center",
                 flexShrink: 0,
               }}
             >
-              <Icon name="arrowR" size={18} color="var(--gold-deep)" />
+              <Icon name="arrowR" size={18} color="var(--signal)" />
             </div>
           </button>
         </div>

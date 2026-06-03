@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { Icon } from "@/components/icons";
 import { Logo, Verified, Avatar } from "@/components/ui";
@@ -45,9 +46,9 @@ export default function AppLayout({
           overflowY: "auto",
         }}
       >
-        <div style={{ padding: "0 8px", marginBottom: 28 }}>
+        <Link href="/" aria-label="Go to home" style={{ padding: "0 8px", marginBottom: 28, display: "flex" }}>
           <Logo light size={28} sub />
-        </div>
+        </Link>
 
         <nav className="stack" style={{ gap: 2, flex: 1 }}>
           {NAV.map((n) => {

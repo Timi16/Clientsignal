@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Logo, Field } from "@/components/ui";
 import { Icon } from "@/components/icons";
@@ -35,9 +36,9 @@ function AuthBrandPanelInternal() {
         }}
       />
 
-      <div style={{ position: "relative", zIndex: 1 }}>
+      <Link href="/" aria-label="Go to home" style={{ position: "relative", zIndex: 1, display: "flex", alignSelf: "flex-start" }}>
         <Logo light size={30} sub />
-      </div>
+      </Link>
 
       <div
         style={{

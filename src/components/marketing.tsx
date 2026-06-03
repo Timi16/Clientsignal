@@ -288,7 +288,9 @@ export function Footer() {
         }}>
           {/* Brand col */}
           <div className="stack" style={{ gap: 18 }}>
-            <Logo light size={26} sub />
+            <Link href="/" aria-label="Go to home" style={{ display: "flex", alignSelf: "flex-start" }}>
+              <Logo light size={26} sub />
+            </Link>
             <p style={{ fontSize: 14, color: "rgba(234,240,249,0.55)", lineHeight: 1.7, maxWidth: 280 }}>
               The modern intake and lead-routing platform for attorneys.
               Verified leads, scored cases, delivered instantly.

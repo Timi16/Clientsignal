@@ -43,13 +43,13 @@ export default function ClientDashboard() {
         <StageTracker stage={c.stage} />
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr", gap: 18 }} className="dash-grid">
+      <div style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr", gap: 22 }} className="dash-grid">
         {/* left: next steps + attorney */}
-        <div className="stack" style={{ gap: 18 }}>
+        <div className="stack" style={{ gap: 22 }}>
           {atty ? (
-            <div className="card" style={{ padding: 24, background: "var(--pine)", color: "#fff" }}>
+            <div className="card" style={{ padding: 30, minHeight: 226, background: "var(--pine)", color: "#fff" }}>
               <span className="eyebrow" style={{ color: "var(--gold-soft)" }}>Your attorney</span>
-              <div className="row" style={{ gap: 15, marginTop: 14 }}>
+              <div className="row" style={{ gap: 17, marginTop: 18 }}>
                 <Avatar name={atty.name} size={60} />
                 <div className="stack" style={{ gap: 4 }}>
                   <div className="row" style={{ gap: 7 }}><strong style={{ fontSize: 18 }}>{atty.name}</strong><Verified size={16} /></div>
@@ -57,13 +57,13 @@ export default function ClientDashboard() {
                   <span className="pill" style={{ background: "rgba(212,160,23,0.18)", color: "var(--gold-soft)", fontSize: 11, padding: "3px 9px", marginTop: 4 }}>Verified Attorney — License Confirmed</span>
                 </div>
               </div>
-              <div className="row" style={{ gap: 10, marginTop: 18 }}>
+              <div className="row" style={{ gap: 12, marginTop: 24 }}>
                 <button className="btn btn-signal" style={{ flex: 1 }} onClick={() => router.push("/client/messages")}><Icon name="message" size={16} /> Message {atty.name.split(" ")[0]}</button>
                 <button className="btn btn-ghost-light" onClick={() => router.push("/client/attorney")}>View profile</button>
               </div>
             </div>
           ) : (
-            <div className="card" style={{ padding: 24, background: "var(--pine)", color: "#fff", textAlign: "center" }}>
+            <div className="card" style={{ padding: 30, minHeight: 226, background: "var(--pine)", color: "#fff", textAlign: "center" }}>
               <div className="stack" style={{ alignItems: "center", gap: 12 }}>
                 <Mark size={48} live />
                 <strong style={{ fontSize: 17 }}>Finding your attorney…</strong>
@@ -74,14 +74,14 @@ export default function ClientDashboard() {
           )}
 
           {/* next steps */}
-          <div className="card" style={{ padding: 22 }}>
-            <div className="row between" style={{ marginBottom: 16 }}>
+          <div className="card" style={{ padding: 26, minHeight: 310 }}>
+            <div className="row between" style={{ marginBottom: 20 }}>
               <strong style={{ fontSize: 16 }}>What to do next</strong>
               <button onClick={() => router.push("/client/documents")} style={{ fontSize: 13, color: "var(--signal)", fontWeight: 600 }} className="row gap-1">Documents <Icon name="arrowR" size={14} /></button>
             </div>
-            <div className="stack" style={{ gap: 11 }}>
+            <div className="stack" style={{ gap: 14 }}>
               {nextSteps.slice(0, 3).map((s, i) => (
-                <div key={i} className="row between" style={{ padding: 14, borderRadius: 12, border: "1px solid var(--line)", background: s.hot ? "var(--blue-tint)" : "var(--card)" }}>
+                <div key={i} className="row between" style={{ padding: 18, minHeight: 78, borderRadius: 12, border: "1px solid var(--line)", background: s.hot ? "var(--blue-tint)" : "var(--card)" }}>
                   <div className="row" style={{ gap: 12 }}>
                     <div style={{ width: 38, height: 38, borderRadius: 10, background: s.hot ? "var(--signal)" : "var(--paper-2)", color: s.hot ? "#fff" : "var(--pine)", display: "grid", placeItems: "center", flex: "none" }}><Icon name={s.icon} size={18} /></div>
                     <div className="stack" style={{ gap: 1 }}><strong style={{ fontSize: 14.5 }}>{s.t}</strong><span style={{ fontSize: 12.5, color: "var(--text-3)" }}>{s.d}</span></div>
@@ -94,21 +94,21 @@ export default function ClientDashboard() {
         </div>
 
         {/* right: case summary */}
-        <div className="stack" style={{ gap: 18 }}>
-          <div className="card" style={{ padding: 22 }}>
-            <strong style={{ fontSize: 15, display: "block", marginBottom: 16 }}>Case summary</strong>
-            <p style={{ fontSize: 13.5, color: "var(--text-2)", lineHeight: 1.55, marginBottom: 16 }}>{c.summary}</p>
-            <div className="stack" style={{ gap: 13 }}>
+        <div className="stack" style={{ gap: 22 }}>
+          <div className="card" style={{ padding: 26, minHeight: 420 }}>
+            <strong style={{ fontSize: 15, display: "block", marginBottom: 18 }}>Case summary</strong>
+            <p style={{ fontSize: 13.5, color: "var(--text-2)", lineHeight: 1.65, marginBottom: 20 }}>{c.summary}</p>
+            <div className="stack" style={{ gap: 15 }}>
               {([["Type", CASE_TYPES[c.type]?.label], ["Matter", c.matter], ["Location", c.city], ["Opened", c.opened]] as [string, string][]).map(([k, v]) => (
                 <div key={k} className="row between" style={{ fontSize: 13.5, paddingBottom: 11, borderBottom: "1px solid var(--line)" }}><span style={{ color: "var(--text-3)" }}>{k}</span><strong style={{ textAlign: "right", maxWidth: 160 }}>{v}</strong></div>
               ))}
             </div>
-            <div className="row" style={{ gap: 13, marginTop: 16, padding: 14, borderRadius: 12, background: c.strength >= 80 ? "var(--verified-tint)" : "var(--amber-tint)" }}>
+            <div className="row" style={{ gap: 14, marginTop: 22, padding: 18, borderRadius: 12, background: c.strength >= 80 ? "var(--verified-tint)" : "var(--amber-tint)" }}>
               <ScoreRing value={c.strength} size={48} stroke={5} color={c.strength >= 80 ? "var(--verified)" : "var(--amber)"} />
               <div className="stack" style={{ gap: 2 }}><strong style={{ fontSize: 14, color: c.strength >= 80 ? "var(--verified)" : "var(--amber)" }}>{c.strength >= 80 ? "Strong case" : "Good case"}</strong><span style={{ fontSize: 12.5, color: "var(--text-2)" }}>Your details &amp; documents shape your case strength.</span></div>
             </div>
           </div>
-          <div className="card" style={{ padding: 20 }}>
+          <div className="card" style={{ padding: 24, minHeight: 128 }}>
             <div className="row" style={{ gap: 10 }}><Icon name="lock" size={18} color="var(--pine)" /><strong style={{ fontSize: 14 }}>Private &amp; secure</strong></div>
             <p style={{ fontSize: 13, color: "var(--text-2)", lineHeight: 1.55, marginTop: 9 }}>Your information is encrypted and shared only with your matched attorney. ClientSignal never sells your data.</p>
           </div>

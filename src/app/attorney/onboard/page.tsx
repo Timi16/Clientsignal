@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Icon } from "@/components/icons";
 import { Logo, Field, LField, inpStyle } from "@/components/ui";
@@ -68,9 +69,9 @@ export default function OnboardPage() {
           gap: 8,
         }}
       >
-        <div style={{ marginBottom: 40 }}>
+        <Link href="/" aria-label="Go to home" style={{ marginBottom: 40, display: "flex" }}>
           <Logo light size={28} sub />
-        </div>
+        </Link>
         <div style={{ fontSize: 12, fontWeight: 600, color: "rgba(234,240,249,0.4)", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 16 }}>
           Setup progress
         </div>

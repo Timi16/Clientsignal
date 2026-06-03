@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Logo, Field } from "@/components/ui";
 import { Icon } from "@/components/icons";
@@ -54,9 +55,9 @@ export default function ClientSignup() {
         />
 
         {/* Logo at top */}
-        <div style={{ position: "absolute", top: 44, left: 40, zIndex: 1 }}>
+        <Link href="/" aria-label="Go to home" style={{ position: "absolute", top: 44, left: 40, zIndex: 1 }}>
           <Logo light size={30} sub />
-        </div>
+        </Link>
 
         {/* Bottom text */}
         <div style={{ position: "relative", zIndex: 1, maxWidth: 380 }}>

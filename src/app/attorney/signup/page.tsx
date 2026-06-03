@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Logo, Avatar, Verified, Field, LField, inpStyle } from "@/components/ui";
 import { Icon } from "@/components/icons";
@@ -35,9 +36,9 @@ function AuthBrandPanel() {
         }}
       />
 
-      <div style={{ position: "relative", zIndex: 1 }}>
+      <Link href="/" aria-label="Go to home" style={{ position: "relative", zIndex: 1, display: "flex", alignSelf: "flex-start" }}>
         <Logo light size={30} sub />
-      </div>
+      </Link>
 
       <div style={{ position: "relative", zIndex: 1, flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", gap: 32, maxWidth: 400 }}>
         {/* Quote */}
@@ -159,8 +160,8 @@ export default function AttorneySignup() {
           <span
             className="pill"
             style={{
-              background: "var(--gold-tint)",
-              color: "var(--gold-text)",
+              background: "var(--signal-tint)",
+              color: "var(--signal)",
               alignSelf: "flex-start",
             }}
           >
@@ -169,7 +170,7 @@ export default function AttorneySignup() {
                 width: 7,
                 height: 7,
                 borderRadius: "50%",
-                background: "var(--gold)",
+                background: "var(--signal)",
               }}
             />
             Join as a verified attorney
@@ -228,12 +229,12 @@ export default function AttorneySignup() {
 
             {/* Submit */}
             <button
-              className="btn btn-gold btn-lg"
+              className="btn btn-signal btn-lg"
               style={{ width: "100%", marginTop: 4 }}
               onClick={() => router.push("/attorney/onboard")}
             >
               Create account &amp; continue
-              <Icon name="arrowR" size={17} color="var(--on-gold)" />
+              <Icon name="arrowR" size={17} color="#fff" />
             </button>
           </div>
 

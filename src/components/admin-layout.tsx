@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { Icon } from "@/components/icons";
 import { Logo, Avatar } from "@/components/ui";
@@ -44,9 +45,9 @@ export default function AdminLayout({
           overflowY: "auto",
         }}
       >
-        <div style={{ padding: "0 8px", marginBottom: 10 }}>
+        <Link href="/" aria-label="Go to home" style={{ padding: "0 8px", marginBottom: 10, display: "flex" }}>
           <Logo light size={28} sub />
-        </div>
+        </Link>
 
         {/* admin badge */}
         <div style={{ padding: "0 8px", marginBottom: 22 }}>

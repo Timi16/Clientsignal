@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Logo, Avatar, Verified, Field } from "@/components/ui";
 import { Icon } from "@/components/icons";
@@ -38,9 +39,9 @@ function AuthBrandPanel({ variant = "attorney" }: { variant?: "attorney" | "inte
       />
 
       {/* Content */}
-      <div style={{ position: "relative", zIndex: 1 }}>
+      <Link href="/" aria-label="Go to home" style={{ position: "relative", zIndex: 1, display: "flex", alignSelf: "flex-start" }}>
         <Logo light size={30} sub />
-      </div>
+      </Link>
 
       <div style={{ position: "relative", zIndex: 1, flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", gap: 32, maxWidth: 400 }}>
         {isInternal ? (

@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, ReactNode } from "react";
+import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { Icon } from "@/components/icons";
 import { Logo, Mark, CaseTag, Avatar } from "@/components/ui";
@@ -119,9 +120,9 @@ export default function ClientLayout({
           }}
         >
           {/* Logo */}
-          <div style={{ padding: "22px 22px 18px" }}>
+          <Link href="/" aria-label="Go to home" style={{ padding: "22px 22px 18px", display: "flex" }}>
             <Logo size={28} />
-          </div>
+          </Link>
 
           {/* Case selector card */}
           <div style={{ padding: "0 16px", marginBottom: 8 }}>

@@ -187,9 +187,9 @@ export function ChooserArt({ kind }: { kind: string }) {
   }
   return (
     <svg width="56" height="56" viewBox="0 0 56 56" fill="none" aria-hidden="true">
-      <rect width="56" height="56" rx="16" fill="var(--gold-tint)" />
-      <path d="M28 12l13 6.5v6c0 8-5.5 13.5-13 16-7.5-2.5-13-8-13-16v-6L28 12z" fill="none" stroke="var(--gold-deep)" strokeWidth="2.4" strokeLinejoin="round" />
-      <path d="M22 28l4 4 9-9" stroke="var(--gold-deep)" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
+      <rect width="56" height="56" rx="16" fill="var(--signal-tint)" />
+      <path d="M28 12l13 6.5v6c0 8-5.5 13.5-13 16-7.5-2.5-13-8-13-16v-6L28 12z" fill="none" stroke="var(--signal)" strokeWidth="2.4" strokeLinejoin="round" />
+      <path d="M22 28l4 4 9-9" stroke="var(--signal)" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }

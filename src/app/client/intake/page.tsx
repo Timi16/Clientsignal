@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Icon } from "@/components/icons";
 import { Logo, Mark, ScoreRing, Verified, Avatar, CaseTag, LField, inpStyle } from "@/components/ui";
@@ -31,7 +32,7 @@ function IntakeDone({ data, score, urgency, inDashboard }: { data: Record<string
 
   return (
     <div className="thin-scroll" style={{ height: "100vh", overflowY: "auto", background: "var(--paper)" }}>
-      <div className="row" style={{ padding: "20px 28px", borderBottom: "1px solid var(--line)" }}><Logo size={26} /></div>
+      <div className="row" style={{ padding: "20px 28px", borderBottom: "1px solid var(--line)" }}><Link href="/" aria-label="Go to home"><Logo size={26} /></Link></div>
       <div className="wrap" style={{ maxWidth: 620, paddingTop: 50, paddingBottom: 70 }}>
         <div className="rise stack" style={{ alignItems: "center", textAlign: "center", gap: 18, marginBottom: 36 }}>
           <div style={{ width: 76, height: 76, borderRadius: "50%", background: "var(--verified-tint)", display: "grid", placeItems: "center" }}>
@@ -132,7 +133,7 @@ export default function IntakePage({ inDashboard = false }: { inDashboard?: bool
     <div className="thin-scroll" style={{ height: "100vh", overflowY: "auto", background: "var(--paper)" }}>
       {/* top bar */}
       <div className="row between" style={{ padding: "20px 28px", borderBottom: "1px solid var(--line)", background: "rgba(234,240,249,0.9)", backdropFilter: "blur(10px)", position: "sticky", top: 0, zIndex: 10 }}>
-        <button onClick={() => router.push(exitTo)}><Logo size={26} /></button>
+        <Link href="/" aria-label="Go to home"><Logo size={26} /></Link>
         {inDashboard && <span className="pill" style={{ background: "var(--blue-tint)", color: "var(--signal)" }}><Icon name="plus" size={13} /> New case</span>}
         <button className="btn btn-ghost btn-sm" onClick={() => router.push(exitTo)}><Icon name="x" size={16} /> Exit</button>
       </div>

@@ -37,10 +37,10 @@ export default function DashboardPage() {
       </div>
 
       {/* stat cards */}
-      <div className="stat-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 16, marginBottom: 22 }}>
+      <div className="stat-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 18, marginBottom: 26 }}>
         {STATS.map(s => (
-          <div key={s.label} className="card" style={{ padding: 20 }}>
-            <div className="row between" style={{ marginBottom: 14 }}>
+          <div key={s.label} className="card" style={{ padding: 24, minHeight: 148, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+            <div className="row between" style={{ marginBottom: 18 }}>
               <span className="eyebrow" style={{ fontSize: 10.5 }}>{s.label}</span>
               <span className="pill" style={{ background: "var(--verified-tint)", color: "var(--verified)", fontSize: 11, padding: "3px 8px" }}>{s.delta}</span>
             </div>
@@ -53,17 +53,17 @@ export default function DashboardPage() {
       </div>
 
       {/* bottom grid */}
-      <div style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr", gap: 18 }} className="dash-grid">
+      <div style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr", gap: 22 }} className="dash-grid">
         {/* live lead feed */}
-        <div className="card" style={{ padding: 22 }}>
-          <div className="row between" style={{ marginBottom: 16 }}>
+        <div className="card" style={{ padding: 26, minHeight: 474 }}>
+          <div className="row between" style={{ marginBottom: 20 }}>
             <div className="row" style={{ gap: 9 }}><span className="pulse-dot coral" /><strong style={{ fontSize: 16 }}>Live lead feed</strong></div>
             <button onClick={() => router.push("/attorney/leads")} style={{ fontSize: 13.5, color: "var(--pine)", fontWeight: 600 }} className="row gap-1">View all <Icon name="arrowR" size={15} /></button>
           </div>
-          <div className="stack" style={{ gap: 11 }}>
+          <div className="stack" style={{ gap: 14 }}>
             {LEADS.slice(0, 4).map(l => (
               <button key={l.id} onClick={() => router.push("/attorney/leads/detail")} className="row between" style={{
-                padding: 14, borderRadius: 14, border: "1px solid var(--line)",
+                padding: "18px 16px", minHeight: 76, borderRadius: 14, border: "1px solid var(--line)",
                 background: l.status === "new" ? "var(--signal-tint)" : "var(--paper)",
                 textAlign: "left", transition: "transform .15s", width: "100%",
               }}
@@ -93,14 +93,14 @@ export default function DashboardPage() {
         </div>
 
         {/* right column */}
-        <div className="stack" style={{ gap: 18 }}>
-          <div className="card" style={{ padding: 22 }}>
+        <div className="stack" style={{ gap: 22 }}>
+          <div className="card" style={{ padding: 26, minHeight: 244 }}>
             <strong style={{ fontSize: 16, display: "block", marginBottom: 18 }}>Leads this week</strong>
-            <Bars data={WEEK_DATA} />
+            <Bars data={WEEK_DATA} h={162} />
           </div>
-          <div className="card" style={{ padding: 22 }}>
-            <strong style={{ fontSize: 16, display: "block", marginBottom: 16 }}>By practice area</strong>
-            <div className="stack" style={{ gap: 13 }}>
+          <div className="card" style={{ padding: 26, minHeight: 228 }}>
+            <strong style={{ fontSize: 16, display: "block", marginBottom: 18 }}>By practice area</strong>
+            <div className="stack" style={{ gap: 17 }}>
               {([["Personal Injury", 62, "var(--coral)"], ["Employment", 28, "var(--verified)"], ["Family", 10, "#9B5DE5"]] as [string, number, string][]).map(([l, v, c]) => (
                 <div key={l} className="stack" style={{ gap: 6 }}>
                   <div className="row between" style={{ fontSize: 13 }}><span>{l}</span><strong className="mono">{v}%</strong></div>
