@@ -66,9 +66,9 @@ export default function ForAttorneys() {
             <h2 className="display" style={{ fontSize: "clamp(32px,5vw,52px)" }}>Three steps between a problem and a callback.</h2>
           </div>
           <div className="row" style={{ gap: 50, alignItems: "flex-start", flexWrap: "wrap" }}>
-            <Step n={1} icon="pen" title="Describe it once" body="A guided intake adapts its questions to your case type — injury, family, criminal, immigration and more — and lets you attach documents securely." accent="var(--signal-tint)" />
-            <Step n={2} icon="zap" title="We score & route" body="ClientSignal grades each inquiry on quality and urgency, then matches it to verified attorneys by practice area and jurisdiction." accent="var(--amber-tint)" />
-            <Step n={3} icon="phone" title="An attorney responds" body="The right attorney is alerted instantly by SMS and email and reaches out directly — usually within minutes, while it still matters." accent="var(--verified-tint)" />
+            <Step n={1} icon="pen" title="Describe it once" desc="A guided intake adapts its questions to your case type — injury, family, criminal, immigration and more — and lets you attach documents securely." />
+            <Step n={2} icon="zap" title="We score & route" desc="ClientSignal grades each inquiry on quality and urgency, then matches it to verified attorneys by practice area and jurisdiction." />
+            <Step n={3} icon="phone" title="An attorney responds" desc="The right attorney is alerted instantly by SMS and email and reaches out directly — usually within minutes, while it still matters." />
           </div>
         </div>
       </section>

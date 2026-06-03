@@ -144,9 +144,9 @@ export default function HomePage() {
 
       {/* Hero */}
       <section style={{ padding: "80px 0 60px", background: "var(--paper)" }}>
-        <div className="wrap" style={{
+        <div className="wrap hero-grid" style={{
           display: "grid", gridTemplateColumns: "1fr 1fr", gap: 60, alignItems: "center",
-        }} className="wrap hero-grid">
+        }}>
           <div className="stack rise" style={{ gap: 28 }}>
             <div className="row" style={{ gap: 8 }}>
               <span className="pulse-dot" />
