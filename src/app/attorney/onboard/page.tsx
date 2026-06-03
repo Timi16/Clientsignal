@@ -57,7 +57,7 @@ export default function OnboardPage() {
     setStates((prev) => (prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]));
 
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "300px 1fr", minHeight: "100vh" }}>
+    <div className="auth-grid" style={{ display: "grid", gridTemplateColumns: "300px 1fr", height: "100vh" }}>
       {/* step rail */}
       <aside
         style={{
@@ -153,7 +153,7 @@ export default function OnboardPage() {
       </aside>
 
       {/* content */}
-      <main className="thin-scroll" style={{ overflowY: "auto", padding: "48px 56px" }}>
+      <main className="thin-scroll" style={{ overflowY: "auto", padding: "48px 56px", height: "100vh" }}>
         <div style={{ maxWidth: 640 }}>
           <h1 style={{ fontSize: 26, fontWeight: 700, color: "var(--ink)", marginBottom: 8 }}>
             {STEPS[step].label}
@@ -169,7 +169,7 @@ export default function OnboardPage() {
 
           {/* step 0: firm profile */}
           {step === 0 && (
-            <div className="stack" style={{ gap: 20 }}>
+            <div className="stack rise" style={{ gap: 20 }}>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
                 <Field label="Full name" placeholder="Sarah Mitchell" icon="user" />
                 <Field label="Email" type="email" placeholder="sarah@mitchellcole.com" icon="mail" />
@@ -189,7 +189,7 @@ export default function OnboardPage() {
 
           {/* step 1: practice areas */}
           {step === 1 && (
-            <div className="row" style={{ gap: 12, flexWrap: "wrap" }}>
+            <div className="row rise" style={{ gap: 12, flexWrap: "wrap" }}>
               {Object.entries(CASE_TYPES).map(([k, t]) => {
                 const on = areas.includes(k);
                 return (
@@ -221,7 +221,7 @@ export default function OnboardPage() {
 
           {/* step 2: service locations */}
           {step === 2 && (
-            <div className="stack" style={{ gap: 18 }}>
+            <div className="stack rise" style={{ gap: 18 }}>
               <p style={{ fontSize: 13.5, color: "var(--text-2)" }}>
                 Select all states where you are bar-admitted.
               </p>
@@ -256,7 +256,7 @@ export default function OnboardPage() {
 
           {/* step 3: licence verification */}
           {step === 3 && (
-            <div className="stack" style={{ gap: 22 }}>
+            <div className="stack rise" style={{ gap: 22 }}>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
                 <Field label="Bar number" placeholder="TX #24087" icon="shield" />
                 <Field label="State of admission" placeholder="Texas" icon="flag" />
@@ -287,7 +287,7 @@ export default function OnboardPage() {
 
           {/* step 4: lead preferences */}
           {step === 4 && (
-            <div className="stack" style={{ gap: 24 }}>
+            <div className="stack rise" style={{ gap: 24 }}>
               <LField label="Desired lead volume per month">
                 <div className="row" style={{ gap: 10 }}>
                   {["1-5", "5-15", "15-30", "30+"].map((v) => (

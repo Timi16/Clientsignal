@@ -67,17 +67,18 @@ export default function BookDemo() {
           <Logo size={32} />
 
           <div
-            className="card"
+            className="card cal-grid"
             style={{
               width: "100%",
               display: "grid",
-              gridTemplateColumns: "320px 1fr",
+              gridTemplateColumns: "300px 1fr",
               overflow: "hidden",
               minHeight: 520,
             }}
           >
             {/* Left: dark event info */}
             <div
+              className="gridlines"
               style={{
                 background: "var(--pine)",
                 color: "#fff",
@@ -85,6 +86,7 @@ export default function BookDemo() {
                 display: "flex",
                 flexDirection: "column",
                 gap: 20,
+                position: "relative",
               }}
             >
               <Mark size={36} live />

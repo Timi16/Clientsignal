@@ -2,33 +2,25 @@
 
 import AppLayout from "@/components/attorney-layout";
 import { Icon } from "@/components/icons";
-import { ScoreRing, Spark, Bars, Avatar, CaseTag } from "@/components/ui";
+import { ScoreRing, Spark, Bars, CaseTag } from "@/components/ui";
 import { LEADS } from "@/lib/data";
 import { useRouter } from "next/navigation";
 
 const STATS = [
-  { label: "New leads", value: "8", delta: "+3 vs last week", spark: [3, 5, 4, 6, 5, 7, 6, 8], color: "var(--signal)" },
-  { label: "Response rate", value: "94%", delta: "+2pp", spark: [80, 85, 88, 90, 87, 92, 91, 94], color: "var(--verified)" },
-  { label: "Median response", value: "3m 40s", delta: "-18s", spark: [5, 4.8, 4.5, 4.2, 4, 3.9, 3.8, 3.67], color: "var(--amber)" },
-  { label: "Lead value", value: "$284K", delta: "+$32K", spark: [180, 200, 210, 235, 250, 260, 270, 284], color: "var(--gold)" },
+  { label: "New leads today", value: "8", delta: "+3 vs yest.", spark: [3, 5, 4, 6, 5, 7, 8], color: "var(--pine)" },
+  { label: "Response rate", value: "94%", delta: "+2pts", spark: [88, 90, 89, 92, 91, 93, 94], color: "var(--verified)" },
+  { label: "Median response", value: "3m 40s", delta: "-50s", spark: [6, 5, 5, 4, 4, 4, 3.6], color: "var(--amber)" },
+  { label: "Lead value (mo)", value: "$284K", delta: "+18%", spark: [180, 200, 210, 240, 250, 270, 284], color: "var(--signal-deep)" },
 ];
 
 const WEEK_DATA = [
-  { l: "Mon", v: 4 },
-  { l: "Tue", v: 6 },
-  { l: "Wed", v: 3 },
-  { l: "Thu", v: 7, hot: true },
-  { l: "Fri", v: 5 },
-  { l: "Sat", v: 2 },
-  { l: "Sun", v: 1 },
-];
-
-const AREA_DATA = [
-  { l: "PI", v: 38, hot: true },
-  { l: "Fam", v: 22 },
-  { l: "Crim", v: 18 },
-  { l: "Imm", v: 14 },
-  { l: "Emp", v: 8 },
+  { l: "Mon", v: 6 },
+  { l: "Tue", v: 9 },
+  { l: "Wed", v: 5 },
+  { l: "Thu", v: 11, hot: true },
+  { l: "Fri", v: 8 },
+  { l: "Sat", v: 3 },
+  { l: "Sun", v: 2 },
 ];
 
 export default function DashboardPage() {
@@ -36,122 +28,86 @@ export default function DashboardPage() {
 
   return (
     <AppLayout>
-      {/* greeting */}
-      <div style={{ marginBottom: 32 }}>
-        <h1 style={{ fontSize: 28, fontWeight: 700, color: "var(--ink)", marginBottom: 6 }}>
-          Good morning, Sarah.
-        </h1>
-        <p className="row" style={{ gap: 8, color: "var(--text-2)", fontSize: 15 }}>
-          <span className="pulse-dot" style={{ width: 8, height: 8 }} />
-          You have <strong style={{ color: "var(--signal)" }}>2 new leads</strong> waiting for a response.
-        </p>
+      {/* greeting + live alert */}
+      <div className="row between" style={{ marginBottom: 24, flexWrap: "wrap", gap: 16 }}>
+        <div>
+          <h2 className="display" style={{ fontSize: 30 }}>Good morning, Sarah.</h2>
+          <p style={{ color: "var(--text-2)", fontSize: 15, marginTop: 4 }}>You have <strong style={{ color: "var(--coral)" }}>2 new matched leads</strong> waiting — your fastest competitors respond in minutes.</p>
+        </div>
       </div>
 
       {/* stat cards */}
-      <div
-        className="stat-grid"
-        style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginBottom: 32 }}
-      >
-        {STATS.map((s) => (
-          <div key={s.label} className="card" style={{ padding: "22px 24px" }}>
+      <div className="stat-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 16, marginBottom: 22 }}>
+        {STATS.map(s => (
+          <div key={s.label} className="card" style={{ padding: 20 }}>
             <div className="row between" style={{ marginBottom: 14 }}>
-              <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text-2)" }}>{s.label}</span>
-              <Spark data={s.spark} w={80} h={28} color={s.color} />
+              <span className="eyebrow" style={{ fontSize: 10.5 }}>{s.label}</span>
+              <span className="pill" style={{ background: "var(--verified-tint)", color: "var(--verified)", fontSize: 11, padding: "3px 8px" }}>{s.delta}</span>
             </div>
-            <div style={{ fontSize: 28, fontWeight: 700, color: "var(--ink)", marginBottom: 4 }} className="mono">
-              {s.value}
+            <div className="row between" style={{ alignItems: "flex-end" }}>
+              <strong className="mono" style={{ fontSize: 28, color: "var(--ink)", letterSpacing: "-0.02em" }}>{s.value}</strong>
+              <Spark data={s.spark} color={s.color} w={86} h={34} />
             </div>
-            <span style={{ fontSize: 12.5, color: "var(--verified)", fontWeight: 600 }}>{s.delta}</span>
           </div>
         ))}
       </div>
 
       {/* bottom grid */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 380px", gap: 20 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr", gap: 18 }} className="dash-grid">
         {/* live lead feed */}
-        <div className="card" style={{ padding: "24px 26px" }}>
-          <div className="row between" style={{ marginBottom: 20 }}>
-            <h2 className="row" style={{ gap: 10, fontSize: 16, fontWeight: 700, color: "var(--ink)" }}>
-              <span className="pulse-dot" />
-              Live lead feed
-            </h2>
-            <button
-              className="btn btn-ghost btn-sm"
-              onClick={() => router.push("/attorney/leads")}
-            >
-              View all
-            </button>
+        <div className="card" style={{ padding: 22 }}>
+          <div className="row between" style={{ marginBottom: 16 }}>
+            <div className="row" style={{ gap: 9 }}><span className="pulse-dot coral" /><strong style={{ fontSize: 16 }}>Live lead feed</strong></div>
+            <button onClick={() => router.push("/attorney/leads")} style={{ fontSize: 13.5, color: "var(--pine)", fontWeight: 600 }} className="row gap-1">View all <Icon name="arrowR" size={15} /></button>
           </div>
-          <div className="stack" style={{ gap: 0 }}>
-            {LEADS.slice(0, 4).map((l, i) => (
-              <div
-                key={l.id}
-                className="row"
-                style={{
-                  gap: 16,
-                  padding: "16px 0",
-                  borderTop: i > 0 ? "1px solid var(--line)" : "none",
-                  cursor: "pointer",
-                }}
-                onClick={() => router.push("/attorney/leads/detail")}
+          <div className="stack" style={{ gap: 11 }}>
+            {LEADS.slice(0, 4).map(l => (
+              <button key={l.id} onClick={() => router.push("/attorney/leads/detail")} className="row between" style={{
+                padding: 14, borderRadius: 14, border: "1px solid var(--line)",
+                background: l.status === "new" ? "var(--signal-tint)" : "var(--paper)",
+                textAlign: "left", transition: "transform .15s", width: "100%",
+              }}
+                onMouseEnter={e => (e.currentTarget.style.transform = "translateX(3px)")}
+                onMouseLeave={e => (e.currentTarget.style.transform = "none")}
               >
-                <ScoreRing value={l.quality} size={48} stroke={5} />
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div className="row" style={{ gap: 8, marginBottom: 4 }}>
-                    <span style={{ fontWeight: 650, fontSize: 14.5, color: "var(--ink)" }}>{l.name}</span>
-                    <CaseTag type={l.type} sm />
+                <div className="row" style={{ gap: 13 }}>
+                  <ScoreRing value={l.quality} size={42} stroke={4} />
+                  <div className="stack" style={{ gap: 4 }}>
+                    <div className="row" style={{ gap: 8 }}>
+                      <strong style={{ fontSize: 14.5 }}>{l.name}</strong>
+                      {l.status === "new" && <span className="pill" style={{ background: "var(--coral)", color: "#fff", fontSize: 9.5, padding: "2px 7px" }}>NEW</span>}
+                    </div>
+                    <div className="row" style={{ gap: 8, fontSize: 12.5, color: "var(--text-3)" }}>
+                      <CaseTag type={l.type} sm />
+                      <span>· {l.city}</span>
+                    </div>
                   </div>
-                  <span style={{ fontSize: 13, color: "var(--text-3)" }}>
-                    {l.city} &middot; {l.time}
-                  </span>
                 </div>
-                <div style={{ textAlign: "right" }}>
-                  <div className="mono" style={{ fontSize: 14, fontWeight: 600, color: "var(--ink)" }}>
-                    {l.value}
-                  </div>
-                  <span
-                    className="pill"
-                    style={{
-                      fontSize: 11,
-                      padding: "3px 9px",
-                      background:
-                        l.status === "new"
-                          ? "var(--signal-tint)"
-                          : l.status === "viewed"
-                          ? "var(--amber-tint)"
-                          : "var(--verified-tint)",
-                      color:
-                        l.status === "new"
-                          ? "var(--signal)"
-                          : l.status === "viewed"
-                          ? "var(--amber)"
-                          : "var(--verified)",
-                    }}
-                  >
-                    {l.status}
-                  </span>
+                <div className="stack" style={{ alignItems: "flex-end", gap: 3 }}>
+                  <strong className="mono" style={{ fontSize: 14, color: "var(--pine)" }}>{l.value}</strong>
+                  <span className="mono" style={{ fontSize: 11, color: "var(--text-3)" }}>{l.time}</span>
                 </div>
-              </div>
+              </button>
             ))}
           </div>
         </div>
 
         {/* right column */}
-        <div className="stack" style={{ gap: 20 }}>
-          {/* weekly chart */}
-          <div className="card" style={{ padding: "24px 26px" }}>
-            <h3 style={{ fontSize: 14.5, fontWeight: 700, color: "var(--ink)", marginBottom: 18 }}>
-              Leads this week
-            </h3>
-            <Bars data={WEEK_DATA} h={120} color="var(--signal-tint)" />
+        <div className="stack" style={{ gap: 18 }}>
+          <div className="card" style={{ padding: 22 }}>
+            <strong style={{ fontSize: 16, display: "block", marginBottom: 18 }}>Leads this week</strong>
+            <Bars data={WEEK_DATA} />
           </div>
-
-          {/* by practice area */}
-          <div className="card" style={{ padding: "24px 26px" }}>
-            <h3 style={{ fontSize: 14.5, fontWeight: 700, color: "var(--ink)", marginBottom: 18 }}>
-              By practice area
-            </h3>
-            <Bars data={AREA_DATA} h={110} color="var(--pine-tint)" />
+          <div className="card" style={{ padding: 22 }}>
+            <strong style={{ fontSize: 16, display: "block", marginBottom: 16 }}>By practice area</strong>
+            <div className="stack" style={{ gap: 13 }}>
+              {([["Personal Injury", 62, "var(--coral)"], ["Employment", 28, "var(--verified)"], ["Family", 10, "#9B5DE5"]] as [string, number, string][]).map(([l, v, c]) => (
+                <div key={l} className="stack" style={{ gap: 6 }}>
+                  <div className="row between" style={{ fontSize: 13 }}><span>{l}</span><strong className="mono">{v}%</strong></div>
+                  <div style={{ height: 7, borderRadius: 999, background: "var(--paper-2)" }}><div style={{ height: "100%", width: `${v}%`, background: c, borderRadius: 999, transition: "width .6s var(--ease)" }} /></div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>

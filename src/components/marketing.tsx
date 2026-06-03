@@ -34,7 +34,7 @@ export function MarketingNav({ audience = "home" }: { audience?: "home" | "clien
         <Link href="/" style={{ display: "flex", alignItems: "center" }}>
           <Logo size={28} />
         </Link>
-        <div className="row" style={{ gap: 6 }}>
+        <div className="row m-nav-links" style={{ gap: 6 }}>
           {links.map(([label, path]) => (
             <Link key={label} href={path}
               style={{ padding: "8px 16px", fontSize: 14.5, fontWeight: 500, color: "var(--text-2)", borderRadius: "var(--r-sm)", transition: "color .2s, background .2s" }}
@@ -95,22 +95,21 @@ export function HeroTagCloud() {
 }
 
 /* ===== Step ===== */
-export function Step({ n, icon, title, desc }: { n: number; icon: string; title: string; desc: string }) {
+export function Step({ n, icon, title, desc, accent }: { n: number; icon: string; title: string; desc: string; accent?: string }) {
   return (
     <div className="stack" style={{ gap: 16, flex: 1 }}>
-      <div className="row" style={{ gap: 14 }}>
+      <div className="row between">
         <div style={{
-          width: 44, height: 44, borderRadius: "50%",
-          background: "var(--signal-tint)", color: "var(--signal)",
+          width: 52, height: 52, borderRadius: 14,
+          background: accent || "var(--pine-tint)",
           display: "grid", placeItems: "center",
-          fontWeight: 700, fontSize: 16, fontFamily: "var(--mono)", flex: "none",
         }}>
-          {n}
+          <Icon name={icon} size={24} color="var(--pine)" />
         </div>
-        <Icon name={icon} size={22} color="var(--signal)" />
+        <span className="display" style={{ fontSize: 44, color: "var(--line-2)", lineHeight: 1 }}>0{n}</span>
       </div>
-      <h3 style={{ fontSize: 19, fontWeight: 700, color: "var(--ink)" }}>{title}</h3>
-      <p style={{ fontSize: 15, color: "var(--text-2)", lineHeight: 1.65 }}>{desc}</p>
+      <h3 style={{ fontSize: 21, fontWeight: 600, letterSpacing: "-0.01em" }}>{title}</h3>
+      <p style={{ fontSize: 15, color: "var(--text-2)", lineHeight: 1.6 }}>{desc}</p>
     </div>
   );
 }
@@ -186,7 +185,7 @@ export function Pricing() {
       </div>
 
       {/* Cards */}
-      <div style={{
+      <div className="pricing-grid" style={{
         display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 24, width: "100%",
       }}>
         {tiers.map((t) => (
@@ -284,7 +283,7 @@ export function Footer() {
       background: "var(--pine-deep)", color: "var(--on-pine)", padding: "72px 0 40px",
     }}>
       <div className="wrap">
-        <div style={{
+        <div className="footer-grid" style={{
           display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", gap: 48,
         }}>
           {/* Brand col */}

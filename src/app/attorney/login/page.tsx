@@ -177,13 +177,15 @@ export default function AttorneyLogin() {
 
       {/* Right form */}
       <div
+        className="thin-scroll"
         style={{
           display: "flex",
-          alignItems: "center",
+          alignItems: "flex-start",
           justifyContent: "center",
           padding: "48px 40px",
           background: "var(--paper)",
           overflowY: "auto",
+          height: "100vh",
         }}
       >
         <div
@@ -194,6 +196,7 @@ export default function AttorneyLogin() {
             display: "flex",
             flexDirection: "column",
             gap: 28,
+            margin: "auto 0",
           }}
         >
           {/* Pill */}

@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Hanken+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
 
 :root {
   /* Surfaces */
@@ -236,8 +235,16 @@ img, svg { display: block; }
   .auth-brand { display: none !important; }
   .app-grid { grid-template-columns: 76px 1fr !important; }
   .app-side .side-label { display: none !important; }
+  .m-nav-links { display: none !important; }
+  .footer-grid { grid-template-columns: 1fr 1fr !important; gap: 32px !important; }
+  .pricing-grid { grid-template-columns: 1fr !important; max-width: 400px !important; margin: 0 auto !important; }
+  .cal-grid { grid-template-columns: 1fr !important; }
 }
-@media (max-width: 760px) { .wrap { padding: 0 18px; } }
+@media (max-width: 760px) {
+  .wrap { padding: 0 18px; }
+  .footer-grid { grid-template-columns: 1fr !important; }
+}
 @media (max-width: 600px) {
   .feat-grid, .stat-grid, .ck-grid { grid-template-columns: 1fr !important; }
+  .step-row { flex-direction: column !important; gap: 32px !important; }
 }

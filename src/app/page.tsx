@@ -4,9 +4,9 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Icon } from "@/components/icons";
-import { Mark, Logo, ScoreRing, Verified, Avatar, Photo, CaseTag } from "@/components/ui";
+import { ScoreRing, Verified, Avatar, Photo } from "@/components/ui";
 import { LEADS, TESTIMONIALS, CASE_TYPES } from "@/lib/data";
-import { MarketingNav, Step, Footer } from "@/components/marketing";
+import { MarketingNav, Footer } from "@/components/marketing";
 
 /* ===== HomeProductPreview (fake app window with lead inbox) ===== */
 function HomeProductPreview() {
@@ -81,59 +81,6 @@ function HomeProductPreview() {
   );
 }
 
-/* ===== TrustStrip ===== */
-function TrustStrip() {
-  const badges = [
-    { icon: "shield", text: "ABA Compliant" },
-    { icon: "lock", text: "SOC 2 Type II" },
-    { icon: "check", text: "Exclusive Leads" },
-    { icon: "bolt", text: "< 3 min Delivery" },
-    { icon: "star", text: "4.9 Attorney Rating" },
-  ];
-  return (
-    <div className="row" style={{
-      justifyContent: "center", gap: 40,
-      padding: "28px 0",
-      borderTop: "1px solid var(--line)",
-      borderBottom: "1px solid var(--line)",
-      flexWrap: "wrap",
-    }}>
-      {badges.map((b) => (
-        <div key={b.text} className="row" style={{ gap: 9 }}>
-          <Icon name={b.icon} size={18} color="var(--text-3)" />
-          <span style={{ fontSize: 13.5, fontWeight: 600, color: "var(--text-3)", letterSpacing: "0.02em" }}>{b.text}</span>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-/* ===== Testimonial Card ===== */
-function TestimonialCard({ t, i }: { t: typeof TESTIMONIALS[0]; i: number }) {
-  return (
-    <div className="tcard card stack" style={{
-      overflow: "hidden", flex: "none", width: 340,
-      animationDelay: `${i * 0.12}s`,
-    }}>
-      <Photo src={t.photo} name={t.name} w="100%" h={220} radius={0} kenburns />
-      <div className="stack" style={{ padding: "22px 24px", gap: 14, flex: 1 }}>
-        <div className="row" style={{ gap: 3 }}>
-          {Array.from({ length: t.stars }).map((_, j) => (
-            <Icon key={j} name="star" size={15} color="var(--gold)" />
-          ))}
-        </div>
-        <p style={{ fontSize: 14.5, color: "var(--text-1)", lineHeight: 1.65, fontStyle: "italic", flex: 1 }}>
-          &ldquo;{t.quote}&rdquo;
-        </p>
-        <div className="stack" style={{ gap: 3 }}>
-          <span style={{ fontWeight: 700, fontSize: 14, color: "var(--ink)" }}>{t.name}</span>
-          <span style={{ fontSize: 12.5, color: "var(--text-3)" }}>{t.role}</span>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 /* ===== Page ===== */
 export default function HomePage() {
   const router = useRouter();
@@ -143,101 +90,73 @@ export default function HomePage() {
       <MarketingNav audience="home" />
 
       {/* Hero */}
-      <section style={{ padding: "80px 0 60px", background: "var(--paper)" }}>
-        <div className="wrap hero-grid" style={{
-          display: "grid", gridTemplateColumns: "1fr 1fr", gap: 60, alignItems: "center",
-        }}>
-          <div className="stack rise" style={{ gap: 28 }}>
-            <div className="row" style={{ gap: 8 }}>
-              <span className="pulse-dot" />
-              <span className="mono" style={{ fontSize: 12, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--signal)" }}>Now accepting attorneys</span>
+      <section style={{ position: "relative", overflow: "hidden", borderBottom: "1px solid var(--line)" }}>
+        <div style={{ position: "absolute", top: -240, right: -160, width: 760, height: 760, borderRadius: "50%", background: "radial-gradient(circle, var(--signal-tint) 0%, transparent 62%)", pointerEvents: "none" }} />
+        <div className="wrap" style={{ position: "relative", paddingTop: 64, paddingBottom: 70 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1.04fr 0.96fr", gap: 56, alignItems: "center" }} className="hero-grid">
+            <div className="stack" style={{ gap: 24 }}>
+              <span className="pill rise" style={{ background: "var(--card)", border: "1px solid var(--line)", color: "var(--text-2)", alignSelf: "flex-start" }}>
+                <span className="pulse-dot" /> Verified attorneys · vetted cases
+              </span>
+              <h1 className="display rise" style={{ fontSize: "clamp(40px,5.6vw,72px)", animationDelay: ".08s" }}>
+                Find the <span style={{ fontStyle: "italic", color: "var(--pine)" }}>right attorney</span>, fast<span style={{ color: "var(--signal-deep)" }}>.</span>
+              </h1>
+              <p className="rise" style={{ fontSize: "clamp(17px,2vw,20px)", color: "var(--text-2)", lineHeight: 1.55, maxWidth: 480, animationDelay: ".16s" }}>
+                ClientSignal verifies every attorney and scores every case, then connects clients with licensed lawyers who can actually help — managed in one secure place.
+              </p>
+              <div className="row rise" style={{ gap: 13, flexWrap: "wrap", animationDelay: ".24s" }}>
+                <button className="btn btn-ink btn-lg" onClick={() => router.push("/get-started")}>Get started free <Icon name="arrowR" size={18} /></button>
+                <button className="btn btn-ghost btn-lg" onClick={() => router.push("/demo")}><Icon name="clock" size={17} /> Book a demo</button>
+              </div>
+              <div className="row rise" style={{ gap: 12, marginTop: 4, animationDelay: ".3s", alignItems: "center" }}>
+                <div className="row" style={{ marginLeft: 4 }}>
+                  {["Sarah Mitchell", "David Park", "Elena Reyes", "Carlos Ruiz"].map((n, i) => (
+                    <div key={n} style={{ marginLeft: i ? -10 : 0, border: "2px solid var(--paper)", borderRadius: "50%" }}><Avatar name={n} size={32} /></div>
+                  ))}
+                </div>
+                <div className="stack" style={{ gap: 1 }}>
+                  <div className="row" style={{ gap: 3, color: "var(--gold-deep)" }}>{"★★★★★".split("").map((s, i) => <span key={i} style={{ fontSize: 12 }}>{s}</span>)}</div>
+                  <span style={{ fontSize: 12.5, color: "var(--text-3)" }}>Trusted by <strong style={{ color: "var(--text-2)" }}>2,400+</strong> verified attorneys</span>
+                </div>
+              </div>
             </div>
-            <h1 className="display" style={{ fontSize: 52, color: "var(--ink)" }}>
-              Legal leads,<br />routed in <span style={{ color: "var(--signal)" }}>seconds</span>
-            </h1>
-            <p style={{ fontSize: 18, color: "var(--text-2)", lineHeight: 1.7, maxWidth: 480 }}>
-              ClientSignal matches verified clients with licensed attorneys instantly.
-              AI-scored intake, exclusive leads, and seamless CRM delivery.
-            </p>
-            <div className="row" style={{ gap: 14 }}>
-              <button className="btn btn-signal btn-lg" onClick={() => router.push("/get-started")}>
-                Get Started <Icon name="arrowR" size={18} />
-              </button>
-              <button className="btn btn-ghost btn-lg" onClick={() => router.push("/demo")}>
-                Book a Demo
-              </button>
-            </div>
+            <div className="rise" style={{ animationDelay: ".2s" }}><HomeProductPreview /></div>
           </div>
-          <HomeProductPreview />
         </div>
       </section>
 
-      {/* Trust strip */}
-      <section style={{ background: "var(--card)" }}>
-        <div className="wrap">
-          <TrustStrip />
+      {/* Social proof strip */}
+      <section style={{ borderBottom: "1px solid var(--line)", padding: "22px 0", background: "var(--card)" }}>
+        <div className="wrap stack" style={{ gap: 16 }}>
+          <span className="mono" style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--text-3)", textAlign: "center" }}>Built on the standards legal professionals trust</span>
+          <div className="row" style={{ gap: 18, flexWrap: "wrap", justifyContent: "center", alignItems: "center" }}>
+            {[["shield", "State Bar Verified"], ["lock", "SOC 2 Type II"], ["check", "ABA-aligned intake"], ["lock", "256-bit encryption"], ["scale", "Attorney-Client privilege safe"]].map(([ic, t]) => (
+              <span key={t} className="row" style={{ gap: 8, padding: "8px 16px", borderRadius: 999, background: "var(--paper)", border: "1px solid var(--line)", fontSize: 13, fontWeight: 600, color: "var(--text-2)" }}><Icon name={ic} size={15} color="var(--pine)" /> {t}</span>
+            ))}
+          </div>
         </div>
       </section>
 
       {/* Two paths */}
-      <section style={{ padding: "88px 0", background: "var(--card)" }}>
-        <div className="wrap stack" style={{ gap: 56, alignItems: "center" }}>
-          <div className="stack" style={{ textAlign: "center", gap: 14, maxWidth: 560 }}>
-            <span className="eyebrow" style={{ color: "var(--signal)" }}>Two sides, one platform</span>
-            <h2 className="display" style={{ fontSize: 38, color: "var(--ink)" }}>Built for both sides of legal</h2>
-            <p style={{ fontSize: 16, color: "var(--text-2)", lineHeight: 1.7 }}>
-              Whether you need an attorney or you are one, ClientSignal connects you faster than anything else.
-            </p>
+      <section style={{ padding: "70px 0 90px" }}>
+        <div className="wrap">
+          <div className="stack" style={{ alignItems: "center", textAlign: "center", gap: 12, marginBottom: 40 }}>
+            <span className="eyebrow">Choose your path</span>
+            <h2 className="display" style={{ fontSize: "clamp(28px,4vw,42px)" }}>Two sides, one trusted platform.</h2>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 28, width: "100%" }}>
-            {/* Client card */}
-            <div className="card feat-card stack" style={{ padding: 40, gap: 22 }}>
-              <div style={{
-                width: 56, height: 56, borderRadius: 16,
-                background: "var(--blue-tint)", display: "grid", placeItems: "center",
-              }}>
-                <Icon name="user" size={26} color="var(--signal)" />
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 22 }} className="hero-grid">
+            {[
+              { who: "For Clients", t: "Get matched with the right attorney.", d: "Describe your situation once, get matched with a verified attorney, and track your whole case — messages, documents and status — in one place. Always free.", icon: "scale", cta: "Find legal help", dest: "/for-clients", bg: "var(--blue-tint)", c: "var(--signal)" },
+              { who: "For Attorneys", t: "Grow your practice with qualified clients.", d: "Receive vetted, scored, exclusive client opportunities matched to your practice areas and jurisdiction — and respond before anyone else.", icon: "briefcase", cta: "Grow my practice", dest: "/for-attorneys", bg: "var(--gold-tint)", c: "var(--gold-deep)" },
+            ].map(p => (
+              <div key={p.who} className="card feat-card" style={{ padding: 34, cursor: "pointer" }} onClick={() => router.push(p.dest)}>
+                <div style={{ width: 56, height: 56, borderRadius: 14, background: p.bg, display: "grid", placeItems: "center", marginBottom: 20 }}><Icon name={p.icon} size={26} color={p.c} /></div>
+                <span className="eyebrow" style={{ display: "block", marginBottom: 10 }}>{p.who}</span>
+                <h3 className="display" style={{ fontSize: 26, marginBottom: 12 }}>{p.t}</h3>
+                <p style={{ fontSize: 15, color: "var(--text-2)", lineHeight: 1.6, marginBottom: 22 }}>{p.d}</p>
+                <span className="row gap-1" style={{ color: p.c, fontWeight: 700, fontSize: 15 }}>{p.cta} <Icon name="arrowR" size={17} /></span>
               </div>
-              <h3 style={{ fontSize: 22, fontWeight: 700, color: "var(--ink)" }}>For Clients</h3>
-              <p style={{ fontSize: 15, color: "var(--text-2)", lineHeight: 1.65 }}>
-                Describe your legal situation once. Get matched with a licensed, vetted attorney in your area within minutes — not days.
-              </p>
-              <ul className="stack" style={{ gap: 10 }}>
-                {["Free to submit your case", "Verified, licensed attorneys only", "Secure, encrypted communication", "Track your case in real time"].map(f => (
-                  <li key={f} className="row" style={{ gap: 10 }}>
-                    <Icon name="check" size={16} color="var(--verified)" stroke={2.5} />
-                    <span style={{ fontSize: 14, color: "var(--text-1)" }}>{f}</span>
-                  </li>
-                ))}
-              </ul>
-              <button className="btn btn-signal" style={{ alignSelf: "flex-start", marginTop: 6 }} onClick={() => router.push("/for-clients")}>
-                Learn more <Icon name="arrowR" size={16} />
-              </button>
-            </div>
-            {/* Attorney card */}
-            <div className="card feat-card stack" style={{ padding: 40, gap: 22 }}>
-              <div style={{
-                width: 56, height: 56, borderRadius: 16,
-                background: "var(--gold-tint)", display: "grid", placeItems: "center",
-              }}>
-                <Icon name="scale" size={26} color="var(--gold-deep)" />
-              </div>
-              <h3 style={{ fontSize: 22, fontWeight: 700, color: "var(--ink)" }}>For Attorneys</h3>
-              <p style={{ fontSize: 15, color: "var(--text-2)", lineHeight: 1.65 }}>
-                Stop chasing cold leads. Receive pre-screened, AI-scored clients matched to your practice area and location.
-              </p>
-              <ul className="stack" style={{ gap: 10 }}>
-                {["Exclusive — leads are never shared", "AI quality scoring before you accept", "Instant CRM sync (Clio, MyCase, etc.)", "Verified client consent & documents"].map(f => (
-                  <li key={f} className="row" style={{ gap: 10 }}>
-                    <Icon name="check" size={16} color="var(--verified)" stroke={2.5} />
-                    <span style={{ fontSize: 14, color: "var(--text-1)" }}>{f}</span>
-                  </li>
-                ))}
-              </ul>
-              <button className="btn btn-pine" style={{ alignSelf: "flex-start", marginTop: 6 }} onClick={() => router.push("/for-attorneys")}>
-                Learn more <Icon name="arrowR" size={16} />
-              </button>
-            </div>
+            ))}
           </div>
         </div>
       </section>
@@ -248,30 +167,29 @@ export default function HomePage() {
       }} className="gridlines">
         <div className="wrap stack" style={{ gap: 56, position: "relative", zIndex: 1 }}>
           <div className="stack" style={{ textAlign: "center", gap: 14, alignItems: "center" }}>
-            <span className="mono" style={{ fontSize: 12, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--gold-soft)" }}>How it works</span>
-            <h2 className="display" style={{ fontSize: 38, color: "#fff" }}>From intake to retainer in four steps</h2>
+            <span className="eyebrow" style={{ color: "var(--gold-soft)" }}>How it works</span>
+            <h2 className="display" style={{ fontSize: "clamp(30px,4.5vw,48px)", color: "#fff" }}>Trust, built into every step.</h2>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 28 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 22 }} className="feat-grid">
             {[
-              { n: 1, icon: "file", title: "Client submits intake", desc: "A person with a legal need fills out our guided intake form — verified identity, real details, consent on file." },
-              { n: 2, icon: "bolt", title: "AI scores & routes", desc: "Our model scores case quality, urgency, and value, then matches to the best-fit attorney in real time." },
-              { n: 3, icon: "bell", title: "Attorney gets the lead", desc: "You receive an exclusive, scored lead via SMS, email, and dashboard — with full case context." },
-              { n: 4, icon: "phone", title: "Connect & retain", desc: "Respond directly, book a consult, and convert. The lead syncs to your CRM automatically." },
-            ].map(s => (
-              <div key={s.n} className="stack rise" style={{ gap: 16, animationDelay: `${s.n * 0.1}s` }}>
-                <div className="row" style={{ gap: 14 }}>
+              { icon: "user", title: "Create an account", desc: "Clients and attorneys each get a secure, dedicated workspace." },
+              { icon: "pen", title: "Describe or set up", desc: "Clients outline their case; attorneys verify their licence & areas." },
+              { icon: "shield", title: "We verify & match", desc: "Every attorney is licence-checked; every case is scored and routed." },
+              { icon: "message", title: "Connect & resolve", desc: "Message, share documents and track everything in one dashboard." },
+            ].map((s, i) => (
+              <div key={s.title} className="stack rise" style={{ gap: 14, animationDelay: `${(i + 1) * 0.1}s` }}>
+                <div className="row between">
                   <div style={{
-                    width: 44, height: 44, borderRadius: "50%",
-                    background: "rgba(37,99,235,0.15)", color: "var(--signal-glow)",
+                    width: 48, height: 48, borderRadius: 12,
+                    background: "rgba(255,255,255,0.08)",
                     display: "grid", placeItems: "center",
-                    fontWeight: 700, fontSize: 16, fontFamily: "var(--mono)", flex: "none",
                   }}>
-                    {s.n}
+                    <Icon name={s.icon} size={22} color="var(--gold-soft)" />
                   </div>
-                  <Icon name={s.icon} size={22} color="var(--gold-soft)" />
+                  <span className="display" style={{ fontSize: 36, color: "rgba(255,255,255,0.15)" }}>0{i + 1}</span>
                 </div>
-                <h3 style={{ fontSize: 19, fontWeight: 700, color: "#fff" }}>{s.title}</h3>
-                <p style={{ fontSize: 15, color: "rgba(234,240,249,0.65)", lineHeight: 1.65 }}>{s.desc}</p>
+                <strong style={{ fontSize: 17, color: "#fff" }}>{s.title}</strong>
+                <p style={{ fontSize: 14, color: "rgba(234,240,249,0.66)", lineHeight: 1.55 }}>{s.desc}</p>
               </div>
             ))}
           </div>
@@ -279,64 +197,71 @@ export default function HomePage() {
       </section>
 
       {/* Testimonials */}
-      <section style={{ padding: "88px 0", background: "var(--paper)", overflow: "hidden" }}>
-        <div className="wrap stack" style={{ gap: 48 }}>
-          <div className="stack" style={{ textAlign: "center", gap: 14, alignItems: "center" }}>
-            <span className="eyebrow" style={{ color: "var(--signal)" }}>Testimonials</span>
-            <h2 className="display" style={{ fontSize: 38, color: "var(--ink)" }}>Trusted by attorneys and clients</h2>
-          </div>
-          <div className="row" style={{
-            gap: 24, overflowX: "auto", paddingBottom: 8,
-            scrollSnapType: "x mandatory",
-          }}>
-            {TESTIMONIALS.map((t, i) => (
-              <TestimonialCard key={i} t={t} i={i} />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Trust points */}
-      <section style={{ padding: "72px 0", background: "var(--card)" }}>
+      <section style={{ padding: "30px 0 90px" }}>
         <div className="wrap">
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 28 }}>
-            {[
-              { icon: "shield", title: "Verified & Exclusive", desc: "Every lead is identity-verified and sent to exactly one attorney. No shared leads, no bidding wars." },
-              { icon: "bolt", title: "AI-Powered Scoring", desc: "Our models score quality, urgency, and case value before the lead reaches you — so you know what's worth your time." },
-              { icon: "plug", title: "Seamless Integrations", desc: "One-click sync with Clio, MyCase, Calendly, and 6,000+ apps via Zapier. No manual data entry." },
-            ].map(c => (
-              <div key={c.title} className="card feat-card stack" style={{ padding: 32, gap: 16 }}>
-                <div style={{
-                  width: 48, height: 48, borderRadius: 14,
-                  background: "var(--signal-tint)", display: "grid", placeItems: "center",
-                }}>
-                  <Icon name={c.icon} size={24} color="var(--signal)" />
+          <div className="row between" style={{ alignItems: "flex-end", marginBottom: 40, flexWrap: "wrap", gap: 16 }}>
+            <div className="stack" style={{ gap: 14, maxWidth: 560 }}>
+              <span className="eyebrow">Trusted by both sides</span>
+              <h2 className="display" style={{ fontSize: "clamp(30px,4.5vw,48px)" }}>Real attorneys. Real clients. Real outcomes.</h2>
+            </div>
+            <div className="row" style={{ gap: 8 }}>
+              <span className="row" style={{ gap: 3, color: "var(--gold-deep)" }}>{"★★★★★".split("").map((s, i) => <span key={i}>{s}</span>)}</span>
+              <span style={{ fontSize: 14, color: "var(--text-2)", fontWeight: 600 }}>4.9 / 5 · 1,200+ reviews</span>
+            </div>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 22 }} className="feat-grid">
+            {TESTIMONIALS.map((t) => (
+              <div key={t.name} className="card tcard" style={{ padding: 0, overflow: "hidden" }}>
+                <div style={{ position: "relative", height: 230 }}>
+                  <Photo src={t.photo} name={t.name} w="100%" h="100%" radius={0} kenburns />
+                  <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(11,31,58,0.86) 0%, rgba(11,31,58,0.12) 55%, transparent 100%)" }} />
+                  <span className="pill" style={{ position: "absolute", top: 14, left: 14, background: "rgba(255,255,255,0.92)", color: "var(--pine)", fontSize: 11 }}>{t.area}</span>
+                  <div style={{ position: "absolute", bottom: 14, left: 16, right: 16, color: "#fff" }}>
+                    <div className="row" style={{ gap: 7 }}><strong style={{ fontSize: 16 }}>{t.name}</strong><Verified size={15} /></div>
+                    <span style={{ fontSize: 12.5, color: "rgba(255,255,255,0.82)" }}>{t.role}</span>
+                  </div>
                 </div>
-                <h3 style={{ fontSize: 18, fontWeight: 700, color: "var(--ink)" }}>{c.title}</h3>
-                <p style={{ fontSize: 14.5, color: "var(--text-2)", lineHeight: 1.65 }}>{c.desc}</p>
+                <div style={{ padding: 20 }}>
+                  <div className="row" style={{ gap: 2, color: "var(--gold-deep)", marginBottom: 10 }}>{Array.from({ length: t.stars }).map((_, j) => <span key={j} style={{ fontSize: 13 }}>★</span>)}</div>
+                  <p className="serif" style={{ fontSize: 15.5, lineHeight: 1.55, color: "var(--ink)", fontStyle: "italic" }}>&ldquo;{t.quote}&rdquo;</p>
+                </div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* CTA band */}
-      <section style={{
-        padding: "72px 0",
-        background: "linear-gradient(135deg, var(--signal) 0%, var(--signal-deep) 100%)",
-      }}>
-        <div className="wrap stack" style={{ alignItems: "center", textAlign: "center", gap: 24 }}>
-          <h2 className="display" style={{ fontSize: 36, color: "#fff" }}>Ready to transform your intake?</h2>
-          <p style={{ fontSize: 17, color: "rgba(255,255,255,0.8)", maxWidth: 480 }}>
-            Join hundreds of attorneys receiving verified, exclusive leads every week.
-          </p>
-          <div className="row" style={{ gap: 14 }}>
-            <button className="btn btn-lg" style={{ background: "#fff", color: "var(--signal-deep)", fontWeight: 700 }} onClick={() => router.push("/get-started")}>
-              Get Started Free <Icon name="arrowR" size={18} />
-            </button>
-            <button className="btn btn-ghost-light btn-lg" onClick={() => router.push("/demo")}>
-              Book a Demo
-            </button>
+      {/* Trust points */}
+      <section style={{ padding: "90px 0" }}>
+        <div className="wrap">
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 22 }} className="feat-grid">
+            {[
+              ["shield", "Licence-verified attorneys", "Every attorney's bar licence, identity and firm are confirmed within 24 hours of joining — no exceptions."],
+              ["lock", "Private & encrypted", "Client information is encrypted and shared only with a matched attorney. Never sold, never spammed."],
+              ["bolt", "Fast, exclusive matches", "Cases are routed to one attorney at a time — not blasted to ten — so clients get real attention, fast."],
+            ].map(([ic, t, d]) => (
+              <div key={t} className="card" style={{ padding: 28 }}>
+                <div style={{ width: 50, height: 50, borderRadius: 13, background: "var(--verified-tint)", display: "grid", placeItems: "center", marginBottom: 18 }}><Icon name={ic} size={23} color="var(--verified)" /></div>
+                <h3 style={{ fontSize: 19, fontWeight: 700, marginBottom: 9 }}>{t}</h3>
+                <p style={{ fontSize: 14.5, color: "var(--text-2)", lineHeight: 1.6 }}>{d}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Final CTA */}
+      <section style={{ padding: "10px 0 100px" }}>
+        <div className="wrap">
+          <div style={{ background: "var(--signal)", borderRadius: 26, padding: "70px 56px", textAlign: "center" }}>
+            <div className="stack" style={{ gap: 22, maxWidth: 600, margin: "0 auto" }}>
+              <h2 className="display" style={{ fontSize: "clamp(32px,5vw,52px)", color: "#fff" }}>Ready to get started?</h2>
+              <p style={{ fontSize: 18, color: "rgba(255,255,255,0.85)", lineHeight: 1.5 }}>Create your free account and get to the right place in seconds.</p>
+              <div className="row" style={{ gap: 14, justifyContent: "center", flexWrap: "wrap" }}>
+                <button className="btn btn-lg" style={{ background: "#fff", color: "var(--signal)" }} onClick={() => router.push("/get-started")}>Get started free</button>
+                <button className="btn btn-ghost-light btn-lg" onClick={() => router.push("/login")}>Login</button>
+              </div>
+            </div>
           </div>
         </div>
       </section>
