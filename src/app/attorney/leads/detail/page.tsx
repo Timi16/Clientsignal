@@ -111,7 +111,7 @@ export default function LeadDetailPage() {
             <div className="card" style={{ padding: "28px 26px", background: "var(--pine)", color: "#fff", border: "none" }}>
               <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 8 }}>Respond & claim</h3>
               <p style={{ fontSize: 13.5, color: "rgba(234,240,249,0.65)", marginBottom: 22, lineHeight: 1.6 }}>
-                Claiming this lead will reveal the client's contact info and lock it exclusively to you.
+                Claiming this lead will reveal the client&apos;s contact info and lock it exclusively to you.
               </p>
               <div style={{ marginBottom: 20 }}>
                 <span className="mono" style={{ fontSize: 26, fontWeight: 700, color: "var(--gold-soft)" }}>

@@ -7,9 +7,26 @@ import { Icon } from "@/components/icons";
 import { Logo, Mark, ScoreRing, Verified, Avatar, CaseTag, LField, inpStyle } from "@/components/ui";
 import { CASE_TYPES, INTAKE_CONFIG } from "@/lib/data";
 
-function IntakeDone({ data, score, urgency, inDashboard }: { data: Record<string, any>; score: number; urgency: number; inDashboard?: boolean }) {
+type UploadedDoc = { name: string; size: string };
+type IntakeData = {
+  type: string;
+  sub: string;
+  desc: string;
+  city: string;
+  state: string;
+  name: string;
+  email: string;
+  phone: string;
+  when: string;
+  urgent: string;
+  consent: boolean;
+  docs: UploadedDoc[];
+};
+
+function IntakeDone({ data, score, urgency }: { data: IntakeData; score: number; urgency: number }) {
   const router = useRouter();
   const [phase, setPhase] = useState(0);
+  const leadId = 4472 + ((score + urgency + data.desc.length) % 9);
   useEffect(() => {
     const t1 = setTimeout(() => setPhase(1), 1400);
     const t2 = setTimeout(() => setPhase(2), 2800);
@@ -47,7 +64,7 @@ function IntakeDone({ data, score, urgency, inDashboard }: { data: Record<string
         <div className="card rise" style={{ padding: 26, marginBottom: 20, animationDelay: ".1s" }}>
           <div className="row between" style={{ marginBottom: 20 }}>
             <span className="eyebrow">Your inquiry · scored</span>
-            <span className="mono" style={{ fontSize: 12, color: "var(--text-3)" }}>LD-{Math.floor(4472 + Math.random() * 9)}</span>
+            <span className="mono" style={{ fontSize: 12, color: "var(--text-3)" }}>LD-{leadId}</span>
           </div>
           <div className="row" style={{ gap: 26, justifyContent: "center", marginBottom: 22 }}>
             <div className="stack" style={{ alignItems: "center", gap: 7 }}><ScoreRing value={score} size={84} stroke={7} /><span style={{ fontSize: 12.5, color: "var(--text-2)" }}>Quality</span></div>
@@ -91,8 +108,8 @@ export default function IntakePage({ inDashboard = false }: { inDashboard?: bool
   const router = useRouter();
   const exitTo = inDashboard ? "/client/cases" : "/";
   const [step, setStep] = useState(0);
-  const [data, setData] = useState<Record<string, any>>({ type: "", sub: "", desc: "", city: "", state: "", name: "", email: "", phone: "", when: "", urgent: "", consent: false, docs: [] });
-  const set = (k: string, v: any) => setData(d => ({ ...d, [k]: v }));
+  const [data, setData] = useState<IntakeData>({ type: "", sub: "", desc: "", city: "", state: "", name: "", email: "", phone: "", when: "", urgent: "", consent: false, docs: [] });
+  const set = <K extends keyof IntakeData>(k: K, v: IntakeData[K]) => setData(d => ({ ...d, [k]: v }));
   const cfg = INTAKE_CONFIG[data.type];
   const steps = ["Case type", "Details", "Your story", "Documents", "Contact"];
 
@@ -127,7 +144,7 @@ export default function IntakePage({ inDashboard = false }: { inDashboard?: bool
   const score = Math.min(98, 55 + (data.desc.length > 80 ? 18 : 8) + (data.docs?.length || 0) * 5 + (data.urgent ? 10 : 0) + (data.consent ? 6 : 0));
   const urgency = data.urgent === "yes" ? 88 : 60;
 
-  if (step === 5) return <IntakeDone data={data} score={score} urgency={urgency} inDashboard={inDashboard} />;
+  if (step === 5) return <IntakeDone data={data} score={score} urgency={urgency} />;
 
   return (
     <div className="thin-scroll" style={{ height: "100vh", overflowY: "auto", background: "var(--paper)" }}>
@@ -245,13 +262,13 @@ export default function IntakePage({ inDashboard = false }: { inDashboard?: bool
             </button>
             {data.docs?.length > 0 && (
               <div className="stack" style={{ gap: 10 }}>
-                {data.docs.map((d: any, i: number) => (
+                {data.docs.map((d, i) => (
                   <div key={i} className="row between card" style={{ padding: "13px 16px" }}>
                     <div className="row" style={{ gap: 12 }}>
                       <span style={{ color: "var(--pine)" }}><Icon name="doc" size={20} /></span>
                       <div className="stack"><strong style={{ fontSize: 14 }}>{d.name}</strong><span className="mono" style={{ fontSize: 11.5, color: "var(--text-3)" }}>{d.size} · uploaded</span></div>
                     </div>
-                    <button onClick={() => set("docs", data.docs.filter((_: any, j: number) => j !== i))} style={{ color: "var(--text-3)" }}><Icon name="x" size={18} /></button>
+                    <button onClick={() => set("docs", data.docs.filter((_d, j) => j !== i))} style={{ color: "var(--text-3)" }}><Icon name="x" size={18} /></button>
                   </div>
                 ))}
               </div>

@@ -96,8 +96,8 @@ export default function VerifyStatusPage() {
             marginBottom: 40,
           }}
         >
-          We're reviewing your licence and firm details. This typically takes 1-2 business days.
-          You'll receive an email as soon as your account is approved.
+          We&apos;re reviewing your licence and firm details. This typically takes 1-2 business days.
+          You&apos;ll receive an email as soon as your account is approved.
         </p>
 
         {/* 3-step progress */}
