@@ -7,8 +7,9 @@ import { Logo } from "@/components/ui";
 
 const STEPS = [
   { label: "Submitted", status: "done" },
-  { label: "Under review", status: "done" },
-  { label: "Approved", status: "pending" },
+  { label: "Automated checks", status: "done" },
+  { label: "Manual review", status: "pending" },
+  { label: "Badge activation", status: "pending" },
 ];
 
 export default function VerifyStatusPage() {
@@ -96,8 +97,8 @@ export default function VerifyStatusPage() {
             marginBottom: 40,
           }}
         >
-          We&apos;re reviewing your licence and firm details. This typically takes 1-2 business days.
-          You&apos;ll receive an email as soon as your account is approved.
+          We&apos;re reviewing your license, identity, firm details, email domain, phone verification, and risk flags.
+          Estimated time: under 24 hours.
         </p>
 
         {/* 3-step progress */}

@@ -2,205 +2,231 @@
 
 import { useRouter } from "next/navigation";
 import { Icon } from "@/components/icons";
-import { Mark, Logo, Verified, Avatar, ScoreRing } from "@/components/ui";
-import { MarketingNav, HeroTagCloud, Step, Pricing, FAQ, Footer } from "@/components/marketing";
-import { CASE_TYPES } from "@/lib/data";
+import { MarketingNav, Pricing, FAQ, Footer } from "@/components/marketing";
+
+const LAW_AREAS = ["Personal Injury", "Criminal Law", "Immigration", "Family Law", "Employment Law"];
+
+const PROBLEMS = [
+  "78% of clients hire the first attorney who responds.",
+  "Solos lose 30-40% of leads due to slow intake.",
+  "Manual intake is chaotic, inconsistent, and expensive.",
+  "Most lead-gen companies send unverified, low-quality cases.",
+];
+
+const DIFFERENTIATORS = [
+  ["shield", "Vetted leads", "Every inquiry is screened for contact accuracy, intent, and case type."],
+  ["lock", "Trusted sources", "No spam, no bots, no recycled leads."],
+  ["scale", "Qualified cases", "Cases are scored and routed instantly to the right attorney."],
+  ["bell", "Real-time alerts", "Text, email, or in-app signal so your firm can respond first."],
+];
+
+const WORKFLOW = [
+  ["A client reaches out", "They submit a short intake form through your website, landing page, or ClientSignal link."],
+  ["We verify and score the lead", "ClientSignal checks for accuracy, intent, practice area, urgency, and supporting documents."],
+  ["You receive an instant signal", "Text, email, or in-app alert. Your firm chooses the routing channel."],
+  ["You engage first and win the case", "Speed plus verification helps raise conversion quality."],
+];
+
+const FEATURES = [
+  ["shield", "Verified Leads", "Every inquiry is screened for accuracy, intent, and case type."],
+  ["bell", "Instant Alerts", "Get notified the moment a qualified client reaches out."],
+  ["filter", "Smart Routing", "Send the right cases to the right attorney automatically."],
+  ["message", "Client Messaging", "Respond quickly with built-in SMS and email tools."],
+  ["chart", "Analytics Dashboard", "Track lead quality, response times, and conversion rates."],
+  ["lock", "Encrypted Intake", "Sensitive intake and documents are treated as encrypted, secure data."],
+];
+
+const PRACTICE_TOOLS = [
+  ["Personal Injury", "Timeline case tracker, document checklist automation, form auto-fill, severity and liability scoring."],
+  ["Family Law", "Safe-contact prompts, custody and child-risk screening, financial complexity scoring, court-order uploads."],
+  ["Criminal Law", "Custody status, court dates, charges, bail details, prior history, and urgent hearing flags."],
+  ["Immigration", "Status, visa type, I-94, pending applications, hearing risk, deportation urgency, and document uploads."],
+  ["Employment Law", "Termination, discrimination, wage, retaliation, evidence, and filing-deadline screening."],
+];
 
 export default function ForAttorneys() {
   const router = useRouter();
   const go = (p: string) => router.push(p);
+
   return (
     <div id="m-scroll" className="thin-scroll" style={{ height: "100%", overflowY: "auto", background: "var(--paper)" }}>
       <MarketingNav audience="attorney" />
 
-      {/* HERO */}
-      <section style={{ position: "relative", overflow: "hidden" }}>
-        <div style={{ position: "absolute", top: -200, right: -150, width: 700, height: 700, borderRadius: "50%", background: "radial-gradient(circle, var(--signal-tint) 0%, transparent 60%)", pointerEvents: "none" }} />
-        <div className="wrap" style={{ position: "relative", paddingTop: 70, paddingBottom: 90 }}>
-          <div style={{ display: "grid", gridTemplateColumns: "1.15fr 0.85fr", gap: 60, alignItems: "center" }} className="hero-grid">
-            <div className="stack" style={{ gap: 28 }}>
-              <span className="pill rise" style={{ background: "var(--card)", border: "1px solid var(--line)", color: "var(--text-2)", alignSelf: "flex-start", animationDelay: ".05s" }}>
-                <span className="pulse-dot" /> Vetted. Trusted. Qualified leads.
-              </span>
-              <h1 className="display rise" style={{ fontSize: "clamp(40px,6vw,74px)", animationDelay: ".12s" }}>
-                Smart intake.<br />Instant alerts.<br /><span style={{ fontStyle: "italic", color: "var(--pine)" }}>Better clients</span><span style={{ color: "var(--signal-deep)" }}>.</span>
-              </h1>
-              <p className="rise" style={{ fontSize: "clamp(17px,2vw,20px)", color: "var(--text-2)", lineHeight: 1.55, maxWidth: 490, animationDelay: ".2s" }}>
-                The modern intake and lead-routing platform for solos and small firms. We verify every lead, score every case, and deliver only qualified clients — routed to you the instant they&apos;re ready.
-              </p>
-              <div className="row rise" style={{ gap: 14, flexWrap: "wrap", animationDelay: ".28s" }}>
-                <button className="btn btn-signal btn-lg" onClick={() => go("/attorney/signup")}><Icon name="bolt" size={19} /> Get started</button>
-                <button className="btn btn-ghost btn-lg" onClick={() => go("/demo")}><Icon name="clock" size={18} /> Book a demo</button>
-              </div>
-              <div className="row rise" style={{ gap: 24, marginTop: 10, animationDelay: ".36s", flexWrap: "wrap" }}>
-                {[["~4 min", "median response"], ["48 hr", "quality guarantee"], ["100%", "verified bar #"]].map(([n, l]) => (
-                  <div key={l} className="stack" style={{ gap: 2 }}>
-                    <strong className="mono" style={{ fontSize: 22, color: "var(--ink)" }}>{n}</strong>
-                    <span style={{ fontSize: 12.5, color: "var(--text-3)" }}>{l}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="rise" style={{ animationDelay: ".24s" }}><HeroTagCloud /></div>
-          </div>
-        </div>
-      </section>
-
-      {/* TRUST STRIP */}
-      <section style={{ borderTop: "1px solid var(--line)", borderBottom: "1px solid var(--line)", padding: "26px 0", background: "var(--card)" }}>
-        <div className="wrap row" style={{ gap: 40, flexWrap: "wrap", justifyContent: "space-between", opacity: 0.8 }}>
-          <span className="mono" style={{ fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-3)" }}>Trusted across practice areas</span>
-          <div className="row" style={{ gap: 28, flexWrap: "wrap" }}>
-            {["Personal Injury", "Family", "Criminal", "Immigration", "Employment", "Business"].map(t => (
-              <span key={t} style={{ fontWeight: 600, fontSize: 15, color: "var(--text-2)" }}>{t}</span>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* HOW IT WORKS */}
-      <section id="how" style={{ padding: "110px 0" }}>
-        <div className="wrap">
-          <div className="stack" style={{ gap: 16, marginBottom: 56, maxWidth: 560 }}>
-            <span className="eyebrow">How it works</span>
-            <h2 className="display" style={{ fontSize: "clamp(32px,5vw,52px)" }}>Three steps between a problem and a callback.</h2>
-          </div>
-          <div className="row step-row" style={{ gap: 50, alignItems: "flex-start", flexWrap: "wrap" }}>
-            <Step n={1} icon="pen" title="Describe it once" desc="A guided intake adapts its questions to your case type — injury, family, criminal, immigration and more — and lets you attach documents securely." accent="var(--signal-tint)" />
-            <Step n={2} icon="zap" title="We score & route" desc="ClientSignal grades each inquiry on quality and urgency, then matches it to verified attorneys by practice area and jurisdiction." accent="var(--amber-tint)" />
-            <Step n={3} icon="phone" title="An attorney responds" desc="The right attorney is alerted instantly by SMS and email and reaches out directly — usually within minutes, while it still matters." accent="var(--verified-tint)" />
-          </div>
-        </div>
-      </section>
-
-      {/* LEAD SCORING */}
-      <section id="scoring" style={{ padding: "110px 0", background: "var(--pine)", color: "var(--on-pine)", position: "relative", overflow: "hidden" }}>
-        <div className="gridlines" />
-        <div className="wrap" style={{ position: "relative" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 64, alignItems: "center" }} className="hero-grid">
+      <section style={{ position: "relative", overflow: "hidden", borderBottom: "1px solid var(--line)" }}>
+        <div className="wrap" style={{ paddingTop: 70, paddingBottom: 76 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1.05fr 0.95fr", gap: 48, alignItems: "center" }} className="hero-grid">
             <div className="stack" style={{ gap: 24 }}>
-              <span className="eyebrow" style={{ color: "var(--gold-soft)" }}>The signal engine</span>
-              <h2 className="display" style={{ fontSize: "clamp(32px,5vw,52px)" }}>Not just a lead.<br />A scored, ranked <span style={{ fontStyle: "italic", color: "var(--gold-soft)" }}>signal</span>.</h2>
-              <p style={{ fontSize: 17, color: "rgba(234,240,249,0.78)", lineHeight: 1.6, maxWidth: 460 }}>
-                Every inquiry is graded the instant it arrives. Attorneys see exactly where to spend their attention — no more sifting through cold, half-finished form fills.
-              </p>
-              <div className="stack" style={{ gap: 14, marginTop: 6 }}>
-                {[
-                  ["Quality score", "Completeness, consent, documents, and contactability."],
-                  ["Urgency score", "Deadlines, statute clocks, and time-sensitivity."],
-                  ["Est. case value", "Modeled range to prioritize the highest-impact matters."],
-                ].map(([t, d]) => (
-                  <div key={t} className="row" style={{ gap: 14, alignItems: "flex-start" }}>
-                    <span style={{ marginTop: 3, color: "var(--gold-soft)", flex: "none" }}><Icon name="check" size={18} stroke={2.6} /></span>
-                    <div><strong style={{ fontSize: 15.5 }}>{t}</strong> <span style={{ color: "rgba(234,240,249,0.66)", fontSize: 15 }}>— {d}</span></div>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="card" style={{ background: "var(--card)", color: "var(--ink)", padding: 28, boxShadow: "var(--sh-lg)" }}>
-              <span className="eyebrow">How scoring works</span>
-              <div className="stack" style={{ gap: 16, marginTop: 20 }}>
-                {[
-                  ["shield", "Identity & consent verified", "SMS + email confirmed before routing", "var(--verified)"],
-                  ["doc", "Completeness & documents", "More detail and evidence = higher score", "var(--signal)"],
-                  ["clock", "Urgency & deadlines", "Time-sensitive matters surface first", "var(--amber)"],
-                  ["scale", "Practice-area & jurisdiction fit", "Only matched to what you actually handle", "var(--pine)"],
-                ].map(([ic, t, d, c]) => (
-                  <div key={t} className="row" style={{ gap: 14 }}>
-                    <div style={{ width: 44, height: 44, borderRadius: 11, background: "var(--paper-2)", display: "grid", placeItems: "center", flex: "none" }}><Icon name={ic} size={20} color={c} /></div>
-                    <div className="stack" style={{ gap: 2 }}><strong style={{ fontSize: 14.5 }}>{t}</strong><span style={{ fontSize: 12.5, color: "var(--text-3)", lineHeight: 1.4 }}>{d}</span></div>
-                  </div>
-                ))}
-              </div>
-              <div className="row between" style={{ marginTop: 22, paddingTop: 18, borderTop: "1px solid var(--line)" }}>
-                <span style={{ fontSize: 13.5, color: "var(--text-2)" }}>Every lead arrives pre-scored &amp; exclusive</span>
-                <span className="pill" style={{ background: "var(--verified-tint)", color: "var(--verified)", fontSize: 12 }}><Verified size={13} /> Vetted</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* FOR ATTORNEYS FEATURES */}
-      <section id="attorneys" style={{ padding: "110px 0" }}>
-        <div className="wrap">
-          <div className="row between" style={{ alignItems: "flex-end", marginBottom: 50, flexWrap: "wrap", gap: 20 }}>
-            <div className="stack" style={{ gap: 16, maxWidth: 560 }}>
-              <span className="eyebrow">For attorneys</span>
-              <h2 className="display" style={{ fontSize: "clamp(32px,5vw,52px)" }}>Be the first call, not the fifth.</h2>
-            </div>
-            <button className="btn btn-pine" onClick={() => go("/attorney/signup")}>Apply to join <Icon name="arrowR" size={17} /></button>
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 22 }} className="feat-grid">
-            {[
-              ["bell", "Instant alerts", "SMS + email the moment a matching lead is scored. Respond from your phone in seconds."],
-              ["shield", "Verified & exclusive", "Every attorney is bar-verified. Premium leads are sold to one attorney — never blasted to ten."],
-              ["message", "Built-in messaging", "A secure two-way thread with each client, plus case notes that stay attached to the lead."],
-              ["plug", "CRM integrations", "Push accepted leads straight into Clio, MyCase, or Lawmatics — no copy-paste."],
-              ["chart", "Real analytics", "Win rates, response times, lead value, and ROI per practice area — all in one view."],
-              ["dollar", "Pay your way", "Predictable monthly subscription or pure pay-per-lead. Switch anytime."],
-            ].map(([icon, t, d]) => (
-              <div key={t} className="card feat-card" style={{ padding: 26 }}>
-                <div style={{ width: 46, height: 46, borderRadius: 12, background: "var(--pine-tint)", display: "grid", placeItems: "center", marginBottom: 18 }}>
-                  <Icon name={icon} size={22} color="var(--pine)" />
-                </div>
-                <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 8 }}>{t}</h3>
-                <p style={{ fontSize: 14.5, color: "var(--text-2)", lineHeight: 1.55 }}>{d}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* EDITORIAL IMAGE BAND */}
-      <section style={{ padding: "0 0 30px" }}>
-        <div className="wrap">
-          <div style={{ display: "grid", gridTemplateColumns: "1.1fr 0.9fr", borderRadius: 26, overflow: "hidden", boxShadow: "var(--sh-lg)" }} className="hero-grid">
-            <div style={{ position: "relative", minHeight: 420, background: "#0B1F3A" }}>
-              <img src="https://images.unsplash.com/photo-1521791136064-7986c2920216?w=1100&h=900&fit=crop" alt="Attorneys in consultation" style={{ width: "100%", height: "100%", objectFit: "cover", position: "absolute", inset: 0 }} />
-              <div style={{ position: "absolute", inset: 0, background: "linear-gradient(120deg, rgba(11,31,58,0.55), rgba(11,31,58,0.1))" }} />
-            </div>
-            <div className="gridlines" style={{ background: "var(--pine)", color: "#fff", padding: "54px 48px", display: "flex", flexDirection: "column", justifyContent: "center", position: "relative" }}>
-              <span style={{ fontSize: 56, fontFamily: "var(--serif)", color: "var(--gold-soft)", lineHeight: 0.5, height: 30, position: "relative", zIndex: 1 }}>&ldquo;</span>
-              <p className="display" style={{ fontSize: "clamp(22px,2.4vw,29px)", lineHeight: 1.32, marginBottom: 26, position: "relative", zIndex: 1 }}>
-                In our first month we signed three personal-injury cases worth more than a year of our old ad spend. The leads actually pick up the phone.
-              </p>
-              <div className="row" style={{ gap: 13, position: "relative", zIndex: 1 }}>
-                <Avatar name="David Park" size={48} />
-                <div className="stack" style={{ gap: 2 }}>
-                  <div className="row" style={{ gap: 6 }}><strong style={{ fontSize: 15 }}>David Park</strong><Verified size={15} /></div>
-                  <span style={{ fontSize: 13, color: "rgba(234,240,249,0.65)" }}>Park Immigration Law · San Jose</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <Pricing />
-      <FAQ />
-
-      {/* CTA BAND */}
-      <section style={{ padding: "30px 0 100px" }}>
-        <div className="wrap">
-          <div className="gridlines" style={{ background: "var(--pine)", borderRadius: 26, padding: "72px 56px", position: "relative", overflow: "hidden" }}>
-            <div style={{ position: "absolute", top: "50%", right: -80, transform: "translateY(-50%)", opacity: 0.5 }}>
-              <svg width="420" height="420" viewBox="0 0 420 420" fill="none">
-                <g transform="rotate(-45 210 210)" stroke="#D4A017" fill="none" strokeLinecap="round">
-                  {[60, 110, 160, 210].map((r, i) => <path key={i} d={`M210 ${210 + r} a${r} ${r} 0 0 0 0 ${-2 * r}`} strokeWidth="3" opacity={0.5 - i * 0.1} />)}
-                </g>
-                <circle cx="110" cy="210" r="9" fill="#3B82F6" />
-              </svg>
-            </div>
-            <div className="stack" style={{ gap: 24, position: "relative", maxWidth: 600, zIndex: 1 }}>
-              <span className="eyebrow" style={{ color: "var(--gold-soft)" }}>Get started</span>
-              <h2 className="display" style={{ fontSize: "clamp(34px,5vw,56px)", color: "#fff" }}>Send your <span style={{ fontStyle: "italic", color: "var(--gold-soft)" }}>signal</span>.</h2>
-              <p style={{ fontSize: 18, color: "rgba(234,240,249,0.75)", maxWidth: 460, lineHeight: 1.5 }}>
-                Whether you need legal help or you&apos;re ready to respond to leads — get matched in minutes.
+              <span className="pill" style={{ background: "var(--card)", border: "1px solid var(--line)", color: "var(--text-2)", alignSelf: "flex-start" }}>
+                <span className="pulse-dot" /> Updated May 31, 2026
+              </span>
+              <h1 className="display" style={{ fontSize: "clamp(40px,6vw,72px)" }}>
+                Vetted. Trusted. Qualified leads, delivered instantly.
+              </h1>
+              <p style={{ fontSize: "clamp(17px,2vw,20px)", color: "var(--text-2)", lineHeight: 1.55, maxWidth: 560 }}>
+                ClientSignal is the modern intake and lead-routing platform built for solos and small firms. We verify every lead, score every case, and deliver only qualified clients.
               </p>
               <div className="row" style={{ gap: 14, flexWrap: "wrap" }}>
-                <button className="btn btn-signal btn-lg" onClick={() => go("/attorney/signup")}>Get started</button>
-                <button className="btn btn-ghost-light btn-lg" onClick={() => go("/demo")}>Book a demo</button>
+                <button className="btn btn-signal btn-lg" onClick={() => go("/attorney/signup")}><Icon name="bolt" size={18} /> Start Free Trial</button>
+                <button className="btn btn-ghost btn-lg" onClick={() => go("/demo")}><Icon name="clock" size={18} /> Book a Demo</button>
+              </div>
+              <div className="row" style={{ gap: 10, flexWrap: "wrap" }}>
+                {LAW_AREAS.map((area) => (
+                  <span key={area} className="pill" style={{ background: "var(--card)", border: "1px solid var(--line)", color: "var(--text-2)" }}>{area}</span>
+                ))}
+              </div>
+            </div>
+
+            <div className="card" style={{ padding: 26, boxShadow: "var(--sh-lg)" }}>
+              <div className="row between" style={{ paddingBottom: 16, borderBottom: "1px solid var(--line)", marginBottom: 18 }}>
+                <span className="eyebrow">Lead signal</span>
+                <span className="pill" style={{ background: "var(--verified-tint)", color: "var(--verified)" }}><Icon name="check" size={13} /> Qualified</span>
+              </div>
+              <div className="stack" style={{ gap: 16 }}>
+                {[
+                  ["Practice area", "Personal Injury"],
+                  ["Contact verified", "SMS + email confirmed"],
+                  ["Urgency", "Medical treatment, police report, active pain"],
+                  ["Routing", "PI attorney in jurisdiction"],
+                ].map(([label, value]) => (
+                  <div key={label} className="row between" style={{ gap: 16, paddingBottom: 12, borderBottom: "1px solid var(--line)" }}>
+                    <span style={{ color: "var(--text-3)", fontSize: 14 }}>{label}</span>
+                    <strong style={{ textAlign: "right", color: "var(--ink)" }}>{value}</strong>
+                  </div>
+                ))}
+              </div>
+              <button className="btn btn-pine" style={{ width: "100%", marginTop: 22 }} onClick={() => go("/demo")}>View the Workflow <Icon name="arrowR" size={17} /></button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section style={{ padding: "82px 0" }}>
+        <div className="wrap hero-grid" style={{ display: "grid", gridTemplateColumns: "0.85fr 1.15fr", gap: 44, alignItems: "start" }}>
+          <div className="stack" style={{ gap: 14 }}>
+            <span className="eyebrow">The Problem</span>
+            <h2 className="display" style={{ fontSize: "clamp(30px,4.4vw,48px)" }}>Clients are reaching out. Firms are not responding fast enough.</h2>
+            <p style={{ color: "var(--text-2)", lineHeight: 1.65, fontSize: 16 }}>
+              The result is missed cases, lost revenue, and frustrated clients. ClientSignal fixes this.
+            </p>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }} className="feat-grid">
+            {PROBLEMS.map((problem) => (
+              <div key={problem} className="card" style={{ padding: 22 }}>
+                <Icon name="bell" size={20} color="var(--coral)" />
+                <p style={{ marginTop: 12, color: "var(--text-1)", fontWeight: 600, lineHeight: 1.45 }}>{problem}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section style={{ padding: "84px 0", background: "var(--card)", borderTop: "1px solid var(--line)", borderBottom: "1px solid var(--line)" }}>
+        <div className="wrap">
+          <div className="stack" style={{ gap: 14, maxWidth: 640, marginBottom: 36 }}>
+            <span className="eyebrow">Smart Intake. Instant Alerts. Better Clients.</span>
+            <h2 className="display" style={{ fontSize: "clamp(30px,4.4vw,48px)" }}>AI-verified leads for modern law firms.</h2>
+            <p style={{ color: "var(--text-2)", lineHeight: 1.65, fontSize: 16 }}>Connecting attorneys with clients who truly need them. More clients. Less noise. Better cases.</p>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 18 }} className="feat-grid">
+            {DIFFERENTIATORS.map(([icon, title, desc]) => (
+              <div key={title} className="card feat-card" style={{ padding: 24 }}>
+                <div style={{ width: 44, height: 44, borderRadius: 10, background: "var(--pine-tint)", display: "grid", placeItems: "center", marginBottom: 16 }}>
+                  <Icon name={icon} size={21} color="var(--pine)" />
+                </div>
+                <h3 style={{ fontSize: 17, fontWeight: 700, marginBottom: 8 }}>{title}</h3>
+                <p style={{ fontSize: 14, color: "var(--text-2)", lineHeight: 1.55 }}>{desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="workflow" style={{ padding: "90px 0", background: "var(--pine)", color: "#fff", position: "relative" }} className="gridlines">
+        <div className="wrap" style={{ position: "relative", zIndex: 1 }}>
+          <div className="row between" style={{ alignItems: "end", marginBottom: 42, gap: 20, flexWrap: "wrap" }}>
+            <div className="stack" style={{ gap: 12, maxWidth: 560 }}>
+              <span className="eyebrow" style={{ color: "var(--gold-soft)" }}>How It Works</span>
+              <h2 className="display" style={{ fontSize: "clamp(30px,4.4vw,48px)", color: "#fff" }}>Four steps from inquiry to engagement.</h2>
+            </div>
+            <button className="btn btn-ghost-light" onClick={() => go("/demo")}>View the Workflow <Icon name="arrowR" size={17} /></button>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 18 }} className="feat-grid">
+            {WORKFLOW.map(([title, desc], i) => (
+              <div key={title} style={{ padding: 22, border: "1px solid rgba(255,255,255,0.12)", borderRadius: 16, background: "rgba(255,255,255,0.04)" }}>
+                <span className="mono" style={{ color: "var(--gold-soft)", fontSize: 24, fontWeight: 700 }}>0{i + 1}</span>
+                <h3 style={{ fontSize: 18, margin: "16px 0 8px", color: "#fff" }}>{title}</h3>
+                <p style={{ color: "rgba(234,240,249,0.7)", fontSize: 14, lineHeight: 1.55 }}>{desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section style={{ padding: "86px 0" }}>
+        <div className="wrap">
+          <div className="stack" style={{ gap: 12, textAlign: "center", alignItems: "center", marginBottom: 38 }}>
+            <span className="eyebrow">Features</span>
+            <h2 className="display" style={{ fontSize: "clamp(30px,4.4vw,48px)" }}>Everything you need to capture better clients.</h2>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 18 }} className="feat-grid">
+            {FEATURES.map(([icon, title, desc]) => (
+              <div key={title} className="card" style={{ padding: 24 }}>
+                <Icon name={icon} size={23} color="var(--signal)" />
+                <h3 style={{ fontSize: 18, fontWeight: 700, margin: "14px 0 8px" }}>{title}</h3>
+                <p style={{ color: "var(--text-2)", fontSize: 14.5, lineHeight: 1.55 }}>{desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section style={{ padding: "84px 0", background: "var(--card)", borderTop: "1px solid var(--line)", borderBottom: "1px solid var(--line)" }}>
+        <div className="wrap">
+          <div className="stack" style={{ gap: 12, marginBottom: 34, maxWidth: 720 }}>
+            <span className="eyebrow">Practice Area Intake</span>
+            <h2 className="display" style={{ fontSize: "clamp(30px,4.4vw,48px)" }}>Each practice area asks the questions attorneys actually need.</h2>
+            <p style={{ color: "var(--text-2)", lineHeight: 1.65 }}>Personal injury gets timelines and documents. Family law gets safety screening. Criminal law gets court urgency. Immigration gets status and document checks. Employment law gets evidence and deadline prompts.</p>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 14 }} className="feat-grid">
+            {PRACTICE_TOOLS.map(([area, detail]) => (
+              <div key={area} className="card" style={{ padding: 20 }}>
+                <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 8 }}>{area}</h3>
+                <p style={{ color: "var(--text-2)", fontSize: 13.5, lineHeight: 1.55 }}>{detail}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section style={{ padding: "86px 0" }}>
+        <div className="wrap">
+          <div className="stack" style={{ gap: 12, textAlign: "center", alignItems: "center", marginBottom: 34 }}>
+            <span className="eyebrow">Pricing</span>
+            <h2 className="display" style={{ fontSize: "clamp(30px,4.4vw,48px)" }}>Pick the package that matches your intake motion.</h2>
+          </div>
+          <Pricing />
+        </div>
+      </section>
+
+      <section style={{ padding: "20px 0 86px" }}>
+        <div className="wrap">
+          <div className="stack" style={{ gap: 12, textAlign: "center", alignItems: "center", marginBottom: 24 }}>
+            <span className="eyebrow">FAQ</span>
+            <h2 className="display" style={{ fontSize: "clamp(28px,4vw,40px)" }}>Common questions.</h2>
+          </div>
+          <FAQ />
+        </div>
+      </section>
+
+      <section style={{ padding: "0 0 100px" }}>
+        <div className="wrap">
+          <div className="gridlines" style={{ background: "var(--pine)", borderRadius: 26, padding: "70px 56px", textAlign: "center", position: "relative", overflow: "hidden" }}>
+            <div className="stack" style={{ gap: 22, maxWidth: 660, margin: "0 auto", position: "relative", zIndex: 1 }}>
+              <span className="eyebrow" style={{ color: "var(--gold-soft)" }}>Final CTA</span>
+              <h2 className="display" style={{ fontSize: "clamp(32px,5vw,52px)", color: "#fff" }}>Ready for vetted, trusted, qualified leads?</h2>
+              <div className="row" style={{ gap: 14, justifyContent: "center", flexWrap: "wrap" }}>
+                <button className="btn btn-signal btn-lg" onClick={() => go("/attorney/signup")}>Start Free Trial</button>
+                <button className="btn btn-ghost-light btn-lg" onClick={() => go("/demo")}>Book a Demo</button>
               </div>
             </div>
           </div>

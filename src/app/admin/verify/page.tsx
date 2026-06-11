@@ -34,7 +34,7 @@ export default function AdminVerify() {
             <div className="card" style={{ padding: 20 }}>
               <strong style={{ fontSize: 14, display: "block", marginBottom: 14 }}>Submitted details</strong>
               <div className="stack" style={{ gap: 11 }}>
-                {([["Bar number", a.bar], ["Firm", a.firm], ["Practice areas", a.specialties.map(s => CASE_TYPES[s]?.label).join(", ")], ["State bar status", "Active · good standing"]] as [string, string][]).map(([k, v]) => (
+                {([["Bar number", a.bar], ["Firm", a.firm], ["Practice areas", a.specialties.map(s => CASE_TYPES[s]?.label).join(", ")], ["Work email", `${a.name.split(" ")[0].toLowerCase()}@${a.firm.toLowerCase().replace(/[^a-z]/g, "")}.com`], ["State bar status", "Active · good standing"]] as [string, string][]).map(([k, v]) => (
                   <div key={k} className="row between" style={{ fontSize: 13.5 }}><span style={{ color: "var(--text-3)" }}>{k}</span><strong style={{ textAlign: "right", maxWidth: 200 }}>{v}</strong></div>
                 ))}
               </div>
@@ -42,7 +42,7 @@ export default function AdminVerify() {
             <div className="card" style={{ padding: 20 }}>
               <strong style={{ fontSize: 14, display: "block", marginBottom: 14 }}>License document</strong>
               <div style={{ borderRadius: 12, border: "1px solid var(--line)", background: "var(--paper-2)", height: 132, display: "grid", placeItems: "center", marginBottom: 12 }}>
-                <div className="stack" style={{ alignItems: "center", gap: 8 }}><Icon name="doc" size={30} color="var(--pine)" /><span className="mono" style={{ fontSize: 12, color: "var(--text-3)" }}>Bar_license_{a.bar.split(" ")[0]}.pdf</span></div>
+                  <div className="stack" style={{ alignItems: "center", gap: 8 }}><Icon name="doc" size={30} color="var(--pine)" /><span className="mono" style={{ fontSize: 12, color: "var(--text-3)" }}>Bar_license_{a.bar.split(" ")[0]}.pdf</span></div>
               </div>
               <button className="btn btn-ghost btn-sm" style={{ width: "100%" }}><Icon name="eye" size={15} /> Open document</button>
             </div>
@@ -51,13 +51,36 @@ export default function AdminVerify() {
           {/* rating */}
           <div className="card" style={{ padding: 22, marginBottom: 18 }}>
             <strong style={{ fontSize: 14, display: "block", marginBottom: 6 }}>Trust rating</strong>
-            <p style={{ fontSize: 13, color: "var(--text-3)", marginBottom: 14 }}>Assign a verification confidence rating before deciding.</p>
+            <p style={{ fontSize: 13, color: "var(--text-3)", marginBottom: 14 }}>Green can approve, Yellow requires manual review, and Red should be rejected or sent back for more information.</p>
             <div className="row" style={{ gap: 11 }}>
               {Object.entries(RATING).map(([k, [l, c, t]]) => (
                 <div key={k} className="row" style={{ gap: 9, flex: 1, padding: "13px 16px", borderRadius: 12, background: t, border: `1.5px solid ${k === a.rating ? c : "transparent"}` }}>
                   <span style={{ width: 12, height: 12, borderRadius: "50%", background: c }} />
                   <strong style={{ fontSize: 14, color: c }}>{l}</strong>
                   {k === a.rating && <Icon name="check" size={16} color={c} stroke={2.5} style={{ marginLeft: "auto" }} />}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="card" style={{ padding: 22, marginBottom: 18 }}>
+            <strong style={{ fontSize: 14, display: "block", marginBottom: 14 }}>24-hour verification checklist</strong>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }} className="dash-grid">
+              {[
+                "Name matches bar record",
+                "Bar number matches state database",
+                "License status is Active",
+                "No suspension or disbarment",
+                "Work email domain matches firm",
+                "Phone verified by SMS",
+                "Firm website lists attorney",
+                "Uploaded documents are readable",
+                "Discipline and risk flags reviewed",
+                "Verification timestamp recorded",
+              ].map((item) => (
+                <div key={item} className="row" style={{ gap: 9, fontSize: 13.5, color: "var(--text-2)" }}>
+                  <Icon name="check" size={15} color="var(--verified)" stroke={2.5} />
+                  {item}
                 </div>
               ))}
             </div>
@@ -71,7 +94,7 @@ export default function AdminVerify() {
           ) : (
             <div className="row" style={{ gap: 12 }}>
               <button className="btn btn-ghost" style={{ flex: 1, color: "var(--coral)", borderColor: "var(--coral)" }} onClick={() => decide("reject")}><Icon name="x" size={17} /> Reject</button>
-              <button className="btn btn-pine" style={{ flex: 2 }} onClick={() => decide("approve")}><Icon name="check" size={17} /> Approve &amp; verify {a.name.split(" ")[0]}</button>
+              <button className="btn btn-pine" style={{ flex: 2 }} onClick={() => decide("approve")}><Icon name="check" size={17} /> Approve &amp; activate Verified Attorney badge</button>
             </div>
           )}
         </div>

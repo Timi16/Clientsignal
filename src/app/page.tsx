@@ -96,17 +96,17 @@ export default function HomePage() {
           <div style={{ display: "grid", gridTemplateColumns: "1.04fr 0.96fr", gap: 56, alignItems: "center" }} className="hero-grid">
             <div className="stack" style={{ gap: 24 }}>
               <span className="pill rise" style={{ background: "var(--card)", border: "1px solid var(--line)", color: "var(--text-2)", alignSelf: "flex-start" }}>
-                <span className="pulse-dot" /> Verified attorneys · vetted cases
+                <span className="pulse-dot" /> Vetted. Trusted. Qualified leads.
               </span>
               <h1 className="display rise" style={{ fontSize: "clamp(40px,5.6vw,72px)", animationDelay: ".08s" }}>
-                Find the <span style={{ fontStyle: "italic", color: "var(--pine)" }}>right attorney</span>, fast<span style={{ color: "var(--signal-deep)" }}>.</span>
+                ClientSignal connects attorneys with clients who truly need them<span style={{ color: "var(--signal-deep)" }}>.</span>
               </h1>
               <p className="rise" style={{ fontSize: "clamp(17px,2vw,20px)", color: "var(--text-2)", lineHeight: 1.55, maxWidth: 480, animationDelay: ".16s" }}>
-                ClientSignal verifies every attorney and scores every case, then connects clients with licensed lawyers who can actually help — managed in one secure place.
+                AI-verified leads for modern law firms. Smart intake, instant alerts, and qualified cases for Personal Injury, Criminal Law, Immigration, Family Law, and Employment Law.
               </p>
               <div className="row rise" style={{ gap: 13, flexWrap: "wrap", animationDelay: ".24s" }}>
-                <button className="btn btn-ink btn-lg" onClick={() => router.push("/get-started")}>Get started free <Icon name="arrowR" size={18} /></button>
-                <button className="btn btn-ghost btn-lg" onClick={() => router.push("/demo")}><Icon name="clock" size={17} /> Book a demo</button>
+                <button className="btn btn-ink btn-lg" onClick={() => router.push("/attorney/signup")}>Start Free Trial <Icon name="arrowR" size={18} /></button>
+                <button className="btn btn-ghost btn-lg" onClick={() => router.push("/demo")}><Icon name="clock" size={17} /> Book a Demo</button>
               </div>
               <div className="row rise" style={{ gap: 12, marginTop: 4, animationDelay: ".3s", alignItems: "center" }}>
                 <div className="row" style={{ marginLeft: 4 }}>
@@ -147,7 +147,7 @@ export default function HomePage() {
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 22 }} className="hero-grid">
             {[
               { who: "For Clients", t: "Get matched with the right attorney.", d: "Describe your situation once, get matched with a verified attorney, and track your whole case — messages, documents and status — in one place. Always free.", icon: "scale", cta: "Find legal help", dest: "/for-clients", bg: "var(--blue-tint)", c: "var(--signal)" },
-              { who: "For Attorneys", t: "Grow your practice with qualified clients.", d: "Receive vetted, scored, exclusive client opportunities matched to your practice areas and jurisdiction — and respond before anyone else.", icon: "briefcase", cta: "Grow my practice", dest: "/for-attorneys", bg: "var(--gold-tint)", c: "var(--gold-deep)" },
+              { who: "For Attorneys", t: "Grow your practice with qualified clients.", d: "Receive vetted, scored, exclusive client opportunities matched to your practice areas and jurisdiction, then respond before anyone else.", icon: "briefcase", cta: "Start free trial", dest: "/for-attorneys", bg: "var(--gold-tint)", c: "var(--gold-deep)" },
             ].map(p => (
               <div key={p.who} className="card feat-card" style={{ padding: 34, cursor: "pointer" }} onClick={() => router.push(p.dest)}>
                 <div style={{ width: 56, height: 56, borderRadius: 14, background: p.bg, display: "grid", placeItems: "center", marginBottom: 20 }}><Icon name={p.icon} size={26} color={p.c} /></div>
@@ -173,8 +173,8 @@ export default function HomePage() {
           <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 22 }} className="feat-grid">
             {[
               { icon: "user", title: "Create an account", desc: "Clients and attorneys each get a secure, dedicated workspace." },
-              { icon: "pen", title: "Describe or set up", desc: "Clients outline their case; attorneys verify their licence & areas." },
-              { icon: "shield", title: "We verify & match", desc: "Every attorney is licence-checked; every case is scored and routed." },
+              { icon: "pen", title: "Describe or set up", desc: "Clients outline their case; attorneys verify their license and areas." },
+              { icon: "shield", title: "We verify & match", desc: "Every attorney is license-checked; every case is scored and routed." },
               { icon: "message", title: "Connect & resolve", desc: "Message, share documents and track everything in one dashboard." },
             ].map((s, i) => (
               <div key={s.title} className="stack rise" style={{ gap: 14, animationDelay: `${(i + 1) * 0.1}s` }}>
@@ -236,7 +236,7 @@ export default function HomePage() {
         <div className="wrap">
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 22 }} className="feat-grid">
             {[
-              ["shield", "Licence-verified attorneys", "Every attorney's bar licence, identity and firm are confirmed within 24 hours of joining — no exceptions."],
+              ["shield", "License-verified attorneys", "Every attorney's bar license, identity and firm are confirmed within 24 hours of joining — no exceptions."],
               ["lock", "Private & encrypted", "Client information is encrypted and shared only with a matched attorney. Never sold, never spammed."],
               ["bolt", "Fast, exclusive matches", "Cases are routed to one attorney at a time — not blasted to ten — so clients get real attention, fast."],
             ].map(([ic, t, d]) => (
@@ -255,11 +255,11 @@ export default function HomePage() {
         <div className="wrap">
           <div style={{ background: "var(--signal)", borderRadius: 26, padding: "70px 56px", textAlign: "center" }}>
             <div className="stack" style={{ gap: 22, maxWidth: 600, margin: "0 auto" }}>
-              <h2 className="display" style={{ fontSize: "clamp(32px,5vw,52px)", color: "#fff" }}>Ready to get started?</h2>
-              <p style={{ fontSize: 18, color: "rgba(255,255,255,0.85)", lineHeight: 1.5 }}>Create your free account and get to the right place in seconds.</p>
+              <h2 className="display" style={{ fontSize: "clamp(32px,5vw,52px)", color: "#fff" }}>Ready for vetted, trusted, qualified leads?</h2>
+              <p style={{ fontSize: 18, color: "rgba(255,255,255,0.85)", lineHeight: 1.5 }}>Start with ClientSignal, then book time to review the right package for your firm.</p>
               <div className="row" style={{ gap: 14, justifyContent: "center", flexWrap: "wrap" }}>
-                <button className="btn btn-lg" style={{ background: "#fff", color: "var(--signal)" }} onClick={() => router.push("/get-started")}>Get started free</button>
-                <button className="btn btn-ghost-light btn-lg" onClick={() => router.push("/login")}>Login</button>
+                <button className="btn btn-lg" style={{ background: "#fff", color: "var(--signal)" }} onClick={() => router.push("/attorney/signup")}>Start Free Trial</button>
+                <button className="btn btn-ghost-light btn-lg" onClick={() => router.push("/demo")}>Book a Demo</button>
               </div>
             </div>
           </div>

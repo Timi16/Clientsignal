@@ -23,6 +23,34 @@ type IntakeData = {
   docs: UploadedDoc[];
 };
 
+const PRACTICE_PROMPTS: Record<string, { signals: string[]; docs: string[]; scoring: string[] }> = {
+  injury: {
+    signals: ["Date, time, and location of incident", "Injury and medical treatment details", "Police report, witnesses, photos, and liability indicators", "Insurance and claim information"],
+    docs: ["Photos of injuries", "Photos of vehicles or property", "Police report", "Medical records", "Insurance letters"],
+    scoring: ["Severity score", "Liability score", "Insurance coverage score", "Urgency score", "Case value potential"],
+  },
+  family: {
+    signals: ["Safe contact confirmation", "Case type, household, children, and custody details", "Domestic violence or protective-order screening", "Property, debt, income, court dates, and existing orders"],
+    docs: ["Court orders", "CPS documents", "Police reports", "Marriage certificate", "Financial statements", "Message screenshots"],
+    scoring: ["Urgency score", "Safety risk score", "Child involvement score", "Financial complexity score", "Case type score"],
+  },
+  criminal: {
+    signals: ["Charges, arrest date, location, and custody status", "Court date, court location, judge, and bail amount", "Prior arrests, convictions, probation, or parole", "Witnesses, video evidence, and injury flags"],
+    docs: ["Arrest report", "Court documents", "Bail paperwork", "Police reports", "Photos, videos, or screenshots"],
+    scoring: ["Custody urgency score", "Court deadline score", "Charge severity score", "Prior history score", "Representation conflict score"],
+  },
+  immigration: {
+    signals: ["Current status and visa type", "Entry method, inspection, I-94, and expiration", "Pending USCIS applications and receipt numbers", "Detention, deportation, criminal history, family status, and hearing risk"],
+    docs: ["Passport", "Visa", "I-94", "USCIS notices", "Court documents", "Work authorization", "Marriage or birth certificates"],
+    scoring: ["Status urgency score", "Removal risk score", "Document completeness score", "Family eligibility score", "Criminal-history impact score"],
+  },
+  employment: {
+    signals: ["Termination, discrimination, harassment, wage, or retaliation details", "Employer, dates, witnesses, and HR complaint status", "Pay, overtime, severance, or policy evidence", "Filing deadlines and active agency complaints"],
+    docs: ["Termination letter", "Employment agreement", "Pay stubs", "HR emails", "Messages", "Policy documents"],
+    scoring: ["Deadline urgency score", "Evidence score", "Damages score", "Retaliation indicator score", "Employer size score"],
+  },
+};
+
 function IntakeDone({ data, score, urgency }: { data: IntakeData; score: number; urgency: number }) {
   const router = useRouter();
   const [phase, setPhase] = useState(0);
@@ -111,6 +139,7 @@ export default function IntakePage({ inDashboard = false }: { inDashboard?: bool
   const [data, setData] = useState<IntakeData>({ type: "", sub: "", desc: "", city: "", state: "", name: "", email: "", phone: "", when: "", urgent: "", consent: false, docs: [] });
   const set = <K extends keyof IntakeData>(k: K, v: IntakeData[K]) => setData(d => ({ ...d, [k]: v }));
   const cfg = INTAKE_CONFIG[data.type];
+  const prompts = PRACTICE_PROMPTS[data.type];
   const steps = ["Case type", "Details", "Your story", "Documents", "Contact"];
 
   const canNext = () => {
@@ -242,6 +271,19 @@ export default function IntakePage({ inDashboard = false }: { inDashboard?: bool
                 ))}
               </div>
             </LField>
+            {prompts && (
+              <div className="card" style={{ padding: 18, background: "var(--card)" }}>
+                <strong style={{ display: "block", fontSize: 14.5, marginBottom: 12 }}>This intake also checks</strong>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }} className="dash-grid">
+                  {prompts.signals.map((item) => (
+                    <div key={item} className="row" style={{ gap: 9, alignItems: "flex-start", fontSize: 13.5, color: "var(--text-2)" }}>
+                      <Icon name="check" size={15} color="var(--verified)" stroke={2.5} style={{ marginTop: 2, flex: "none" }} />
+                      {item}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -252,7 +294,11 @@ export default function IntakePage({ inDashboard = false }: { inDashboard?: bool
               <h1 className="display" style={{ fontSize: "clamp(28px,4.2vw,40px)", marginBottom: 10 }}>Add supporting documents.</h1>
               <p style={{ color: "var(--text-2)", fontSize: 15.5 }}>Optional — but documents raise your match quality and help attorneys respond faster.</p>
             </div>
-            <button onClick={() => set("docs", [...(data.docs || []), { name: ["Police_report.pdf", "ER_intake.pdf", "Photos.zip", "Contract.pdf", "Notice.pdf"][(data.docs?.length || 0) % 5], size: (Math.random() * 3 + 0.4).toFixed(1) + " MB" }])}
+            <button onClick={() => {
+              const names = prompts?.docs?.length ? prompts.docs : ["Police report", "ER intake", "Photos", "Contract", "Notice"];
+              const label = names[(data.docs?.length || 0) % names.length].replaceAll(" ", "_").replaceAll("/", "_");
+              set("docs", [...(data.docs || []), { name: `${label}.pdf`, size: (Math.random() * 3 + 0.4).toFixed(1) + " MB" }]);
+            }}
               style={{ border: "2px dashed var(--line-2)", borderRadius: 16, padding: "36px 20px", background: "var(--card)", cursor: "pointer", transition: "border-color .2s" }}>
               <div className="stack" style={{ alignItems: "center", gap: 10 }}>
                 <span style={{ color: "var(--pine)" }}><Icon name="upload" size={30} /></span>
@@ -260,6 +306,16 @@ export default function IntakePage({ inDashboard = false }: { inDashboard?: bool
                 <span style={{ fontSize: 13.5, color: "var(--text-3)" }}>PDF, JPG, PNG or ZIP · encrypted at rest</span>
               </div>
             </button>
+            {prompts && (
+              <div className="card" style={{ padding: 18 }}>
+                <strong style={{ display: "block", fontSize: 14.5, marginBottom: 12 }}>Recommended uploads for {CASE_TYPES[data.type]?.label}</strong>
+                <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
+                  {prompts.docs.map((doc) => (
+                    <span key={doc} className="pill" style={{ background: "var(--paper-2)", color: "var(--text-2)" }}>{doc}</span>
+                  ))}
+                </div>
+              </div>
+            )}
             {data.docs?.length > 0 && (
               <div className="stack" style={{ gap: 10 }}>
                 {data.docs.map((d, i) => (
@@ -275,8 +331,15 @@ export default function IntakePage({ inDashboard = false }: { inDashboard?: bool
             )}
             <div className="row" style={{ gap: 10, padding: 14, borderRadius: 12, background: "var(--blue-tint)" }}>
               <span style={{ color: "var(--signal)", flex: "none" }}><Icon name="lock" size={18} /></span>
-              <span style={{ fontSize: 13.5, color: "var(--text-2)" }}>Your documents are encrypted and only shared with the attorney you&apos;re matched to — never sold or broadcast.</span>
+              <span style={{ fontSize: 13.5, color: "var(--text-2)" }}>Your documents and intake data are encrypted and only shared with the verified attorney matched to your matter. This security posture is a core ClientSignal feature.</span>
             </div>
+            {prompts && (
+              <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
+                {prompts.scoring.map((scoreField) => (
+                  <span key={scoreField} className="pill" style={{ background: "var(--verified-tint)", color: "var(--verified)" }}>{scoreField}</span>
+                ))}
+              </div>
+            )}
           </div>
         )}
 

@@ -45,7 +45,7 @@ export function MarketingNav({ audience = "home" }: { audience?: "home" | "clien
         </div>
         <div className="row" style={{ gap: 10 }}>
           <button className="btn btn-ghost btn-sm" onClick={() => router.push(loginDest)}>Log in</button>
-          <button className="btn btn-signal btn-sm" onClick={() => router.push(startDest)}>Get Started</button>
+          <button className="btn btn-signal btn-sm" onClick={() => router.push(startDest)}>Start Free Trial</button>
         </div>
       </div>
     </nav>
@@ -54,8 +54,8 @@ export function MarketingNav({ audience = "home" }: { audience?: "home" | "clien
 
 /* ===== HeroTagCloud ===== */
 const TAG_ITEMS = [
-  "Personal Injury", "DUI Defense", "Immigration", "Family Law", "Employment", "Business",
-  "Estate Planning", "Real Estate", "Tax Law", "Bankruptcy", "Medical Malpractice", "Workers' Comp",
+  "Personal Injury", "Criminal Law", "Immigration", "Family Law", "Employment Law",
+  "Auto Accidents", "DUI / DWI", "Custody", "Asylum", "Wrongful Termination",
 ];
 
 export function HeroTagCloud() {
@@ -117,36 +117,41 @@ export function Step({ n, icon, title, desc, accent }: { n: number; icon: string
 /* ===== Pricing ===== */
 const SUB_TIERS = [
   {
-    name: "Starter", price: "$149", period: "/mo", desc: "For solo practitioners testing the waters.",
-    features: ["Up to 15 leads / month", "Email + SMS alerts", "Lead scoring", "Basic CRM sync", "Email support"],
+    name: "Entry", price: "$49-$79", period: "/lead", desc: "For solos and small firms that need controlled intake volume.",
+    features: ["Basic intake", "Client messaging", "Case notes", "Basic analytics", "Limited leads: 5-10"],
     cta: "Start free trial", highlight: false,
   },
   {
-    name: "Growth", price: "$349", period: "/mo", desc: "For growing firms ready to scale intake.",
-    features: ["Up to 60 leads / month", "Priority matching", "Advanced scoring & analytics", "Full CRM integrations", "Dedicated Slack channel", "Custom intake builder"],
+    name: "Growth", price: "$149-$249", period: "/lead", desc: "For 2-10 attorney firms scaling intake and referrals.",
+    features: ["Everything in Entry", "Smart intake automation", "E-signature for retainers", "Unlimited leads", "Attorney dashboard analytics", "Referral access to other attorneys"],
     cta: "Start free trial", highlight: true,
   },
   {
-    name: "Enterprise", price: "Custom", period: "", desc: "For multi-attorney firms with volume needs.",
-    features: ["Unlimited leads", "SLA-backed routing", "API access & webhooks", "White-label intake forms", "Quarterly business reviews", "Dedicated account manager"],
+    name: "Premium", price: "$399-$699", period: "/lead", desc: "For established, PI, immigration, and multi-office practices.",
+    features: ["Everything in Growth", "AI document summarization", "Advanced analytics", "Team management", "Custom intake templates", "API access", "Client portal access"],
     cta: "Contact sales", highlight: false,
+  },
+  {
+    name: "Optional Leads", price: "Area-based", period: "", desc: "Add practice-specific pay-per-lead volume when your firm wants more cases.",
+    features: ["PI: $89-$200 per lead", "Immigration: $39-$60 per lead", "Family Law: $30-$80 per lead", "Criminal Law: $40-$120 per lead"],
+    cta: "Book a Demo", highlight: false,
   },
 ];
 
 const PPL_TIERS = [
   {
-    name: "Basic", price: "$75", period: "/lead", desc: "Pay only when you accept a lead.",
-    features: ["No monthly commitment", "Verified & exclusive leads", "Lead scoring", "Email alerts", "Basic dashboard"],
+    name: "Personal Injury", price: "$89-$200", period: "/lead", desc: "High-value injury leads with documents and liability screening.",
+    features: ["Incident timeline", "Police report and photo prompts", "Medical treatment indicators", "Insurance and liability checks"],
     cta: "Get started", highlight: false,
   },
   {
-    name: "Pro", price: "$55", period: "/lead", desc: "Committed volume, lower cost per lead.",
-    features: ["10-lead minimum / month", "Priority matching", "Full analytics", "CRM integrations", "SMS + email alerts", "Intake builder"],
+    name: "Immigration + Family", price: "$30-$80", period: "/lead", desc: "Qualified status, safety, hearing, and family-complexity leads.",
+    features: ["Immigration status screening", "Safe-contact prompts", "Court-date urgency", "Document upload checklist"],
     cta: "Get started", highlight: true,
   },
   {
-    name: "Volume", price: "$40", period: "/lead", desc: "High-volume firms with dedicated routing.",
-    features: ["30+ leads / month", "SLA-backed delivery", "API access", "Custom routing rules", "Account manager", "Quarterly reviews"],
+    name: "Criminal Law + Employment Law", price: "$40-$120", period: "/lead", desc: "Urgent defense and workplace leads routed by deadlines.",
+    features: ["Custody and hearing flags", "Charge and court details", "Workplace evidence prompts", "Immediate alert routing"],
     cta: "Contact sales", highlight: false,
   },
 ];
@@ -170,7 +175,7 @@ export function Pricing() {
           transition: "all .2s",
           border: "none", cursor: "pointer",
         }}>
-          Subscription
+          Packages
         </button>
         <button onClick={() => setMode("ppl")} style={{
           padding: "10px 24px", borderRadius: "var(--r-pill)", fontSize: 14, fontWeight: 600,
@@ -180,13 +185,13 @@ export function Pricing() {
           transition: "all .2s",
           border: "none", cursor: "pointer",
         }}>
-          Pay per lead
+          Practice-area leads
         </button>
       </div>
 
       {/* Cards */}
       <div className="pricing-grid" style={{
-        display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 24, width: "100%",
+        display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 18, width: "100%",
       }}>
         {tiers.map((t) => (
           <div key={t.name} className="card stack" style={{
@@ -222,7 +227,7 @@ export function Pricing() {
             <button
               className={`btn ${t.highlight ? "btn-signal" : "btn-ghost"}`}
               style={{ width: "100%", marginTop: "auto" }}
-              onClick={() => router.push(t.cta === "Contact sales" ? "/demo" : "/get-started")}
+              onClick={() => router.push(t.cta === "Contact sales" || t.cta === "Book a Demo" ? "/demo" : "/get-started")}
             >
               {t.cta}
             </button>
@@ -235,12 +240,12 @@ export function Pricing() {
 
 /* ===== FAQ ===== */
 const FAQ_ITEMS = [
-  { q: "How are leads generated?", a: "Leads come from clients who submit their case details through our verified intake system. Every lead is real, consent-verified, and exclusive to one attorney." },
-  { q: "Are leads shared with other attorneys?", a: "No. Every lead on ClientSignal is exclusive. Once a lead is matched to your firm, no other attorney will receive it." },
-  { q: "What practice areas do you cover?", a: "We currently cover Personal Injury, Family Law, Criminal Defense, Immigration, Employment Law, and Business & Contracts, with more areas launching soon." },
-  { q: "How does the scoring system work?", a: "Our AI scores each lead on quality (case strength, documentation, urgency) and match fit (practice area, location, firm capacity). You see the score before you accept." },
-  { q: "Can I cancel anytime?", a: "Yes. Subscription plans are month-to-month with no long-term contracts. Pay-per-lead plans have no commitment at all." },
-  { q: "How do CRM integrations work?", a: "We integrate with Clio, MyCase, Lawmatics, and 6,000+ apps via Zapier. Accepted leads sync automatically as new matters or contacts." },
+  { q: "Are the leads really vetted?", a: "Yes. Every inquiry is screened for accuracy, intent, contactability, consent, and case type before it is routed." },
+  { q: "Do you sell leads to multiple firms?", a: "No. ClientSignal is designed around exclusive leads for the matched firm, not recycled lists or lead blasts." },
+  { q: "What practice areas do you cover?", a: "Personal Injury, Criminal Law, Immigration, Family Law, and Employment Law." },
+  { q: "Can I cancel anytime?", a: "Yes. No long contracts or commitments are required in the prototype pricing model." },
+  { q: "Do you integrate with my CRM?", a: "The product direction includes Clio, MyCase, Lawmatics, and related intake tools. Final integration scope still needs confirmation." },
+  { q: "How is sensitive data protected?", a: "Client documents and intake data are positioned as encrypted, access-controlled, and shared only with verified attorneys connected to the matter." },
 ];
 
 export function FAQ() {

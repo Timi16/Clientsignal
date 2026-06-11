@@ -101,7 +101,7 @@ export default function DashboardPage() {
           <div className="card" style={{ padding: 26, minHeight: 228 }}>
             <strong style={{ fontSize: 16, display: "block", marginBottom: 18 }}>By practice area</strong>
             <div className="stack" style={{ gap: 17 }}>
-              {([["Personal Injury", 62, "var(--coral)"], ["Employment", 28, "var(--verified)"], ["Family", 10, "#9B5DE5"]] as [string, number, string][]).map(([l, v, c]) => (
+              {([["Personal Injury", 62, "var(--coral)"], ["Employment Law", 28, "var(--verified)"], ["Family Law", 10, "#9B5DE5"]] as [string, number, string][]).map(([l, v, c]) => (
                 <div key={l} className="stack" style={{ gap: 6 }}>
                   <div className="row between" style={{ fontSize: 13 }}><span>{l}</span><strong className="mono">{v}%</strong></div>
                   <div style={{ height: 7, borderRadius: 999, background: "var(--paper-2)" }}><div style={{ height: "100%", width: `${v}%`, background: c, borderRadius: 999, transition: "width .6s var(--ease)" }} /></div>

@@ -11,7 +11,7 @@ const STEPS = [
   { label: "Firm profile", icon: "building" },
   { label: "Practice areas", icon: "scale" },
   { label: "Service locations", icon: "flag" },
-  { label: "Licence verification", icon: "shield" },
+  { label: "License verification", icon: "shield" },
   { label: "Lead preferences", icon: "bolt" },
   { label: "Billing setup", icon: "card" },
 ];
@@ -162,8 +162,8 @@ export default function OnboardPage() {
           <p style={{ fontSize: 15, color: "var(--text-3)", marginBottom: 36, lineHeight: 1.6 }}>
             {step === 0 && "Tell us about your firm so we can match you with the right leads."}
             {step === 1 && "Select the practice areas you'd like to receive leads for."}
-            {step === 2 && "Choose the states and cities where you're licenced to practice."}
-            {step === 3 && "Upload your bar licence for verification. We'll review it within 1-2 business days."}
+            {step === 2 && "Choose the states and cities where you're licensed to practice."}
+            {step === 3 && "We verify every attorney to ensure clients receive trusted, licensed legal help. Verification takes less than 24 hours."}
             {step === 4 && "Set your lead volume and budget preferences."}
             {step === 5 && "Add a payment method to activate your account."}
           </p>
@@ -255,14 +255,18 @@ export default function OnboardPage() {
             </div>
           )}
 
-          {/* step 3: licence verification */}
+          {/* step 3: license verification */}
           {step === 3 && (
             <div className="stack rise" style={{ gap: 22 }}>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
                 <Field label="Bar number" placeholder="TX #24087" icon="shield" />
                 <Field label="State of admission" placeholder="Texas" icon="flag" />
               </div>
-              <LField label="Upload bar licence">
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
+                <Field label="Work email" placeholder="sarah@mitchellcole.com" icon="mail" />
+                <Field label="Firm website" placeholder="https://mitchellcole.com" icon="building" />
+              </div>
+              <LField label="Upload bar license">
                 <div
                   style={{
                     width: "100%",
@@ -283,6 +287,22 @@ export default function OnboardPage() {
                   </div>
                 </div>
               </LField>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
+                <LField label="Optional government ID">
+                  <div style={{ padding: 18, borderRadius: 12, border: "1.5px dashed var(--line-2)", background: "var(--paper)", color: "var(--text-2)", fontSize: 13.5 }}>
+                    Used for identity match on higher-risk submissions.
+                  </div>
+                </LField>
+                <LField label="Optional selfie match">
+                  <div style={{ padding: 18, borderRadius: 12, border: "1.5px dashed var(--line-2)", background: "var(--paper)", color: "var(--text-2)", fontSize: 13.5 }}>
+                    Helps prevent impersonation and false firm affiliation.
+                  </div>
+                </LField>
+              </div>
+              <div className="row" style={{ gap: 10, padding: 14, borderRadius: 12, background: "var(--verified-tint)" }}>
+                <Icon name="shield" size={18} color="var(--verified)" />
+                <span style={{ fontSize: 13.5, color: "var(--text-2)" }}>Checks include bar status, firm domain, phone control, discipline flags, and a Green / Yellow / Red risk review.</span>
+              </div>
             </div>
           )}
 
@@ -372,7 +392,7 @@ export default function OnboardPage() {
               >
                 <div className="row between" style={{ marginBottom: 8 }}>
                   <span style={{ fontSize: 13.5, fontWeight: 600, color: "var(--text-2)" }}>Plan</span>
-                  <span style={{ fontSize: 14, fontWeight: 700, color: "var(--ink)" }}>Growth — $499/mo</span>
+                  <span style={{ fontSize: 14, fontWeight: 700, color: "var(--ink)" }}>Growth — $149-$249/lead</span>
                 </div>
                 <div className="row between">
                   <span style={{ fontSize: 13.5, fontWeight: 600, color: "var(--text-2)" }}>First charge</span>

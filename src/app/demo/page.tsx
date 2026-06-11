@@ -356,10 +356,9 @@ export default function BookDemo() {
                 </option>
                 <option>Personal Injury</option>
                 <option>Family Law</option>
-                <option>Criminal Defense</option>
+                <option>Criminal Law</option>
                 <option>Immigration</option>
-                <option>Employment</option>
-                <option>Business &amp; Contracts</option>
+                <option>Employment Law</option>
               </select>
             </LField>
 

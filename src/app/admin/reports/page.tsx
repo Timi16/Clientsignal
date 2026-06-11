@@ -20,7 +20,7 @@ export default function AdminReports() {
         <div className="card" style={{ padding: 24 }}>
           <strong style={{ fontSize: 16, display: "block", marginBottom: 18 }}>Top practice areas</strong>
           <div className="stack" style={{ gap: 14 }}>
-            {([["Personal Injury", 34, "#DC2626"], ["Family Law", 22, "#7C3AED"], ["Immigration", 18, "#2563EB"], ["Criminal", 14, "#0B1F3A"], ["Employment", 12, "#16A34A"]] as [string, number, string][]).map(([l, v, c]) => (
+            {([["Personal Injury", 34, "#DC2626"], ["Family Law", 22, "#7C3AED"], ["Immigration", 18, "#2563EB"], ["Criminal Law", 14, "#0B1F3A"], ["Employment Law", 12, "#16A34A"]] as [string, number, string][]).map(([l, v, c]) => (
               <div key={l} className="stack" style={{ gap: 6 }}>
                 <div className="row between" style={{ fontSize: 13 }}><span>{l}</span><strong className="mono">{v}%</strong></div>
                 <div style={{ height: 8, borderRadius: 999, background: "var(--paper-2)" }}><div style={{ height: "100%", width: `${v * 2.6}%`, maxWidth: "100%", background: c, borderRadius: 999 }} /></div>

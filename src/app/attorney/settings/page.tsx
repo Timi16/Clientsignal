@@ -7,16 +7,13 @@ import { Avatar, Field } from "@/components/ui";
 const PRACTICE_AREAS = [
   "Personal Injury",
   "Family Law",
-  "Criminal Defense",
+  "Criminal Law",
   "Immigration",
-  "Employment",
-  "Business & Contracts",
-  "Estate Planning",
-  "Real Estate",
+  "Employment Law",
 ];
 
 export default function SettingsPage() {
-  const [areas, setAreas] = useState<string[]>(["Personal Injury", "Employment"]);
+  const [areas, setAreas] = useState<string[]>(["Personal Injury", "Employment Law"]);
   const [sms, setSms] = useState(true);
   const [email, setEmail] = useState(true);
   const [push, setPush] = useState(false);

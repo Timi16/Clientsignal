@@ -1,10 +1,9 @@
 export const CASE_TYPES: Record<string, { label: string; color: string; tint: string }> = {
   injury:      { label: "Personal Injury", color: "#DC2626", tint: "var(--coral-tint)" },
   family:      { label: "Family Law",      color: "#7C3AED", tint: "rgba(124,58,237,0.10)" },
-  criminal:    { label: "Criminal Defense", color: "#0B1F3A", tint: "rgba(11,31,58,0.08)" },
+  criminal:    { label: "Criminal Law", color: "#0B1F3A", tint: "rgba(11,31,58,0.08)" },
   immigration: { label: "Immigration",     color: "#2563EB", tint: "var(--blue-tint)" },
-  employment:  { label: "Employment",      color: "#16A34A", tint: "var(--verified-tint)" },
-  business:    { label: "Business & Contracts", color: "#0891B2", tint: "rgba(8,145,178,0.10)" },
+  employment:  { label: "Employment Law",  color: "#16A34A", tint: "var(--verified-tint)" },
 };
 
 export interface Lead {
@@ -19,7 +18,7 @@ export const LEADS: Lead[] = [
   { id: "LD-4468", name: "Dana Okafor", type: "family", quality: 78, urgency: 64, city: "Atlanta, GA", time: "31 min ago", summary: "Considering divorce, two minor children, jointly-owned home. Wants to understand custody and asset division.", value: "$6K–15K", phone: "(404) 555-0176", consent: true, docs: 1, status: "viewed", channel: "Referral" },
   { id: "LD-4465", name: "Tom Reyes", type: "criminal", quality: 88, urgency: 95, city: "Phoenix, AZ", time: "1 hr ago", summary: "Arrested on DUI charge last night, arraignment in 5 days. No prior record. Urgent — needs representation immediately.", value: "$3K–8K", phone: "(602) 555-0133", consent: true, docs: 2, status: "viewed", channel: "Google Ads" },
   { id: "LD-4461", name: "Helen Cho", type: "employment", quality: 73, urgency: 52, city: "Seattle, WA", time: "2 hr ago", summary: "Terminated after reporting safety violations. Believes it was retaliation. Has emails and HR correspondence.", value: "$10K–30K", phone: "(206) 555-0117", consent: true, docs: 4, status: "responded", channel: "Organic" },
-  { id: "LD-4458", name: "Greg Saunders", type: "business", quality: 66, urgency: 38, city: "Denver, CO", time: "4 hr ago", summary: "Co-founder dispute over equity split at a 3-person startup. No formal operating agreement was signed.", value: "$8K–20K", phone: "(303) 555-0188", consent: true, docs: 0, status: "responded", channel: "Referral" },
+  { id: "LD-4458", name: "Greg Saunders", type: "employment", quality: 79, urgency: 58, city: "Denver, CO", time: "4 hr ago", summary: "Laid off after asking for unpaid overtime records. Has pay stubs, text messages, and a supervisor email.", value: "$8K–20K", phone: "(303) 555-0188", consent: true, docs: 3, status: "responded", channel: "Referral" },
 ];
 
 export interface Attorney {
@@ -61,20 +60,19 @@ export const PORTRAITS: Record<string, string> = {
 
 export const TESTIMONIALS = [
   { name: "Sarah Mitchell", role: "Partner · Mitchell & Cole LLP", photo: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=600&h=750&fit=crop&crop=faces", quote: "We respond to matched leads in under four minutes. ClientSignal paid for itself in the first week — the lead quality is simply better.", area: "Personal Injury", stars: 5 },
-  { name: "Andre Coleman", role: "Founder · Coleman Defense", photo: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=600&h=750&fit=crop&crop=faces", quote: "Every lead is verified and exclusive. I'm not fighting nine other firms for the same client anymore — it's just mine.", area: "Criminal Defense", stars: 5 },
+  { name: "Andre Coleman", role: "Founder · Coleman Defense", photo: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=600&h=750&fit=crop&crop=faces", quote: "Every lead is verified and exclusive. I'm not fighting nine other firms for the same client anymore — it's just mine.", area: "Criminal Law", stars: 5 },
   { name: "Claire Donovan", role: "Managing Attorney · Donovan Family Law", photo: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=600&h=750&fit=crop&crop=faces", quote: "The intake scoring tells me exactly where to spend my time. My consult-to-retainer rate is up 40% since we switched.", area: "Family Law", stars: 5 },
-  { name: "Imani Brooks", role: "Client · matched in Atlanta", photo: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=600&h=750&fit=crop&crop=faces", quote: "I described what happened once and a real, licensed attorney called me within minutes. It took the fear out of the whole thing.", area: "Employment", stars: 5 },
+  { name: "Imani Brooks", role: "Client · matched in Atlanta", photo: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=600&h=750&fit=crop&crop=faces", quote: "I described what happened once and a real, licensed attorney called me within minutes. It took the fear out of the whole thing.", area: "Employment Law", stars: 5 },
   { name: "Thomas Reyes", role: "Partner · Reyes & Associates", photo: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=600&h=750&fit=crop&crop=faces", quote: "The CRM sync into Clio is seamless. Accepted leads land as matters automatically — zero copy-paste.", area: "Immigration", stars: 5 },
-  { name: "Jasmine Hale", role: "Solo Practitioner", photo: "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=600&h=750&fit=crop&crop=faces", quote: "As a solo, this is the marketing department I could never afford. Predictable, qualified clients every week.", area: "Estate Planning", stars: 5 },
+  { name: "Jasmine Hale", role: "Solo Practitioner", photo: "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=600&h=750&fit=crop&crop=faces", quote: "As a solo, this is the marketing department I could never afford. Predictable, qualified clients every week.", area: "Employment Law", stars: 5 },
 ];
 
 export const INTAKE_CONFIG: Record<string, { q: string; opts: string[]; extra: string; urgent: string }> = {
-  injury:      { q: "What kind of injury occurred?", opts: ["Car / motor vehicle accident", "Slip & fall", "Workplace injury", "Medical malpractice", "Product defect"], extra: "When did the incident happen?", urgent: "Were you treated by a doctor or hospital?" },
-  family:      { q: "What does your situation involve?", opts: ["Divorce", "Child custody", "Child / spousal support", "Adoption", "Domestic protection order"], extra: "Are there minor children involved?", urgent: "Is there an upcoming court date?" },
-  criminal:    { q: "What are you facing?", opts: ["DUI / DWI", "Drug charge", "Assault", "Theft / property", "Other charge"], extra: "Have you been arrested or charged?", urgent: "Is there a hearing or arraignment scheduled?" },
-  immigration: { q: "What do you need help with?", opts: ["Green card / residency", "Visa (work / family)", "Citizenship", "Deportation defense", "Asylum"], extra: "What is your current status?", urgent: "Is there a filing or status deadline?" },
-  employment:  { q: "What happened at work?", opts: ["Wrongful termination", "Discrimination", "Harassment", "Wage / overtime dispute", "Retaliation"], extra: "Are you currently employed there?", urgent: "Have you filed any internal complaint?" },
-  business:    { q: "What does your matter involve?", opts: ["Contract drafting / review", "Business formation", "Partnership dispute", "Breach of contract", "Intellectual property"], extra: "Is there a signed agreement?", urgent: "Is there a deadline or pending dispute?" },
+  injury:      { q: "What kind of injury occurred?", opts: ["Auto accident", "Truck accident", "Motorcycle accident", "Slip & fall", "Workplace injury", "Medical malpractice", "Dog bite", "Other injury"], extra: "When did the incident happen?", urgent: "Were you injured or treated by a doctor or hospital?" },
+  family:      { q: "What does your family law situation involve?", opts: ["Divorce", "Child custody", "Child support", "Modification", "Enforcement", "Adoption", "Protective order / domestic violence", "Prenuptial or postnuptial agreement"], extra: "Are there minor children involved?", urgent: "Is anyone in danger or is there an upcoming hearing?" },
+  criminal:    { q: "What criminal law issue are you facing?", opts: ["DUI / DWI", "Drug charges", "Assault", "Domestic violence", "Theft / burglary", "Weapons charges", "Probation violation", "Federal charges", "Juvenile case", "Other charge"], extra: "Have you been arrested or charged?", urgent: "Is the person detained or is there a court date within 7 days?" },
+  immigration: { q: "What immigration help do you need?", opts: ["Green card / adjustment of status", "Visa", "Citizenship", "DACA / TPS", "Asylum", "Removal proceedings", "Family petition", "Work authorization"], extra: "What is your current immigration status?", urgent: "Are you at risk of deportation or facing an upcoming hearing?" },
+  employment:  { q: "What happened at work?", opts: ["Wrongful termination", "Discrimination", "Harassment", "Wage / overtime dispute", "Retaliation", "Severance review", "Workplace safety complaint"], extra: "Are you currently employed there?", urgent: "Is there a filing deadline, hearing, or active investigation?" },
 };
 
 export const CASE_STATUS: Record<string, { label: string; color: string; tint: string; dot: string }> = {

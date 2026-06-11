@@ -224,6 +224,10 @@ img, svg { display: block; }
   .ph-kb img { animation: none !important; }
 }
 
+@media (max-width: 1180px) {
+  .pricing-grid { grid-template-columns: 1fr 1fr !important; }
+}
+
 @media (max-width: 1000px) {
   .stat-grid { grid-template-columns: 1fr 1fr !important; }
 }
