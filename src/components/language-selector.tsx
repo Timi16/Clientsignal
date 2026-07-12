@@ -72,7 +72,7 @@ export function LanguageSelectorPopup() {
                   outline: "none",
                 }}
               >
-                <span style={{ fontSize: 28, lineHeight: 1 }}>{lang.flag}</span>
+                {/* flag removed */}
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 1, flex: 1 }}>
                   <span style={{
                     fontSize: 15.5, fontWeight: 600,
@@ -156,7 +156,7 @@ export function LanguageSwitcher() {
         (e.currentTarget as HTMLElement).style.color = "var(--text-2)";
       }}
     >
-      <span style={{ fontSize: 16, lineHeight: 1 }}>{current?.flag}</span>
+      {/* flag removed */}
       <span>{current?.native}</span>
     </button>
   );
