@@ -5,10 +5,13 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Icon } from "./icons";
 import { Mark, Logo } from "./ui";
+import { useI18n } from "@/lib/i18n";
+import { LanguageSwitcher } from "./language-selector";
 
 /* ===== MarketingNav ===== */
 export function MarketingNav({ audience = "home" }: { audience?: "home" | "client" | "attorney" }) {
   const router = useRouter();
+  const { t } = useI18n();
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
     const el = document.querySelector("#m-scroll") as HTMLElement | null;
@@ -19,7 +22,7 @@ export function MarketingNav({ audience = "home" }: { audience?: "home" | "clien
   }, []);
   const loginDest = audience === "client" ? "/client/login" : audience === "attorney" ? "/attorney/login" : "/login";
   const startDest = audience === "client" ? "/client/signup" : audience === "attorney" ? "/attorney/signup" : "/get-started";
-  const links: [string, string][] = [["Home", "/"], ["For Clients", "/for-clients"], ["For Attorneys", "/for-attorneys"]];
+  const links: [string, string][] = [[t.nav.home, "/"], [t.nav.forClients, "/for-clients"], [t.nav.forAttorneys, "/for-attorneys"]];
 
   return (
     <nav style={{
@@ -36,7 +39,7 @@ export function MarketingNav({ audience = "home" }: { audience?: "home" | "clien
         </Link>
         <div className="row m-nav-links" style={{ gap: 6 }}>
           {links.map(([label, path]) => (
-            <Link key={label} href={path}
+            <Link key={path} href={path}
               style={{ padding: "8px 16px", fontSize: 14.5, fontWeight: 500, color: "var(--text-2)", borderRadius: "var(--r-sm)", transition: "color .2s, background .2s" }}
               onMouseEnter={e => { (e.target as HTMLElement).style.color = "var(--ink)"; (e.target as HTMLElement).style.background = "var(--pine-tint)"; }}
               onMouseLeave={e => { (e.target as HTMLElement).style.color = "var(--text-2)"; (e.target as HTMLElement).style.background = "transparent"; }}
@@ -44,8 +47,9 @@ export function MarketingNav({ audience = "home" }: { audience?: "home" | "clien
           ))}
         </div>
         <div className="row" style={{ gap: 10 }}>
-          <button className="btn btn-ghost btn-sm" onClick={() => router.push(loginDest)}>Log in</button>
-          <button className="btn btn-signal btn-sm" onClick={() => router.push(startDest)}>Start Free Trial</button>
+          <LanguageSwitcher />
+          <button className="btn btn-ghost btn-sm" onClick={() => router.push(loginDest)}>{t.nav.logIn}</button>
+          <button className="btn btn-signal btn-sm" onClick={() => router.push(startDest)}>{t.nav.startFreeTrial}</button>
         </div>
       </div>
     </nav>
@@ -115,50 +119,52 @@ export function Step({ n, icon, title, desc, accent }: { n: number; icon: string
 }
 
 /* ===== Pricing ===== */
-const SUB_TIERS = [
-  {
-    name: "Entry", price: "$49-$79", period: "/lead", desc: "For solos and small firms that need controlled intake volume.",
-    features: ["Basic intake", "Client messaging", "Case notes", "Basic analytics", "Limited leads: 5-10"],
-    cta: "Start free trial", highlight: false,
-  },
-  {
-    name: "Growth", price: "$149-$249", period: "/lead", desc: "For 2-10 attorney firms scaling intake and referrals.",
-    features: ["Everything in Entry", "Smart intake automation", "E-signature for retainers", "Unlimited leads", "Attorney dashboard analytics", "Referral access to other attorneys"],
-    cta: "Start free trial", highlight: true,
-  },
-  {
-    name: "Premium", price: "$399-$699", period: "/lead", desc: "For established, PI, immigration, and multi-office practices.",
-    features: ["Everything in Growth", "AI document summarization", "Advanced analytics", "Team management", "Custom intake templates", "API access", "Client portal access"],
-    cta: "Contact sales", highlight: false,
-  },
-  {
-    name: "Optional Leads", price: "Area-based", period: "", desc: "Add practice-specific pay-per-lead volume when your firm wants more cases.",
-    features: ["PI: $89-$200 per lead", "Immigration: $39-$60 per lead", "Family Law: $30-$80 per lead", "Criminal Law: $40-$120 per lead"],
-    cta: "Book a Demo", highlight: false,
-  },
-];
-
-const PPL_TIERS = [
-  {
-    name: "Personal Injury", price: "$89-$200", period: "/lead", desc: "High-value injury leads with documents and liability screening.",
-    features: ["Incident timeline", "Police report and photo prompts", "Medical treatment indicators", "Insurance and liability checks"],
-    cta: "Get started", highlight: false,
-  },
-  {
-    name: "Immigration + Family", price: "$30-$80", period: "/lead", desc: "Qualified status, safety, hearing, and family-complexity leads.",
-    features: ["Immigration status screening", "Safe-contact prompts", "Court-date urgency", "Document upload checklist"],
-    cta: "Get started", highlight: true,
-  },
-  {
-    name: "Criminal Law + Employment Law", price: "$40-$120", period: "/lead", desc: "Urgent defense and workplace leads routed by deadlines.",
-    features: ["Custody and hearing flags", "Charge and court details", "Workplace evidence prompts", "Immediate alert routing"],
-    cta: "Contact sales", highlight: false,
-  },
-];
-
 export function Pricing() {
   const router = useRouter();
+  const { t: tr } = useI18n();
   const [mode, setMode] = useState<"sub" | "ppl">("sub");
+
+  const SUB_TIERS = [
+    {
+      name: tr.pricingTiers.entry, price: "$49-$79", period: "/lead", desc: tr.pricingTiers.entryDesc,
+      features: [tr.pricingTiers.basicIntake, tr.pricingTiers.clientMessaging, tr.pricingTiers.caseNotes, tr.pricingTiers.basicAnalytics, tr.pricingTiers.limitedLeads],
+      cta: tr.nav.startFreeTrial, highlight: false, isSales: false,
+    },
+    {
+      name: tr.pricingTiers.growth, price: "$149-$249", period: "/lead", desc: tr.pricingTiers.growthDesc,
+      features: [tr.pricingTiers.everythingInEntry, tr.pricingTiers.smartIntakeAutomation, tr.pricingTiers.eSignature, tr.pricingTiers.unlimitedLeads, tr.pricingTiers.dashboardAnalytics, tr.pricingTiers.referralAccess],
+      cta: tr.nav.startFreeTrial, highlight: true, isSales: false,
+    },
+    {
+      name: tr.pricingTiers.premium, price: "$399-$699", period: "/lead", desc: tr.pricingTiers.premiumDesc,
+      features: [tr.pricingTiers.everythingInGrowth, tr.pricingTiers.aiDocSummarization, tr.pricingTiers.advancedAnalytics, tr.pricingTiers.teamManagement, tr.pricingTiers.customTemplates, tr.pricingTiers.apiAccess, tr.pricingTiers.clientPortal],
+      cta: tr.pricingTiers.contactSales, highlight: false, isSales: true,
+    },
+    {
+      name: tr.pricingTiers.optionalLeads, price: "Area-based", period: "", desc: tr.pricingTiers.optionalLeadsDesc,
+      features: ["PI: $89-$200 per lead", "Immigration: $39-$60 per lead", "Family Law: $30-$80 per lead", "Criminal Law: $40-$120 per lead"],
+      cta: tr.nav.bookADemo, highlight: false, isSales: true,
+    },
+  ];
+
+  const PPL_TIERS = [
+    {
+      name: tr.caseTypes.injury, price: "$89-$200", period: "/lead", desc: "High-value injury leads with documents and liability screening.",
+      features: ["Incident timeline", "Police report and photo prompts", "Medical treatment indicators", "Insurance and liability checks"],
+      cta: tr.nav.getStarted, highlight: false, isSales: false,
+    },
+    {
+      name: tr.caseTypes.immigration + " + " + tr.caseTypes.family, price: "$30-$80", period: "/lead", desc: "Qualified status, safety, hearing, and family-complexity leads.",
+      features: ["Immigration status screening", "Safe-contact prompts", "Court-date urgency", "Document upload checklist"],
+      cta: tr.nav.getStarted, highlight: true, isSales: false,
+    },
+    {
+      name: tr.caseTypes.criminal + " + " + tr.caseTypes.employment, price: "$40-$120", period: "/lead", desc: "Urgent defense and workplace leads routed by deadlines.",
+      features: ["Custody and hearing flags", "Charge and court details", "Workplace evidence prompts", "Immediate alert routing"],
+      cta: tr.pricingTiers.contactSales, highlight: false, isSales: true,
+    },
+  ];
+
   const tiers = mode === "sub" ? SUB_TIERS : PPL_TIERS;
 
   return (
@@ -175,7 +181,7 @@ export function Pricing() {
           transition: "all .2s",
           border: "none", cursor: "pointer",
         }}>
-          Packages
+          {tr.pricing.packages}
         </button>
         <button onClick={() => setMode("ppl")} style={{
           padding: "10px 24px", borderRadius: "var(--r-pill)", fontSize: 14, fontWeight: 600,
@@ -185,7 +191,7 @@ export function Pricing() {
           transition: "all .2s",
           border: "none", cursor: "pointer",
         }}>
-          Practice-area leads
+          {tr.pricing.practiceAreaLeads}
         </button>
       </div>
 
@@ -205,7 +211,7 @@ export function Pricing() {
                 fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase",
                 padding: "5px 40px", transform: "rotate(45deg)",
               }}>
-                Popular
+                {tr.pricingTiers.popular}
               </div>
             )}
             <div className="stack" style={{ gap: 8 }}>
@@ -227,7 +233,7 @@ export function Pricing() {
             <button
               className={`btn ${t.highlight ? "btn-signal" : "btn-ghost"}`}
               style={{ width: "100%", marginTop: "auto" }}
-              onClick={() => router.push(t.cta === "Contact sales" || t.cta === "Book a Demo" ? "/demo" : "/get-started")}
+              onClick={() => router.push(t.isSales ? "/demo" : "/get-started")}
             >
               {t.cta}
             </button>
@@ -239,17 +245,18 @@ export function Pricing() {
 }
 
 /* ===== FAQ ===== */
-const FAQ_ITEMS = [
-  { q: "Are the leads really vetted?", a: "Yes. Every inquiry is screened for accuracy, intent, contactability, consent, and case type before it is routed." },
-  { q: "Do you sell leads to multiple firms?", a: "No. ClientSignal is designed around exclusive leads for the matched firm, not recycled lists or lead blasts." },
-  { q: "What practice areas do you cover?", a: "Personal Injury, Criminal Law, Immigration, Family Law, and Employment Law." },
-  { q: "Can I cancel anytime?", a: "Yes. No long contracts or commitments are required in the prototype pricing model." },
-  { q: "Do you integrate with my CRM?", a: "The product direction includes Clio, MyCase, Lawmatics, and related intake tools. Final integration scope still needs confirmation." },
-  { q: "How is sensitive data protected?", a: "Client documents and intake data are positioned as encrypted, access-controlled, and shared only with verified attorneys connected to the matter." },
-];
-
 export function FAQ() {
   const [open, setOpen] = useState<number | null>(null);
+  const { t: tr } = useI18n();
+
+  const FAQ_ITEMS = [
+    { q: tr.faq.q1, a: tr.faq.a1 },
+    { q: tr.faq.q2, a: tr.faq.a2 },
+    { q: tr.faq.q3, a: tr.faq.a3 },
+    { q: tr.faq.q4, a: tr.faq.a4 },
+    { q: tr.faq.q5, a: tr.faq.a5 },
+    { q: tr.faq.q6, a: tr.faq.a6 },
+  ];
 
   return (
     <div className="stack" style={{ gap: 2, maxWidth: 720, margin: "0 auto", width: "100%" }}>
@@ -283,6 +290,7 @@ export function FAQ() {
 
 /* ===== Footer ===== */
 export function Footer() {
+  const { t: tr } = useI18n();
   return (
     <footer style={{
       background: "var(--pine-deep)", color: "var(--on-pine)", padding: "72px 0 40px",
@@ -297,43 +305,42 @@ export function Footer() {
               <Logo light size={26} sub />
             </Link>
             <p style={{ fontSize: 14, color: "rgba(234,240,249,0.55)", lineHeight: 1.7, maxWidth: 280 }}>
-              The modern intake and lead-routing platform for attorneys.
-              Verified leads, scored cases, delivered instantly.
+              {tr.footer.tagline}
             </p>
           </div>
           {/* Product col */}
           <div className="stack" style={{ gap: 14 }}>
-            <span className="mono" style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(234,240,249,0.4)", marginBottom: 4 }}>Product</span>
+            <span className="mono" style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(234,240,249,0.4)", marginBottom: 4 }}>{tr.footer.product}</span>
             {[
-              ["For Attorneys", "/for-attorneys"],
-              ["For Clients", "/for-clients"],
-              ["Pricing", "/pricing"],
+              [tr.nav.forAttorneys, "/for-attorneys"],
+              [tr.nav.forClients, "/for-clients"],
+              [tr.forAttorneys.pricing, "/pricing"],
               ["Integrations", "/for-attorneys"],
             ].map(([label, href]) => (
-              <Link key={label} href={href} className="foot-link" style={{ fontSize: 14, color: "rgba(234,240,249,0.7)", transition: "color .2s" }}>{label}</Link>
+              <Link key={href + label} href={href} className="foot-link" style={{ fontSize: 14, color: "rgba(234,240,249,0.7)", transition: "color .2s" }}>{label}</Link>
             ))}
           </div>
           {/* Company col */}
           <div className="stack" style={{ gap: 14 }}>
-            <span className="mono" style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(234,240,249,0.4)", marginBottom: 4 }}>Company</span>
+            <span className="mono" style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(234,240,249,0.4)", marginBottom: 4 }}>{tr.footer.company}</span>
             {[
-              ["About", "/"],
-              ["Careers", "/"],
-              ["Blog", "/"],
-              ["Contact", "/demo"],
+              [tr.footer.about, "/"],
+              [tr.footer.careers, "/"],
+              [tr.footer.blog, "/"],
+              [tr.footer.contact, "/demo"],
             ].map(([label, href]) => (
-              <Link key={label} href={href} className="foot-link" style={{ fontSize: 14, color: "rgba(234,240,249,0.7)", transition: "color .2s" }}>{label}</Link>
+              <Link key={href + label} href={href} className="foot-link" style={{ fontSize: 14, color: "rgba(234,240,249,0.7)", transition: "color .2s" }}>{label}</Link>
             ))}
           </div>
           {/* Legal col */}
           <div className="stack" style={{ gap: 14 }}>
-            <span className="mono" style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(234,240,249,0.4)", marginBottom: 4 }}>Legal</span>
+            <span className="mono" style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(234,240,249,0.4)", marginBottom: 4 }}>{tr.footer.legal}</span>
             {[
-              ["Privacy Policy", "/"],
-              ["Terms of Service", "/"],
-              ["Bar Compliance", "/"],
+              [tr.footer.privacyPolicy, "/"],
+              [tr.footer.termsOfService, "/"],
+              [tr.footer.barCompliance, "/"],
             ].map(([label, href]) => (
-              <Link key={label} href={href} className="foot-link" style={{ fontSize: 14, color: "rgba(234,240,249,0.7)", transition: "color .2s" }}>{label}</Link>
+              <Link key={href + label} href={href} className="foot-link" style={{ fontSize: 14, color: "rgba(234,240,249,0.7)", transition: "color .2s" }}>{label}</Link>
             ))}
           </div>
         </div>
@@ -343,11 +350,11 @@ export function Footer() {
           borderTop: "1px solid rgba(234,240,249,0.1)",
         }}>
           <span style={{ fontSize: 13, color: "rgba(234,240,249,0.35)" }}>
-            &copy; 2026 ClientSignal, Inc. All rights reserved.
+            &copy; 2026 ClientSignal, Inc. {tr.footer.allRightsReserved}
           </span>
           <div className="row" style={{ gap: 20 }}>
             <span style={{ fontSize: 13, color: "rgba(234,240,249,0.35)" }}>SOC 2 Type II</span>
-            <span style={{ fontSize: 13, color: "rgba(234,240,249,0.35)" }}>ABA Compliant</span>
+            <span style={{ fontSize: 13, color: "rgba(234,240,249,0.35)" }}>{tr.footer.abaCompliant}</span>
           </div>
         </div>
       </div>
