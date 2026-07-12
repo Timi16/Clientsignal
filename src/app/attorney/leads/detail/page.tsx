@@ -4,18 +4,12 @@ import { useState } from "react";
 import AppLayout from "@/components/attorney-layout";
 import { Icon } from "@/components/icons";
 import { Avatar, ScoreRing, CaseTag } from "@/components/ui";
-import { LEADS, Lead } from "@/lib/data";
 import { useRouter } from "next/navigation";
-
-/* module-level selected lead */
-let _selected: Lead = LEADS[0];
-export function setSelectedLead(l: Lead) {
-  _selected = l;
-}
+import { getSelectedLead } from "../selected-lead";
 
 export default function LeadDetailPage() {
   const router = useRouter();
-  const lead = _selected;
+  const lead = getSelectedLead();
   const [claimed, setClaimed] = useState(false);
 
   return (

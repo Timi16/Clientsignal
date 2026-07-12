@@ -1,8 +1,7 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import IntakePage from "@/app/client/intake/page";
+import IntakeForm from "@/components/intake-form";
 
 export default function NewCase() {
-  return <IntakePage inDashboard />;
+  return <IntakeForm inDashboard />;
 }

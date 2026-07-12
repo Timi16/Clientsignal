@@ -5,7 +5,7 @@ import AppLayout from "@/components/attorney-layout";
 import { Avatar, CaseTag, ScoreRing } from "@/components/ui";
 import { LEADS } from "@/lib/data";
 import { useRouter } from "next/navigation";
-import { setSelectedLead } from "./detail/page";
+import { setSelectedLead } from "./selected-lead";
 
 const TABS = ["All", "New", "Viewed", "Responded"];
 
