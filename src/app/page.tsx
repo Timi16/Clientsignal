@@ -1,88 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { Icon } from "@/components/icons";
-import { ScoreRing, Verified, Avatar, Photo } from "@/components/ui";
-import { LEADS, TESTIMONIALS, CASE_TYPES } from "@/lib/data";
+import { Verified, Avatar, Photo } from "@/components/ui";
+import { TESTIMONIALS } from "@/lib/data";
 import { MarketingNav, Footer } from "@/components/marketing";
 import { useI18n } from "@/lib/i18n";
 
-/* ===== HomeProductPreview (fake app window with lead inbox) ===== */
-function HomeProductPreview() {
-  const { t } = useI18n();
-  const [active, setActive] = useState(0);
-  useEffect(() => {
-    const t = setInterval(() => setActive(p => (p + 1) % LEADS.length), 3200);
-    return () => clearInterval(t);
-  }, []);
-  const lead = LEADS[active];
-  const ct = CASE_TYPES[lead.type] || { label: lead.type, color: "var(--text-2)", tint: "var(--pine-tint)" };
-
-  return (
-    <div className="card rise" style={{
-      borderRadius: 18, overflow: "hidden",
-      boxShadow: "var(--sh-lg)", maxWidth: 540, width: "100%",
-      animationDelay: ".2s",
-    }}>
-      {/* Title bar */}
-      <div className="row between" style={{
-        padding: "12px 18px", borderBottom: "1px solid var(--line)",
-        background: "var(--paper)",
-      }}>
-        <div className="row" style={{ gap: 8 }}>
-          <span style={{ width: 11, height: 11, borderRadius: "50%", background: "#FF5F57" }} />
-          <span style={{ width: 11, height: 11, borderRadius: "50%", background: "#FEBC2E" }} />
-          <span style={{ width: 11, height: 11, borderRadius: "50%", background: "#28C840" }} />
-        </div>
-        <span className="mono" style={{ fontSize: 11, color: "var(--text-3)" }}>{t.home.leadInbox}</span>
-        <div style={{ width: 40 }} />
-      </div>
-      {/* Lead list */}
-      <div style={{ padding: 0 }}>
-        {LEADS.slice(0, 4).map((l, i) => {
-          const ct2 = CASE_TYPES[l.type] || { label: l.type, color: "var(--text-2)", tint: "var(--pine-tint)" };
-          const translatedLabel = t.caseTypes[l.type as keyof typeof t.caseTypes] || ct2.label;
-          return (
-            <div key={l.id}
-              onClick={() => setActive(i)}
-              className="row"
-              style={{
-                padding: "14px 18px", gap: 14,
-                cursor: "pointer",
-                background: i === active ? "var(--signal-tint)" : "var(--card)",
-                borderBottom: "1px solid var(--line)",
-                transition: "background .2s",
-              }}
-            >
-              <Avatar name={l.name} size={38} />
-              <div className="stack" style={{ flex: 1, gap: 3, minWidth: 0 }}>
-                <div className="row between">
-                  <span style={{ fontWeight: 600, fontSize: 14, color: "var(--ink)" }}>{l.name}</span>
-                  <span className="mono" style={{ fontSize: 11, color: "var(--text-3)" }}>{l.time}</span>
-                </div>
-                <div className="row" style={{ gap: 8 }}>
-                  <span className="pill" style={{
-                    background: ct2.tint, color: ct2.color,
-                    padding: "3px 9px", fontSize: 11,
-                  }}>
-                    <span style={{ width: 6, height: 6, borderRadius: "50%", background: ct2.color }} />
-                    {translatedLabel}
-                  </span>
-                  <span style={{ fontSize: 12.5, color: "var(--text-3)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                    {l.city}
-                  </span>
-                </div>
-              </div>
-              <ScoreRing value={l.quality} size={40} stroke={4} />
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
 
 /* ===== Page ===== */
 export default function HomePage() {
@@ -97,7 +21,7 @@ export default function HomePage() {
       <section style={{ position: "relative", overflow: "hidden", borderBottom: "1px solid var(--line)" }}>
         <div style={{ position: "absolute", top: -240, right: -160, width: 760, height: 760, borderRadius: "50%", background: "radial-gradient(circle, var(--signal-tint) 0%, transparent 62%)", pointerEvents: "none" }} />
         <div className="wrap" style={{ position: "relative", paddingTop: 64, paddingBottom: 70 }}>
-          <div style={{ display: "grid", gridTemplateColumns: "1.04fr 0.96fr", gap: 56, alignItems: "center" }} className="hero-grid">
+          <div className="hero-grid" style={{ maxWidth: 640 }}>
             <div className="stack" style={{ gap: 24 }}>
               <span className="pill rise" style={{ background: "var(--card)", border: "1px solid var(--line)", color: "var(--text-2)", alignSelf: "flex-start" }}>
                 <span className="pulse-dot" /> {t.home.heroPill}
@@ -120,11 +44,9 @@ export default function HomePage() {
                 </div>
                 <div className="stack" style={{ gap: 1 }}>
                   <div className="row" style={{ gap: 3, color: "var(--gold-deep)" }}>{"★★★★★".split("").map((s, i) => <span key={i} style={{ fontSize: 12 }}>{s}</span>)}</div>
-                  <span style={{ fontSize: 12.5, color: "var(--text-3)" }}>{t.home.trustedBy} <strong style={{ color: "var(--text-2)" }}>2,400+</strong> {t.home.verifiedAttorneys}</span>
                 </div>
               </div>
             </div>
-            <div className="rise" style={{ animationDelay: ".2s" }}><HomeProductPreview /></div>
           </div>
         </div>
       </section>
