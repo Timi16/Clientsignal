@@ -1,0 +1,164 @@
+syntax = "proto3";
+
+package cs_case;
+
+service CaseService {
+  rpc GetCase (GetCaseRequest) returns (CaseResponse);
+  rpc ListCases (ListCasesRequest) returns (CasesResponse);
+  rpc UpdateCaseStage (UpdateStageRequest) returns (CaseResponse);
+  rpc UpdateCaseStatus (UpdateStatusRequest) returns (CaseResponse);
+  rpc GetDocumentUploadUrl (DocUploadRequest) returns (PresignedUrlResponse);
+  rpc ConfirmDocumentUpload (ConfirmUploadRequest) returns (DocumentResponse);
+  rpc ListDocuments (ListDocsRequest) returns (DocumentsResponse);
+  rpc RequestDocument (RequestDocRequest) returns (DocumentResponse);
+  rpc CreateNote (CreateNoteRequest) returns (NoteResponse);
+  rpc ListNotes (ListNotesRequest) returns (NotesResponse);
+  rpc GetCaseStrength (GetStrengthRequest) returns (StrengthResponse);
+  rpc GetDocumentDownloadUrl (DocDownloadRequest) returns (DownloadUrlResponse);
+}
+
+message GetCaseRequest {
+  string id = 1;
+}
+
+message ListCasesRequest {
+  string client_user_id = 1;
+  string attorney_id = 2;
+  string status = 3;
+  int32 limit = 4;
+  int32 offset = 5;
+  string search = 6;
+  string sort_by = 7;
+  string sort_order = 8;
+  string practice_area = 9;
+}
+
+message UpdateStageRequest {
+  string case_id = 1;
+  int32 stage = 2;
+}
+
+message UpdateStatusRequest {
+  string case_id = 1;
+  string status = 2;
+}
+
+message DocUploadRequest {
+  string case_id = 1;
+  string file_name = 2;
+  string mime_type = 3;
+  bool required = 4;
+  string uploaded_by_user_id = 5;
+}
+
+message ConfirmUploadRequest {
+  string document_id = 1;
+}
+
+message ListDocsRequest {
+  string case_id = 1;
+}
+
+message RequestDocRequest {
+  string case_id = 1;
+  string document_name = 2;
+  bool required = 3;
+  string attorney_name = 4;
+}
+
+message CreateNoteRequest {
+  string case_id = 1;
+  string attorney_id = 2;
+  string body = 3;
+  string tag = 4;
+}
+
+message ListNotesRequest {
+  string case_id = 1;
+  string attorney_id = 2;
+}
+
+message GetStrengthRequest {
+  string case_id = 1;
+}
+
+message CaseMessage {
+  string id = 1;
+  string lead_id = 2;
+  string client_user_id = 3;
+  string attorney_id = 4;
+  string practice_area = 5;
+  string matter = 6;
+  string city = 7;
+  string state = 8;
+  string status = 9;
+  int32 stage = 10;
+  int32 strength_score = 11;
+  string summary = 12;
+  string opened_at = 13;
+  string closed_at = 14;
+}
+
+message CaseResponse {
+  CaseMessage case_data = 1;
+}
+
+message CasesResponse {
+  repeated CaseMessage cases = 1;
+  int32 total = 2;
+}
+
+message DocumentMessage {
+  string id = 1;
+  string case_id = 2;
+  string file_name = 3;
+  string status = 4;
+  bool required = 5;
+  string uploaded_at = 6;
+}
+
+message DocumentResponse {
+  DocumentMessage document = 1;
+}
+
+message DocumentsResponse {
+  repeated DocumentMessage documents = 1;
+}
+
+message NoteMessage {
+  string id = 1;
+  string case_id = 2;
+  string attorney_id = 3;
+  string body = 4;
+  string tag = 5;
+  string created_at = 6;
+}
+
+message NoteResponse {
+  NoteMessage note = 1;
+}
+
+message NotesResponse {
+  repeated NoteMessage notes = 1;
+}
+
+message StrengthResponse {
+  int32 score = 1;
+  int32 docs_complete = 2;
+  int32 docs_total = 3;
+}
+
+message DocDownloadRequest {
+  string document_id = 1;
+}
+
+message DownloadUrlResponse {
+  string url = 1;
+  string file_name = 2;
+}
+
+message PresignedUrlResponse {
+  string url = 1;
+  string document_id = 2;
+  string file_key = 3;
+}

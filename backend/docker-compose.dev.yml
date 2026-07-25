@@ -1,0 +1,44 @@
+version: '3.9'
+
+services:
+  # ── Infrastructure ──────────────────────────────────────────
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./scripts/init-dbs.sql:/docker-entrypoint-initdb.d/init-dbs.sql
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - '6379:6379'
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+
+  nats:
+    image: nats:2-alpine
+    command: ['--jetstream', '--store_dir', '/data']
+    ports:
+      - '4222:4222'   # client
+      - '8222:8222'   # monitoring
+    volumes:
+      - natsdata:/data
+    healthcheck:
+      test: ['CMD', 'nats-server', '--help']
+      interval: 5s
+
+volumes:
+  pgdata:
+  natsdata:

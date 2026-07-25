@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist",
+    "baseUrl": ".",
+    "paths": {
+      "@cs/common": ["../../libs/common/src"],
+      "@cs/common/*": ["../../libs/common/src/*"]
+    }
+  },
+  "include": ["src/**/*.ts"]
+}

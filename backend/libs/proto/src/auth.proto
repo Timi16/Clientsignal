@@ -1,0 +1,127 @@
+syntax = "proto3";
+
+package auth;
+
+service AuthService {
+  rpc Register (RegisterRequest) returns (AuthResponse);
+  rpc Login (LoginRequest) returns (AuthResponse);
+  rpc Refresh (RefreshRequest) returns (AuthResponse);
+  rpc Logout (LogoutRequest) returns (OkResponse);
+  rpc GetUser (GetUserRequest) returns (UserResponse);
+  rpc GetUsersByIds (GetUsersByIdsRequest) returns (UsersResponse);
+  rpc FindUserByEmail (FindUserByEmailRequest) returns (UserResponse);
+  rpc DisableUser (DisableUserRequest) returns (OkResponse);
+  rpc ListAuditLogs (ListAuditLogsRequest) returns (AuditLogsResponse);
+  rpc VerifyEmail (VerifyEmailRequest) returns (OkResponse);
+  rpc ResendVerificationEmail (ResendVerifyRequest) returns (OkResponse);
+  rpc RequestPasswordReset (PasswordResetRequest) returns (OkResponse);
+  rpc ResetPassword (ResetPasswordRequest) returns (OkResponse);
+}
+
+message RegisterRequest {
+  string email = 1;
+  string name = 2;
+  string password = 3;
+  string role = 4;
+  string ip_address = 5;
+  string user_agent = 6;
+}
+
+message LoginRequest {
+  string email = 1;
+  string password = 2;
+  string ip_address = 3;
+  string user_agent = 4;
+}
+
+message RefreshRequest {
+  string refresh_token = 1;
+  string ip_address = 2;
+  string user_agent = 3;
+}
+
+message LogoutRequest {
+  string refresh_token = 1;
+}
+
+message GetUserRequest {
+  string id = 1;
+}
+
+message GetUsersByIdsRequest {
+  repeated string ids = 1;
+}
+
+message FindUserByEmailRequest {
+  string email = 1;
+}
+
+message DisableUserRequest {
+  string id = 1;
+  string disabled_by = 2;
+}
+
+message ListAuditLogsRequest {
+  string user_id = 1;
+  int32 limit = 2;
+  int32 offset = 3;
+}
+
+message AuthResponse {
+  string access_token = 1;
+  string refresh_token = 2;
+  UserMessage user = 3;
+}
+
+message UserMessage {
+  string id = 1;
+  string email = 2;
+  string name = 3;
+  string role = 4;
+  string email_verified_at = 5;
+  string disabled_at = 6;
+  string last_login_at = 7;
+  string created_at = 8;
+}
+
+message UserResponse {
+  UserMessage user = 1;
+}
+
+message UsersResponse {
+  repeated UserMessage users = 1;
+}
+
+message OkResponse {
+  bool ok = 1;
+}
+
+message AuditLogMessage {
+  string id = 1;
+  string user_id = 2;
+  string action = 3;
+  string ip_address = 4;
+  string created_at = 5;
+}
+
+message AuditLogsResponse {
+  repeated AuditLogMessage logs = 1;
+  int32 total = 2;
+}
+
+message VerifyEmailRequest {
+  string token = 1;
+}
+
+message ResendVerifyRequest {
+  string user_id = 1;
+}
+
+message PasswordResetRequest {
+  string email = 1;
+}
+
+message ResetPasswordRequest {
+  string token = 1;
+  string new_password = 2;
+}

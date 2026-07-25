@@ -1,0 +1,104 @@
+syntax = "proto3";
+
+package messaging;
+
+service MessagingService {
+  rpc ListThreads (ListThreadsRequest) returns (ThreadsResponse);
+  rpc GetThread (GetThreadRequest) returns (ThreadResponse);
+  rpc SendMessage (SendMessageRequest) returns (MessageResponse);
+  rpc MarkRead (MarkReadRequest) returns (OkResponse);
+  rpc GetNotificationPreferences (GetPrefsRequest) returns (PreferencesResponse);
+  rpc UpdateNotificationPreferences (UpdatePrefsRequest) returns (PreferencesResponse);
+  rpc GetUnreadCount (GetUnreadCountRequest) returns (UnreadCountResponse);
+}
+
+message ListThreadsRequest {
+  string user_id = 1;
+  int32 limit = 2;
+  int32 offset = 3;
+}
+
+message GetThreadRequest {
+  string thread_id = 1;
+  int32 message_limit = 2;
+  int32 message_offset = 3;
+}
+
+message SendMessageRequest {
+  string thread_id = 1;
+  string sender_user_id = 2;
+  string body = 3;
+}
+
+message MarkReadRequest {
+  string thread_id = 1;
+  string user_id = 2;
+}
+
+message GetPrefsRequest {
+  string user_id = 1;
+}
+
+message UpdatePrefsRequest {
+  string user_id = 1;
+  bool sms_enabled = 2;
+  bool email_enabled = 3;
+  bool push_enabled = 4;
+}
+
+message GetUnreadCountRequest {
+  string user_id = 1;
+}
+
+message ThreadMessage {
+  string id = 1;
+  string case_id = 2;
+  string client_user_id = 3;
+  string attorney_id = 4;
+  string attorney_user_id = 5;
+  int32 unread_count = 6;
+  MessageItem last_message = 7;
+  string created_at = 8;
+}
+
+message MessageItem {
+  string id = 1;
+  string thread_id = 2;
+  string sender_user_id = 3;
+  string body = 4;
+  string read_at = 5;
+  string created_at = 6;
+}
+
+message ThreadsResponse {
+  repeated ThreadMessage threads = 1;
+  int32 total = 2;
+}
+
+message ThreadResponse {
+  ThreadMessage thread = 1;
+  repeated MessageItem messages = 2;
+}
+
+message MessageResponse {
+  MessageItem message = 1;
+}
+
+message PreferencesMessage {
+  string user_id = 1;
+  bool sms_enabled = 2;
+  bool email_enabled = 3;
+  bool push_enabled = 4;
+}
+
+message PreferencesResponse {
+  PreferencesMessage preferences = 1;
+}
+
+message UnreadCountResponse {
+  int32 count = 1;
+}
+
+message OkResponse {
+  bool ok = 1;
+}

@@ -1,0 +1,133 @@
+syntax = "proto3";
+
+package lead;
+
+service LeadService {
+  rpc SubmitIntake (IntakeRequest) returns (LeadResponse);
+  rpc GetLead (GetLeadRequest) returns (LeadResponse);
+  rpc ListLeads (ListLeadsRequest) returns (LeadsResponse);
+  rpc ViewLead (ViewLeadRequest) returns (OkResponse);
+  rpc ClaimLead (ClaimLeadRequest) returns (LeadClaimResponse);
+  rpc GetDocumentUploadUrl (UploadUrlRequest) returns (PresignedUrlResponse);
+  rpc GetDocumentDownloadUrl (LeadDocDownloadRequest) returns (LeadDownloadUrlResponse);
+  rpc AdminListLeads (AdminListRequest) returns (LeadsResponse);
+  rpc AdminUpdateLeadQA (QAUpdateRequest) returns (OkResponse);
+}
+
+message IntakeRequest {
+  string client_user_id = 1;
+  string client_name = 2;
+  string client_email = 3;
+  string practice_area = 4;
+  string sub_type = 5;
+  string description = 6;
+  string city = 7;
+  string state = 8;
+  bool urgent = 9;
+  bool consent = 10;
+  string phone = 11;
+  string channel = 12;
+}
+
+message GetLeadRequest {
+  string id = 1;
+}
+
+message ListLeadsRequest {
+  string attorney_id = 1;
+  string status = 2;
+  string practice_area = 3;
+  int32 limit = 4;
+  int32 offset = 5;
+  string search = 6;
+  string sort_by = 7;
+  string sort_order = 8;
+  string city = 9;
+  string state = 10;
+}
+
+message ViewLeadRequest {
+  string lead_id = 1;
+  string attorney_id = 2;
+}
+
+message ClaimLeadRequest {
+  string lead_id = 1;
+  string attorney_id = 2;
+  string attorney_user_id = 3;
+  string attorney_name = 4;
+}
+
+message AdminListRequest {
+  string status = 1;
+  int32 limit = 2;
+  int32 offset = 3;
+}
+
+message QAUpdateRequest {
+  string lead_id = 1;
+  int32 quality_score = 2;
+  int32 urgency_score = 3;
+  string status = 4;
+}
+
+message UploadUrlRequest {
+  string lead_id = 1;
+  string file_name = 2;
+  string mime_type = 3;
+}
+
+message LeadDocDownloadRequest {
+  string document_id = 1;
+}
+
+message LeadDownloadUrlResponse {
+  string url = 1;
+  string file_name = 2;
+}
+
+message LeadMessage {
+  string id = 1;
+  string client_user_id = 2;
+  string name = 3;
+  string practice_area = 4;
+  string sub_type = 5;
+  int32 quality_score = 6;
+  int32 urgency_score = 7;
+  string city = 8;
+  string state = 9;
+  string summary = 10;
+  string estimated_value = 11;
+  string phone = 12;
+  bool consent = 13;
+  int32 doc_count = 14;
+  string status = 15;
+  string channel = 16;
+  string matched_attorney_id = 17;
+  string created_at = 18;
+}
+
+message LeadResponse {
+  LeadMessage lead = 1;
+}
+
+message LeadsResponse {
+  repeated LeadMessage leads = 1;
+  int32 total = 2;
+}
+
+message LeadClaimResponse {
+  LeadMessage lead = 1;
+  string phone = 2;
+  bool success = 3;
+}
+
+message PresignedUrlResponse {
+  string url = 1;
+  string document_id = 2;
+  string file_key = 3;
+}
+
+message OkResponse {
+  bool ok = 1;
+}

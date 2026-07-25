@@ -1,0 +1,194 @@
+syntax = "proto3";
+
+package attorney;
+
+service AttorneyService {
+  rpc CreateProfile (CreateProfileRequest) returns (AttorneyResponse);
+  rpc UpdateProfile (UpdateProfileRequest) returns (AttorneyResponse);
+  rpc GetAttorney (GetAttorneyRequest) returns (AttorneyResponse);
+  rpc GetAttorneyByUserId (GetByUserIdRequest) returns (AttorneyResponse);
+  rpc ListAttorneys (ListAttorneysRequest) returns (AttorneysResponse);
+  rpc FindMatchingAttorneys (MatchCriteria) returns (AttorneysResponse);
+  rpc GetVerificationQueue (VerificationQueueRequest) returns (VerificationsResponse);
+  rpc DecideVerification (DecisionRequest) returns (VerificationResponse);
+  rpc UpdatePreferences (PreferencesRequest) returns (PreferencesResponse);
+  rpc GetPreferences (GetPreferencesRequest) returns (PreferencesResponse);
+  rpc GetIntegrations (GetIntegrationsRequest) returns (IntegrationsResponse);
+  rpc ToggleIntegration (ToggleIntegrationRequest) returns (IntegrationResponse);
+  rpc GetAnalytics (GetAnalyticsRequest) returns (AnalyticsResponse);
+}
+
+message CreateProfileRequest {
+  string user_id = 1;
+  string bar_number = 2;
+  string bio = 3;
+  int32 years_experience = 4;
+  string city = 5;
+  string state = 6;
+  string firm_name = 7;
+  repeated string specialties = 8;
+}
+
+message UpdateProfileRequest {
+  string attorney_id = 1;
+  string bio = 2;
+  string city = 3;
+  string state = 4;
+  repeated string specialties = 5;
+}
+
+message GetAttorneyRequest {
+  string id = 1;
+}
+
+message GetByUserIdRequest {
+  string user_id = 1;
+}
+
+message ListAttorneysRequest {
+  string status = 1;
+  string specialty = 2;
+  string state = 3;
+  int32 limit = 4;
+  int32 offset = 5;
+}
+
+message MatchCriteria {
+  string practice_area = 1;
+  string city = 2;
+  string state = 3;
+}
+
+message VerificationQueueRequest {
+  int32 limit = 1;
+  int32 offset = 2;
+}
+
+message DecisionRequest {
+  string verification_id = 1;
+  string attorney_id = 2;
+  string admin_user_id = 3;
+  string decision = 4;
+  string trust_rating = 5;
+  string checklist_json = 6;
+  string reason = 7;
+}
+
+message PreferencesRequest {
+  string attorney_id = 1;
+  bool notification_sms = 2;
+  bool notification_email = 3;
+  bool notification_push = 4;
+  int32 lead_volume_target = 5;
+  int32 max_budget = 6;
+}
+
+message GetPreferencesRequest {
+  string attorney_id = 1;
+}
+
+message GetIntegrationsRequest {
+  string attorney_id = 1;
+}
+
+message ToggleIntegrationRequest {
+  string attorney_id = 1;
+  string integration_name = 2;
+  bool connected = 3;
+}
+
+message GetAnalyticsRequest {
+  string attorney_id = 1;
+}
+
+message AttorneyMessage {
+  string id = 1;
+  string user_id = 2;
+  string bar_number = 3;
+  string bio = 4;
+  int32 years_experience = 5;
+  string city = 6;
+  string state = 7;
+  string status = 8;
+  string trust_rating = 9;
+  int32 total_leads = 10;
+  string response_time_avg = 11;
+  string firm_name = 12;
+  string firm_id = 13;
+  repeated string specialties = 14;
+  string name = 15;
+  string email = 16;
+  string created_at = 17;
+}
+
+message AttorneyResponse {
+  AttorneyMessage attorney = 1;
+}
+
+message AttorneysResponse {
+  repeated AttorneyMessage attorneys = 1;
+  int32 total = 2;
+}
+
+message VerificationMessage {
+  string id = 1;
+  string attorney_id = 2;
+  string admin_user_id = 3;
+  string checklist_json = 4;
+  string decision = 5;
+  string sla_deadline = 6;
+  string decided_at = 7;
+  string created_at = 8;
+  AttorneyMessage attorney = 9;
+}
+
+message VerificationResponse {
+  VerificationMessage verification = 1;
+}
+
+message VerificationsResponse {
+  repeated VerificationMessage verifications = 1;
+  int32 total = 2;
+}
+
+message PreferencesMessage {
+  string attorney_id = 1;
+  bool notification_sms = 2;
+  bool notification_email = 3;
+  bool notification_push = 4;
+  int32 lead_volume_target = 5;
+  int32 max_budget = 6;
+}
+
+message PreferencesResponse {
+  PreferencesMessage preferences = 1;
+}
+
+message IntegrationMessage {
+  string name = 1;
+  string description = 2;
+  string category = 3;
+  bool connected = 4;
+  string color = 5;
+}
+
+message IntegrationResponse {
+  IntegrationMessage integration = 1;
+}
+
+message IntegrationsResponse {
+  repeated IntegrationMessage integrations = 1;
+}
+
+message AnalyticsResponse {
+  int32 total_leads = 1;
+  double acceptance_rate = 2;
+  string avg_response_time = 3;
+  int32 revenue_cents = 4;
+  repeated LeadTrend lead_trends = 5;
+}
+
+message LeadTrend {
+  string date = 1;
+  int32 count = 2;
+}
