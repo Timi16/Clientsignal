@@ -11,7 +11,7 @@ export class DatabaseService implements OnApplicationShutdown {
 
   constructor(config: ConfigService) {
     this.pool = new Pool({
-      connectionString: config.getOrThrow<string>('DATABASE_URL'),
+      connectionString: config.get<string>('CASE_DATABASE_URL') || config.getOrThrow<string>('DATABASE_URL'),
       max: 10,
       idleTimeoutMillis: 30_000,
     });

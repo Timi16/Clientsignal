@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { I18nProvider } from "@/lib/i18n";
+import { AuthProvider } from "@/lib/auth-context";
 import { LanguageSelectorPopup } from "@/components/language-selector";
 
 export const metadata: Metadata = {
@@ -25,10 +26,12 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Hanken+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
       </head>
       <body className="h-full">
-        <I18nProvider>
-          {children}
-          <LanguageSelectorPopup />
-        </I18nProvider>
+        <AuthProvider>
+          <I18nProvider>
+            {children}
+            <LanguageSelectorPopup />
+          </I18nProvider>
+        </AuthProvider>
       </body>
     </html>
   );
