@@ -124,18 +124,29 @@ export function CaseTag({ type, sm }: { type: string; sm?: boolean }) {
 }
 
 /* ---------- Field ---------- */
-export function Field({ label, type = "text", placeholder, icon, defaultValue }: {
+export function Field({ label, type = "text", placeholder, icon, defaultValue, value, onChange, disabled }: {
   label: string; type?: string; placeholder?: string; icon?: string; defaultValue?: string;
+  value?: string; onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void; disabled?: boolean;
 }) {
+  const isPassword = type === "password";
+  const [showPw, setShowPw] = useState(false);
   return (
     <label className="stack" style={{ gap: 8 }}>
       <span style={{ fontSize: 13.5, fontWeight: 600, color: "var(--text-1)" }}>{label}</span>
       <div className="row" style={{ position: "relative" }}>
         {icon && <span style={{ position: "absolute", left: 14, color: "var(--text-3)" }}><Icon name={icon} size={18} /></span>}
-        <input type={type} placeholder={placeholder} defaultValue={defaultValue}
-          style={{ width: "100%", padding: icon ? "12px 14px 12px 42px" : "12px 14px", borderRadius: 10, border: "1.5px solid var(--line-2)", background: "var(--card)", fontSize: 15, color: "var(--ink)", outline: "none", transition: "border-color .2s, box-shadow .2s" }}
+        <input type={isPassword && showPw ? "text" : type} placeholder={placeholder} defaultValue={value !== undefined ? undefined : defaultValue}
+          value={value} onChange={onChange} disabled={disabled}
+          style={{ width: "100%", padding: icon ? "12px 14px 12px 42px" : "12px 14px", paddingRight: isPassword ? 44 : 14, borderRadius: 10, border: "1.5px solid var(--line-2)", background: "var(--card)", fontSize: 15, color: "var(--ink)", outline: "none", transition: "border-color .2s, box-shadow .2s", opacity: disabled ? 0.6 : 1 }}
           onFocus={e => { e.target.style.borderColor = "var(--signal)"; e.target.style.boxShadow = "0 0 0 3px var(--signal-tint)"; }}
           onBlur={e => { e.target.style.borderColor = "var(--line-2)"; e.target.style.boxShadow = "none"; }} />
+        {isPassword && (
+          <button type="button" onClick={(e) => { e.preventDefault(); setShowPw(!showPw); }}
+            style={{ position: "absolute", right: 12, color: "var(--text-3)", cursor: "pointer", background: "none", border: "none", padding: 2, display: "grid", placeItems: "center" }}
+            tabIndex={-1} aria-label={showPw ? "Hide password" : "Show password"}>
+            <Icon name={showPw ? "eyeOff" : "eye"} size={18} />
+          </button>
+        )}
       </div>
     </label>
   );

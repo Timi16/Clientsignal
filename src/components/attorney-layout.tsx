@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { Icon } from "@/components/icons";
 import { Logo, Verified, Avatar } from "@/components/ui";
+import { useRequireAuth } from "@/lib/use-require-auth";
+import { useAuth } from "@/lib/auth-context";
 
 const NAV = [
   { label: "Dashboard", icon: "grid", href: "/attorney/dashboard" },
@@ -28,6 +30,13 @@ export default function AppLayout({
 }) {
   const router = useRouter();
   const path = usePathname();
+  const { user, loading: authLoading } = useRequireAuth("attorney");
+  const { logout } = useAuth();
+  const userName = user?.name || "Attorney";
+
+  if (authLoading || !user) {
+    return <div style={{ display: "grid", placeItems: "center", height: "100vh", color: "var(--text-3)" }}>Loading...</div>;
+  }
 
   return (
     <div className="app-grid" style={{ display: "grid", gridTemplateColumns: "248px 1fr", minHeight: "100vh" }}>
@@ -118,7 +127,7 @@ export default function AppLayout({
             marginTop: 8,
           }}
         >
-          <Avatar name="Sarah Mitchell" size={36} />
+          <Avatar name={userName} size={36} />
           <div className="side-label" style={{ flex: 1, minWidth: 0 }}>
             <div className="row" style={{ gap: 6 }}>
               <span
@@ -131,12 +140,15 @@ export default function AppLayout({
                   whiteSpace: "nowrap",
                 }}
               >
-                Sarah Mitchell
+                {userName}
               </span>
               <Verified size={14} />
             </div>
-            <span style={{ color: "rgba(234,240,249,0.45)", fontSize: 12 }}>Mitchell & Cole LLP</span>
+            <span style={{ color: "rgba(234,240,249,0.45)", fontSize: 12 }}>{user.email}</span>
           </div>
+          <button onClick={async () => { await logout(); router.push("/attorney/login"); }} title="Log out" style={{ color: "rgba(234,240,249,0.5)" }}>
+            <Icon name="logout" size={16} />
+          </button>
         </div>
       </aside>
 

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import AppLayout from "@/components/attorney-layout";
 import { Icon } from "@/components/icons";
+import { useAuth } from "@/lib/auth-context";
 
 const INVOICES = [
   { id: "INV-1042", date: "Jun 1, 2026", amount: "$499.00", status: "Paid" },
@@ -12,6 +13,7 @@ const INVOICES = [
 ];
 
 export default function BillingPage() {
+  const { user } = useAuth();
   const [mode, setMode] = useState<"sub" | "ppl">("sub");
 
   return (

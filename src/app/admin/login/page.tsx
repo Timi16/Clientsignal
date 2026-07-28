@@ -1,9 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Logo, Field } from "@/components/ui";
 import { Icon } from "@/components/icons";
+import { useAuth } from "@/lib/auth-context";
 
 /* ---------- AuthBrandPanel (internal variant) ---------- */
 function AuthBrandPanelInternal() {
@@ -126,6 +128,11 @@ function StatItem({ value, label }: { value: string; label: string }) {
 
 export default function InternalLogin() {
   const router = useRouter();
+  const { login } = useAuth();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   return (
     <div
@@ -203,12 +210,14 @@ export default function InternalLogin() {
               type="email"
               placeholder="you@clientsignal.com"
               icon="mail"
+              value={email} onChange={e => setEmail(e.target.value)} disabled={loading}
             />
             <Field
               label="Password"
               type="password"
               placeholder="Enter your password"
               icon="lock"
+              value={password} onChange={e => setPassword(e.target.value)} disabled={loading}
             />
             <Field
               label="Two-factor code"
@@ -216,14 +225,34 @@ export default function InternalLogin() {
               icon="shield"
             />
 
+            {error && (
+              <div style={{ padding: "10px 14px", borderRadius: 8, background: "var(--coral-tint)", color: "var(--coral)", fontSize: 13.5, fontWeight: 500 }}>
+                {error}
+              </div>
+            )}
+
             {/* Sign in button */}
             <button
               className="btn btn-pine btn-lg"
-              style={{ width: "100%", marginTop: 4 }}
-              onClick={() => router.push("/admin")}
+              style={{ width: "100%", marginTop: 4, opacity: loading ? 0.7 : 1 }}
+              disabled={loading}
+              onClick={async () => {
+                setError("");
+                if (!email || !password) { setError("Please fill in all fields."); return; }
+                setLoading(true);
+                try {
+                  const user = await login(email, password);
+                  if (user.role === "admin") router.push("/admin");
+                  else setError("Access restricted to admin accounts only.");
+                } catch (err: unknown) {
+                  setError(err instanceof Error ? err.message : "Invalid credentials.");
+                } finally {
+                  setLoading(false);
+                }
+              }}
             >
-              Sign in
-              <Icon name="arrowR" size={17} color="#fff" />
+              {loading ? "Signing in..." : "Sign in"}
+              {!loading && <Icon name="arrowR" size={17} color="#fff" />}
             </button>
           </div>
 

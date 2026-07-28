@@ -2,6 +2,7 @@
 
 import AppLayout from "@/components/attorney-layout";
 import { Spark, Bars } from "@/components/ui";
+import { useAuth } from "@/lib/auth-context";
 
 const STATS = [
   { label: "Total leads", value: "47", delta: "+12 this month", spark: [18, 22, 28, 32, 38, 42, 44, 47], color: "var(--signal)" },
@@ -29,9 +30,13 @@ const SOURCE_DATA = [
 ];
 
 export default function AnalyticsPage() {
+  const { user } = useAuth();
+
   return (
     <AppLayout>
-      <h1 style={{ fontSize: 24, fontWeight: 700, color: "var(--ink)", marginBottom: 28 }}>Analytics</h1>
+      <h1 style={{ fontSize: 24, fontWeight: 700, color: "var(--ink)", marginBottom: 28 }}>
+        {user?.name ? `${user.name}'s Analytics` : "Analytics"}
+      </h1>
 
       {/* stat cards */}
       <div

@@ -43,8 +43,9 @@ const protoDir = join(__dirname, '../../../libs/proto/src');
       }),
     }),
 
-    // NATS client (for webhook forwarding)
+    // All microservice clients
     ClientsModule.registerAsync([
+      // NATS client (for webhook forwarding)
       {
         name: Services.NATS,
         inject: [ConfigService],
@@ -55,10 +56,7 @@ const protoDir = join(__dirname, '../../../libs/proto/src');
           },
         }),
       },
-    ]),
-
-    // gRPC client: Auth
-    ClientsModule.registerAsync([
+      // gRPC client: Auth
       {
         name: Services.AUTH,
         inject: [ConfigService],

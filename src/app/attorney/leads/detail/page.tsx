@@ -12,6 +12,22 @@ export default function LeadDetailPage() {
   const lead = getSelectedLead();
   const [claimed, setClaimed] = useState(false);
 
+  if (!lead) {
+    return (
+      <AppLayout>
+        <div style={{ padding: 40, textAlign: "center", color: "var(--text-3)", fontSize: 14 }}>
+          No lead selected.{" "}
+          <button
+            style={{ color: "var(--signal)", fontWeight: 600, cursor: "pointer", background: "none", border: "none", fontSize: 14 }}
+            onClick={() => router.push("/attorney/leads")}
+          >
+            Back to leads
+          </button>
+        </div>
+      </AppLayout>
+    );
+  }
+
   return (
     <AppLayout>
       {/* back */}
@@ -34,18 +50,18 @@ export default function LeadDetailPage() {
               <div style={{ flex: 1 }}>
                 <div className="row" style={{ gap: 10, marginBottom: 4 }}>
                   <h2 style={{ fontSize: 22, fontWeight: 700, color: "var(--ink)" }}>{lead.name}</h2>
-                  <CaseTag type={lead.type} sm />
+                  <CaseTag type={lead.practiceArea} sm />
                 </div>
                 <div style={{ fontSize: 13.5, color: "var(--text-3)" }}>
-                  {lead.id} &middot; {lead.city} &middot; {lead.time}
+                  {lead.id} &middot; {lead.city}{lead.state ? `, ${lead.state}` : ""} &middot; {lead.createdAt ? new Date(lead.createdAt).toLocaleDateString() : ""}
                 </div>
               </div>
             </div>
 
             {/* scores */}
             <div className="row" style={{ gap: 24, marginBottom: 24 }}>
-              <ScoreRing value={lead.quality} size={72} stroke={6} label="Quality" />
-              <ScoreRing value={lead.urgency} size={72} stroke={6} label="Urgency" color={lead.urgency >= 80 ? "var(--coral)" : lead.urgency >= 55 ? "var(--amber)" : "var(--text-3)"} />
+              <ScoreRing value={lead.qualityScore} size={72} stroke={6} label="Quality" />
+              <ScoreRing value={lead.urgencyScore} size={72} stroke={6} label="Urgency" color={lead.urgencyScore >= 80 ? "var(--coral)" : lead.urgencyScore >= 55 ? "var(--amber)" : "var(--text-3)"} />
             </div>
 
             {/* description */}
@@ -71,11 +87,11 @@ export default function LeadDetailPage() {
           <div className="card" style={{ padding: "24px 26px" }}>
             <h3 style={{ fontSize: 15, fontWeight: 700, color: "var(--ink)", marginBottom: 18 }}>
               <Icon name="file" size={17} style={{ display: "inline", verticalAlign: "-3px", marginRight: 8 }} />
-              Documents ({lead.docs})
+              Documents ({lead.docCount})
             </h3>
-            {lead.docs > 0 ? (
+            {lead.docCount > 0 ? (
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 12 }}>
-                {Array.from({ length: lead.docs }).map((_, i) => (
+                {Array.from({ length: lead.docCount }).map((_, i) => (
                   <div
                     key={i}
                     style={{
@@ -109,7 +125,7 @@ export default function LeadDetailPage() {
               </p>
               <div style={{ marginBottom: 20 }}>
                 <span className="mono" style={{ fontSize: 26, fontWeight: 700, color: "var(--gold-soft)" }}>
-                  {lead.value}
+                  {lead.estimatedValue || "—"}
                 </span>
                 <span style={{ fontSize: 13, color: "rgba(234,240,249,0.5)", marginLeft: 8 }}>est. value</span>
               </div>
@@ -167,11 +183,11 @@ export default function LeadDetailPage() {
             <div className="stack" style={{ gap: 16 }}>
               {[
                 { label: "Status", val: lead.status },
-                { label: "Case type", val: lead.type },
-                { label: "City", val: lead.city },
-                { label: "Time received", val: lead.time },
-                { label: "Estimated value", val: lead.value },
-                { label: "Documents", val: `${lead.docs} attached` },
+                { label: "Case type", val: lead.practiceArea },
+                { label: "City", val: `${lead.city}${lead.state ? `, ${lead.state}` : ""}` },
+                { label: "Time received", val: lead.createdAt ? new Date(lead.createdAt).toLocaleDateString() : "—" },
+                { label: "Estimated value", val: lead.estimatedValue || "—" },
+                { label: "Documents", val: `${lead.docCount} attached` },
               ].map((d) => (
                 <div key={d.label} className="row between" style={{ fontSize: 13.5 }}>
                   <span style={{ color: "var(--text-3)", fontWeight: 600 }}>{d.label}</span>

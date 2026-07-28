@@ -107,3 +107,19 @@ export async function listNotes(caseId: string) {
 export async function getCaseStrength(caseId: string) {
   return get<{ score: number; docsComplete: number; docsTotal: number }>(`/cases/${caseId}/strength`);
 }
+
+export interface CaseAttorney {
+  id: string;
+  name: string;
+  firmName: string;
+  yearsExperience: number;
+  barNumber: string;
+  trustRating: string;
+  responseTimeAvg: string;
+  specialties: string[];
+  bio: string;
+}
+
+export async function getCaseAttorney(caseId: string): Promise<{ attorney: CaseAttorney }> {
+  return get<{ attorney: CaseAttorney }>(`/cases/${caseId}/attorney`);
+}

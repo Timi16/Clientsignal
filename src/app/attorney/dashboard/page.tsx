@@ -1,10 +1,13 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import AppLayout from "@/components/attorney-layout";
 import { Icon } from "@/components/icons";
 import { ScoreRing, Spark, Bars, CaseTag } from "@/components/ui";
-import { LEADS } from "@/lib/data";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/lib/auth-context";
+import * as leadsApi from "@/lib/api/leads";
+import type { Lead } from "@/lib/api/leads";
 
 const STATS = [
   { label: "New leads today", value: "8", delta: "+3 vs yest.", spark: [3, 5, 4, 6, 5, 7, 8], color: "var(--pine)" },
@@ -25,14 +28,27 @@ const WEEK_DATA = [
 
 export default function DashboardPage() {
   const router = useRouter();
+  const { user } = useAuth();
+  const firstName = user?.name?.split(" ")[0] || "there";
+  const [leads, setLeads] = useState<Lead[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    leadsApi.listLeads({ limit: 4 }).then(res => {
+      if (!cancelled) setLeads(res.leads);
+    }).catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
+
+  const newLeadCount = leads.filter(l => l.status === "new").length;
 
   return (
     <AppLayout>
       {/* greeting + live alert */}
       <div className="row between" style={{ marginBottom: 24, flexWrap: "wrap", gap: 16 }}>
         <div>
-          <h2 className="display" style={{ fontSize: 30 }}>Good morning, Sarah.</h2>
-          <p style={{ color: "var(--text-2)", fontSize: 15, marginTop: 4 }}>You have <strong style={{ color: "var(--coral)" }}>2 new matched leads</strong> waiting — your fastest competitors respond in minutes.</p>
+          <h2 className="display" style={{ fontSize: 30 }}>Good morning, {firstName}.</h2>
+          <p style={{ color: "var(--text-2)", fontSize: 15, marginTop: 4 }}>You have <strong style={{ color: "var(--coral)" }}>{newLeadCount} new matched lead{newLeadCount !== 1 ? "s" : ""}</strong> waiting — your fastest competitors respond in minutes.</p>
         </div>
       </div>
 
@@ -61,8 +77,10 @@ export default function DashboardPage() {
             <button onClick={() => router.push("/attorney/leads")} style={{ fontSize: 13.5, color: "var(--pine)", fontWeight: 600 }} className="row gap-1">View all <Icon name="arrowR" size={15} /></button>
           </div>
           <div className="stack" style={{ gap: 14 }}>
-            {LEADS.slice(0, 4).map(l => (
-              <button key={l.id} onClick={() => router.push("/attorney/leads/detail")} className="row between" style={{
+            {leads.length === 0 ? (
+              <p style={{ padding: 20, color: "var(--text-3)", fontSize: 14, textAlign: "center" }}>No leads yet — they&apos;ll appear here when matched.</p>
+            ) : leads.map(l => (
+              <button key={l.id} onClick={() => router.push("/attorney/leads")} className="row between" style={{
                 padding: "18px 16px", minHeight: 76, borderRadius: 14, border: "1px solid var(--line)",
                 background: l.status === "new" ? "var(--signal-tint)" : "var(--paper)",
                 textAlign: "left", transition: "transform .15s", width: "100%",
@@ -71,21 +89,20 @@ export default function DashboardPage() {
                 onMouseLeave={e => (e.currentTarget.style.transform = "none")}
               >
                 <div className="row" style={{ gap: 13 }}>
-                  <ScoreRing value={l.quality} size={42} stroke={4} />
+                  <ScoreRing value={l.qualityScore} size={42} stroke={4} />
                   <div className="stack" style={{ gap: 4 }}>
                     <div className="row" style={{ gap: 8 }}>
-                      <strong style={{ fontSize: 14.5 }}>{l.name}</strong>
+                      <strong style={{ fontSize: 14.5 }}>{l.clientName}</strong>
                       {l.status === "new" && <span className="pill" style={{ background: "var(--coral)", color: "#fff", fontSize: 9.5, padding: "2px 7px" }}>NEW</span>}
                     </div>
                     <div className="row" style={{ gap: 8, fontSize: 12.5, color: "var(--text-3)" }}>
-                      <CaseTag type={l.type} sm />
-                      <span>· {l.city}</span>
+                      <CaseTag type={l.practiceArea} sm />
+                      <span>· {l.city}{l.state ? `, ${l.state}` : ""}</span>
                     </div>
                   </div>
                 </div>
                 <div className="stack" style={{ alignItems: "flex-end", gap: 3 }}>
-                  <strong className="mono" style={{ fontSize: 14, color: "var(--pine)" }}>{l.value}</strong>
-                  <span className="mono" style={{ fontSize: 11, color: "var(--text-3)" }}>{l.time}</span>
+                  <span className="mono" style={{ fontSize: 11, color: "var(--text-3)" }}>{new Date(l.createdAt).toLocaleDateString()}</span>
                 </div>
               </button>
             ))}

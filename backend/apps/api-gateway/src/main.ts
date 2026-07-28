@@ -7,18 +7,21 @@ import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const allowedOrigins = process.env.API_CORS_ORIGINS?.split(',') || ['http://localhost:3000', 'http://localhost:3001'];
+  const app = await NestFactory.create(AppModule, {
+    cors: {
+      origin: true,
+      credentials: true,
+      methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization'],
+    },
+  });
 
   // Security
-  app.use(helmet());
+  app.use(helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+  }));
   app.use(cookieParser());
-
-  // CORS
-  const origins = process.env.API_CORS_ORIGINS?.split(',') || ['http://localhost:3000'];
-  app.enableCors({
-    origin: origins,
-    credentials: true,
-  });
 
   // Global validation pipe
   app.useGlobalPipes(

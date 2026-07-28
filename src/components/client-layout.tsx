@@ -1,45 +1,73 @@
 "use client";
 
-import { useSyncExternalStore, useState, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { Icon } from "@/components/icons";
 import { Logo, Avatar } from "@/components/ui";
-import { CLIENT_CASES, CLIENT_ATTYS, CASE_STATUS, CASE_TYPES, ClientCase } from "@/lib/data";
+import { CASE_STATUS, CASE_TYPES } from "@/lib/data";
+import { useRequireAuth } from "@/lib/use-require-auth";
+import { useAuth } from "@/lib/auth-context";
+import * as casesApi from "@/lib/api/cases";
+import * as messagesApi from "@/lib/api/messages";
 
-/* ---------- ME object ---------- */
-export const ME = {
-  name: "Marcus Webb",
-  email: "marcus.webb@email.com",
-  phone: "(512) 555-0192",
-  city: "Austin, TX",
-};
-
-/* ---------- Active-case store ---------- */
-let activeCaseId = CLIENT_CASES[0].id;
-const caseListeners = new Set<() => void>();
-
-function subscribeActiveCase(listener: () => void) {
-  caseListeners.add(listener);
-  return () => {
-    caseListeners.delete(listener);
-  };
+/* ---------- Types ---------- */
+export interface ActiveCaseData {
+  id: string;
+  practiceArea: string;
+  matter: string;
+  city: string;
+  state: string;
+  openedAt: string;
+  status: string;
+  stage: number;
+  strengthScore: number;
+  summary: string;
+  attorneyId: string;
+  docs: casesApi.CaseDocument[];
+  unreadCount: number;
 }
 
-function getActiveCaseId() {
-  return activeCaseId;
+export interface ActiveAttorney {
+  id: string;
+  name: string;
+  firmName: string;
+  yearsExperience: number;
+  barNumber: string;
+  trustRating: string;
+  responseTimeAvg: string;
+  specialties: string[];
+  bio: string;
 }
 
-function updateActiveCaseId(id: string) {
-  activeCaseId = id;
-  caseListeners.forEach(listener => listener());
+/* ---------- Context ---------- */
+interface ClientCaseContextValue {
+  cases: ActiveCaseData[];
+  activeCase: ActiveCaseData | null;
+  attorney: ActiveAttorney | null;
+  setActiveId: (id: string) => void;
+  loading: boolean;
+  refreshCases: () => Promise<void>;
 }
+
+const ClientCaseContext = createContext<ClientCaseContextValue>({
+  cases: [],
+  activeCase: null,
+  attorney: null,
+  setActiveId: () => {},
+  loading: true,
+  refreshCases: async () => {},
+});
 
 export function useActiveCase() {
-  const activeId = useSyncExternalStore(subscribeActiveCase, getActiveCaseId, getActiveCaseId);
+  const ctx = useContext(ClientCaseContext);
   return {
-    activeCase: CLIENT_CASES.find(c => c.id === activeId) || CLIENT_CASES[0],
-    setActiveId: updateActiveCaseId,
+    activeCase: ctx.activeCase,
+    cases: ctx.cases,
+    attorney: ctx.attorney,
+    setActiveId: ctx.setActiveId,
+    loading: ctx.loading,
+    refreshCases: ctx.refreshCases,
   };
 }
 
@@ -74,7 +102,6 @@ const NAV = [
   { label: "Settings", icon: "settings", href: "/client/settings" },
 ];
 
-/* ---------- Header titles ---------- */
 const TITLES: Record<string, string> = {
   "/client/dashboard": "Dashboard",
   "/client/cases": "My Cases",
@@ -87,9 +114,24 @@ const TITLES: Record<string, string> = {
 };
 
 /* ---------- Badge counts ---------- */
-function getBadges(c: ClientCase) {
+function getBadges(c: ActiveCaseData | null) {
+  if (!c) return { docs: 0, msgs: 0 };
   const reqDocs = c.docs.filter(d => d.status === "requested" || d.status === "missing").length;
-  return { docs: reqDocs, msgs: c.unread };
+  return { docs: reqDocs, msgs: c.unreadCount };
+}
+
+/* ---------- format date ---------- */
+function formatOpened(dateStr: string): string {
+  if (!dateStr) return "";
+  const d = new Date(dateStr);
+  const now = new Date();
+  const diffMs = now.getTime() - d.getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  if (diffDays === 0) return "Today";
+  if (diffDays === 1) return "Yesterday";
+  if (diffDays < 7) return `${diffDays} days ago`;
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)} week${Math.floor(diffDays / 7) > 1 ? "s" : ""} ago`;
+  return `${Math.floor(diffDays / 30)} month${Math.floor(diffDays / 30) > 1 ? "s" : ""} ago`;
 }
 
 /* ---------- ClientLayout ---------- */
@@ -106,44 +148,158 @@ export default function ClientLayout({
   const pathname = usePathname();
   const [caseDropOpen, setCaseDropOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
-  const { activeCase, setActiveId } = useActiveCase();
+  const { user, loading: authLoading } = useRequireAuth("client");
+  const { logout } = useAuth();
 
+  // Data state
+  const [cases, setCases] = useState<ActiveCaseData[]>([]);
+  const [activeCaseId, setActiveCaseId] = useState<string>("");
+  const [attorney, setAttorney] = useState<ActiveAttorney | null>(null);
+  const [dataLoading, setDataLoading] = useState(true);
+
+  const userName = user?.name || "User";
+
+  // Fetch cases from API
+  const fetchCases = useCallback(async () => {
+    try {
+      const [casesRes, unreadRes] = await Promise.all([
+        casesApi.listCases({ limit: 50 }),
+        messagesApi.getUnreadCount().catch(() => ({ count: 0 })),
+      ]);
+
+      const caseList: ActiveCaseData[] = await Promise.all(
+        casesRes.cases.map(async (c) => {
+          const docsRes = await casesApi.listDocuments(c.id).catch(() => ({ documents: [] }));
+          // Get unread count per thread for this case
+          let unreadCount = 0;
+          try {
+            const threads = await messagesApi.listThreads();
+            const caseThread = threads.threads.find(t => t.caseId === c.id);
+            if (caseThread) unreadCount = caseThread.unreadCount;
+          } catch { /* no threads yet */ }
+
+          return {
+            id: c.id,
+            practiceArea: c.practiceArea,
+            matter: c.matter,
+            city: c.city ? `${c.city}, ${c.state}` : c.state || "",
+            state: c.state,
+            openedAt: c.openedAt,
+            status: c.status,
+            stage: c.stage,
+            strengthScore: c.strengthScore,
+            summary: c.summary || "",
+            attorneyId: c.attorneyId,
+            docs: docsRes.documents,
+            unreadCount,
+          };
+        })
+      );
+
+      setCases(caseList);
+      if (caseList.length > 0 && !activeCaseId) {
+        setActiveCaseId(caseList[0].id);
+      }
+    } catch {
+      // API not available — show empty state
+      setCases([]);
+    } finally {
+      setDataLoading(false);
+    }
+  }, [activeCaseId]);
+
+  useEffect(() => {
+    if (!authLoading && user) {
+      fetchCases();
+    }
+  }, [authLoading, user, fetchCases]);
+
+  // Fetch attorney when active case changes
+  const activeCase = cases.find(c => c.id === activeCaseId) || cases[0] || null;
+
+  useEffect(() => {
+    if (!activeCase?.attorneyId || !activeCase?.id) {
+      setAttorney(null);
+      return;
+    }
+    casesApi.getCaseAttorney(activeCase.id)
+      .then(res => {
+        setAttorney(res.attorney);
+      })
+      .catch(() => setAttorney(null));
+  }, [activeCase?.attorneyId, activeCase?.id]);
+
+  const setActiveId = useCallback((id: string) => {
+    setActiveCaseId(id);
+  }, []);
+
+  const caseStatus = activeCase ? (CASE_STATUS[activeCase.status] || CASE_STATUS.pending) : CASE_STATUS.pending;
+  const caseType = activeCase ? (CASE_TYPES[activeCase.practiceArea] || { label: activeCase.practiceArea, color: "var(--text-2)", tint: "var(--pine-tint)" }) : null;
   const badges = getBadges(activeCase);
-  const atty = activeCase.atty ? CLIENT_ATTYS[activeCase.atty] : null;
-  const caseStatus = CASE_STATUS[activeCase.status];
-  const caseType = CASE_TYPES[activeCase.type];
-  const notifications = [
-    ...(activeCase.unread > 0 && atty ? [{
-      title: `${atty.name.split(" ")[0]} sent a message`,
-      body: `${activeCase.unread} unread update on ${activeCase.id}`,
+
+  const notifications = activeCase ? [
+    ...(activeCase.unreadCount > 0 && attorney ? [{
+      title: `${attorney.name.split(" ")[0]} sent a message`,
+      body: `${activeCase.unreadCount} unread update on ${activeCase.id}`,
       icon: "message",
       color: "var(--signal)",
       href: "/client/messages",
     }] : []),
-    ...activeCase.docs
+    ...(activeCase.docs
       .filter(d => d.status === "requested" || d.status === "missing")
       .slice(0, 2)
       .map(d => ({
         title: d.status === "requested" ? "Document requested" : "Document missing",
-        body: `${d.name} · ${activeCase.id}`,
+        body: `${d.fileName} · ${activeCase.id}`,
         icon: d.status === "requested" ? "upload" : "doc",
         color: d.status === "requested" ? "var(--amber)" : "var(--coral)",
         href: "/client/documents",
-      })),
+      }))),
     {
-      title: atty ? `Matched with ${atty.name}` : "Attorney matching in progress",
-      body: atty ? `${caseType?.label} · ${atty.firm}` : `${caseType?.label} · searching verified attorneys`,
-      icon: atty ? "shield" : "clock",
-      color: atty ? "var(--verified)" : "var(--amber)",
-      href: atty ? "/client/attorney" : "/client/timeline",
+      title: attorney ? `Matched with ${attorney.name}` : "Attorney matching in progress",
+      body: attorney ? `${caseType?.label} · ${attorney.firmName}` : `${caseType?.label} · searching verified attorneys`,
+      icon: attorney ? "shield" : "clock",
+      color: attorney ? "var(--verified)" : "var(--amber)",
+      href: attorney ? "/client/attorney" : "/client/timeline",
     },
-  ];
+  ] : [];
   const notificationCount = notifications.length;
 
   const headerTitle = titleOverride || TITLES[pathname] || "Dashboard";
 
+  if (authLoading || !user || dataLoading) {
+    return (
+      <div style={{ display: "grid", placeItems: "center", height: "100vh", background: "var(--paper)" }}>
+        <div className="rise" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 24, textAlign: "center" }}>
+          <Logo size={30} />
+          <div style={{ position: "relative", width: 56, height: 56 }}>
+            <svg width="56" height="56" viewBox="0 0 56 56" style={{ animation: "cs-spin 1.2s ease-in-out infinite" }}>
+              <circle cx="28" cy="28" r="23" fill="none" stroke="var(--line)" strokeWidth="3.5" />
+              <circle cx="28" cy="28" r="23" fill="none" stroke="var(--signal)" strokeWidth="3.5" strokeLinecap="round" strokeDasharray="110" strokeDashoffset="80" />
+            </svg>
+          </div>
+          <div>
+            <p style={{ fontSize: 15, fontWeight: 600, color: "var(--ink)", marginBottom: 4 }}>Loading your dashboard</p>
+            <p style={{ fontSize: 13, color: "var(--text-3)" }}>Setting things up for you...</p>
+          </div>
+          <style>{`@keyframes cs-spin { to { transform: rotate(360deg) } }`}</style>
+        </div>
+      </div>
+    );
+  }
+
+  // Context value
+  const ctxValue: ClientCaseContextValue = {
+    cases,
+    activeCase,
+    attorney,
+    setActiveId,
+    loading: dataLoading,
+    refreshCases: fetchCases,
+  };
+
   return (
-    <>
+    <ClientCaseContext.Provider value={ctxValue}>
       <div className="app-grid" style={{ display: "grid", gridTemplateColumns: "256px 1fr", minHeight: "100vh" }}>
         {/* ---- Sidebar ---- */}
         <aside
@@ -159,111 +315,117 @@ export default function ClientLayout({
             overflow: "auto",
           }}
         >
-          {/* Logo */}
           <Link href="/" aria-label="Go to home" style={{ padding: "22px 22px 18px", display: "flex" }}>
             <Logo size={28} />
           </Link>
 
           {/* Case selector card */}
-          <div style={{ padding: "0 16px", marginBottom: 8 }}>
-            <button
-              onClick={() => setCaseDropOpen(!caseDropOpen)}
-              style={{
-                width: "100%",
-                background: "var(--pine)",
-                borderRadius: 14,
-                padding: "14px 16px",
-                display: "flex",
-                flexDirection: "column",
-                gap: 8,
-                textAlign: "left",
-                position: "relative",
-              }}
-            >
-              <div className="row" style={{ gap: 8, width: "100%" }}>
-                <span style={{ width: 8, height: 8, borderRadius: "50%", background: caseStatus.dot, flex: "none" }} />
-                <span className="side-label" style={{ fontSize: 13, fontWeight: 600, color: "#fff", flex: 1 }}>
-                  {activeCase.id}
-                </span>
-                <Icon name="chevD" size={16} color="rgba(255,255,255,0.5)" />
-              </div>
-              <div className="side-label" style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <span style={{ fontSize: 12, color: "rgba(255,255,255,0.6)" }}>
-                  {caseType?.label}
-                </span>
-              </div>
-              <div className="side-label">
-                <span
-                  style={{
-                    fontSize: 11,
-                    fontWeight: 600,
-                    color: caseStatus.color,
-                    background: "rgba(255,255,255,0.1)",
-                    padding: "3px 9px",
-                    borderRadius: 99,
-                  }}
-                >
-                  {caseStatus.label}
-                </span>
-              </div>
-            </button>
-
-            {/* Dropdown */}
-            {caseDropOpen && (
-              <div
+          {activeCase ? (
+            <div style={{ padding: "0 16px", marginBottom: 8 }}>
+              <button
+                onClick={() => setCaseDropOpen(!caseDropOpen)}
                 style={{
-                  marginTop: 6,
-                  background: "#fff",
-                  border: "1px solid var(--line)",
-                  borderRadius: 12,
-                  boxShadow: "var(--sh-md)",
-                  overflow: "hidden",
+                  width: "100%",
+                  background: "var(--pine)",
+                  borderRadius: 14,
+                  padding: "14px 16px",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 8,
+                  textAlign: "left",
+                  position: "relative",
                 }}
               >
-                {CLIENT_CASES.map(c => {
-                  const st = CASE_STATUS[c.status];
-                  const ct = CASE_TYPES[c.type];
-                  return (
-                    <button
-                      key={c.id}
-                      className="dd-item"
-                      onClick={() => {
-                        setActiveId(c.id);
-                        setCaseDropOpen(false);
-                      }}
-                      style={{
-                        width: "100%",
-                        padding: "10px 14px",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 10,
-                        textAlign: "left",
-                        background: c.id === activeCase.id ? "var(--paper)" : "transparent",
-                      }}
-                    >
-                      <span style={{ width: 7, height: 7, borderRadius: "50%", background: st.dot, flex: "none" }} />
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: 13, fontWeight: 600, color: "var(--ink)" }}>{c.id}</div>
-                        <div style={{ fontSize: 11.5, color: "var(--text-3)" }}>{ct?.label}</div>
-                      </div>
-                      <span
+                <div className="row" style={{ gap: 8, width: "100%" }}>
+                  <span style={{ width: 8, height: 8, borderRadius: "50%", background: caseStatus.dot, flex: "none" }} />
+                  <span className="side-label" style={{ fontSize: 13, fontWeight: 600, color: "#fff", flex: 1 }}>
+                    {activeCase.id}
+                  </span>
+                  <Icon name="chevD" size={16} color="rgba(255,255,255,0.5)" />
+                </div>
+                <div className="side-label" style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ fontSize: 12, color: "rgba(255,255,255,0.6)" }}>
+                    {caseType?.label}
+                  </span>
+                </div>
+                <div className="side-label">
+                  <span
+                    style={{
+                      fontSize: 11,
+                      fontWeight: 600,
+                      color: caseStatus.color,
+                      background: "rgba(255,255,255,0.1)",
+                      padding: "3px 9px",
+                      borderRadius: 99,
+                    }}
+                  >
+                    {caseStatus.label}
+                  </span>
+                </div>
+              </button>
+
+              {caseDropOpen && (
+                <div
+                  style={{
+                    marginTop: 6,
+                    background: "#fff",
+                    border: "1px solid var(--line)",
+                    borderRadius: 12,
+                    boxShadow: "var(--sh-md)",
+                    overflow: "hidden",
+                  }}
+                >
+                  {cases.map(c => {
+                    const st = CASE_STATUS[c.status] || CASE_STATUS.pending;
+                    const ct = CASE_TYPES[c.practiceArea] || { label: c.practiceArea };
+                    return (
+                      <button
+                        key={c.id}
+                        className="dd-item"
+                        onClick={() => {
+                          setActiveId(c.id);
+                          setCaseDropOpen(false);
+                        }}
                         style={{
-                          fontSize: 10.5,
-                          fontWeight: 600,
-                          color: st.color,
-                          background: st.tint,
-                          padding: "2px 8px",
-                          borderRadius: 99,
+                          width: "100%",
+                          padding: "10px 14px",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 10,
+                          textAlign: "left",
+                          background: c.id === activeCase.id ? "var(--paper)" : "transparent",
                         }}
                       >
-                        {st.label}
-                      </span>
-                    </button>
-                  );
-                })}
+                        <span style={{ width: 7, height: 7, borderRadius: "50%", background: st.dot, flex: "none" }} />
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontSize: 13, fontWeight: 600, color: "var(--ink)" }}>{c.id}</div>
+                          <div style={{ fontSize: 11.5, color: "var(--text-3)" }}>{ct?.label}</div>
+                        </div>
+                        <span
+                          style={{
+                            fontSize: 10.5,
+                            fontWeight: 600,
+                            color: st.color,
+                            background: st.tint,
+                            padding: "2px 8px",
+                            borderRadius: 99,
+                          }}
+                        >
+                          {st.label}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div style={{ padding: "0 16px", marginBottom: 8 }}>
+              <div style={{ background: "var(--pine)", borderRadius: 14, padding: "20px 16px", textAlign: "center" }}>
+                <span style={{ fontSize: 13, color: "rgba(255,255,255,0.6)" }}>No cases yet</span>
               </div>
-            )}
-          </div>
+            </div>
+          )}
 
           {/* Nav */}
           <nav style={{ flex: 1, padding: "12px 12px 0" }}>
@@ -320,7 +482,7 @@ export default function ClientLayout({
             })}
           </nav>
 
-          {/* User section at bottom */}
+          {/* User section */}
           <div
             style={{
               padding: "16px",
@@ -330,13 +492,13 @@ export default function ClientLayout({
               gap: 12,
             }}
           >
-            <Avatar name={ME.name} size={36} />
+            <Avatar name={userName} size={36} />
             <div className="side-label" style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 13.5, fontWeight: 600, color: "var(--ink)" }}>{ME.name}</div>
-              <div style={{ fontSize: 12, color: "var(--text-3)" }}>{ME.city}</div>
+              <div style={{ fontSize: 13.5, fontWeight: 600, color: "var(--ink)" }}>{userName}</div>
+              <div style={{ fontSize: 12, color: "var(--text-3)" }}>{user.email}</div>
             </div>
             <button
-              onClick={() => router.push("/")}
+              onClick={async () => { await logout(); router.push("/client/login"); }}
               title="Log out"
               style={{ color: "var(--text-3)" }}
             >
@@ -355,7 +517,6 @@ export default function ClientLayout({
             overflow: "auto",
           }}
         >
-          {/* Header bar */}
           <header
             style={{
               display: "flex",
@@ -426,7 +587,7 @@ export default function ClientLayout({
                 >
                   <div className="row between" style={{ padding: "10px 12px 12px", borderBottom: "1px solid var(--line)" }}>
                     <strong style={{ fontSize: 14 }}>Notifications</strong>
-                    <span className="pill" style={{ background: "var(--blue-tint)", color: "var(--signal)", fontSize: 11 }}>{activeCase.id}</span>
+                    {activeCase && <span className="pill" style={{ background: "var(--blue-tint)", color: "var(--signal)", fontSize: 11 }}>{activeCase.id}</span>}
                   </div>
                   <div className="stack" style={{ gap: 4, paddingTop: 6 }}>
                     {notifications.map(n => (
@@ -464,10 +625,11 @@ export default function ClientLayout({
             </div>
           </header>
 
-          {/* Page content */}
           <div style={{ flex: 1, padding: "28px 32px 40px" }}>{children}</div>
         </main>
       </div>
-    </>
+    </ClientCaseContext.Provider>
   );
 }
+
+export { formatOpened };

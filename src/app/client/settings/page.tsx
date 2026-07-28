@@ -1,12 +1,24 @@
 "use client";
 
-import { useState } from "react";
-import ClientLayout, { ME } from "@/components/client-layout";
+import { useState, useEffect } from "react";
+import ClientLayout from "@/components/client-layout";
+import { useAuth } from "@/lib/auth-context";
 import { Icon } from "@/components/icons";
 import { inpStyle } from "@/components/ui";
 
 export default function ClientSettings() {
+  const { user } = useAuth();
   const [prefs, setPrefs] = useState({ sms: true, email: true, updates: true });
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+
+  useEffect(() => {
+    if (user) {
+      setName(user.name || "");
+      setEmail(user.email || "");
+    }
+  }, [user]);
 
   return (
     <ClientLayout title="Settings">
@@ -14,10 +26,10 @@ export default function ClientSettings() {
         <div className="card" style={{ padding: 24, marginBottom: 18 }}>
           <strong style={{ fontSize: 16, display: "block", marginBottom: 18 }}>Your details</strong>
           <div className="row" style={{ gap: 12, marginBottom: 14 }}>
-            <div style={{ flex: 1 }}><label className="stack" style={{ gap: 7 }}><span style={{ fontSize: 13, fontWeight: 600 }}>Full name</span><input defaultValue={ME.name} style={inpStyle} /></label></div>
-            <div style={{ flex: 1 }}><label className="stack" style={{ gap: 7 }}><span style={{ fontSize: 13, fontWeight: 600 }}>Phone</span><input defaultValue="(512) 555-0192" style={inpStyle} /></label></div>
+            <div style={{ flex: 1 }}><label className="stack" style={{ gap: 7 }}><span style={{ fontSize: 13, fontWeight: 600 }}>Full name</span><input value={name} onChange={e => setName(e.target.value)} style={inpStyle} /></label></div>
+            <div style={{ flex: 1 }}><label className="stack" style={{ gap: 7 }}><span style={{ fontSize: 13, fontWeight: 600 }}>Phone</span><input value={phone} onChange={e => setPhone(e.target.value)} style={inpStyle} /></label></div>
           </div>
-          <label className="stack" style={{ gap: 7 }}><span style={{ fontSize: 13, fontWeight: 600 }}>Email</span><input defaultValue="marcus.webb@email.com" style={inpStyle} /></label>
+          <label className="stack" style={{ gap: 7 }}><span style={{ fontSize: 13, fontWeight: 600 }}>Email</span><input value={email} onChange={e => setEmail(e.target.value)} style={inpStyle} /></label>
         </div>
 
         <div className="card" style={{ padding: 24, marginBottom: 18 }}>

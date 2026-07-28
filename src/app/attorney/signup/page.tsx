@@ -1,9 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Logo, Avatar, Verified, Field, LField, inpStyle } from "@/components/ui";
 import { Icon } from "@/components/icons";
+import { useAuth } from "@/lib/auth-context";
 
 /* ---------- AuthBrandPanel (attorney variant) ---------- */
 function AuthBrandPanel() {
@@ -119,6 +121,12 @@ function StatItem({ value, label }: { value: string; label: string }) {
 
 export default function AttorneySignup() {
   const router = useRouter();
+  const { register } = useAuth();
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   return (
     <div
@@ -191,9 +199,11 @@ export default function AttorneySignup() {
 
           {/* Form */}
           <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-            <Field label="Full name" placeholder="Jane Smith" icon="user" />
+            <Field label="Full name" placeholder="Jane Smith" icon="user"
+              value={name} onChange={e => setName(e.target.value)} disabled={loading} />
             <Field label="Firm name" placeholder="Smith & Associates LLP" icon="building" />
-            <Field label="Email address" type="email" placeholder="you@firm.com" icon="mail" />
+            <Field label="Email address" type="email" placeholder="you@firm.com" icon="mail"
+              value={email} onChange={e => setEmail(e.target.value)} disabled={loading} />
             <Field label="Bar number" placeholder="TX #123456" icon="shield" />
 
             {/* State select */}
@@ -225,16 +235,36 @@ export default function AttorneySignup() {
               </select>
             </LField>
 
-            <Field label="Password" type="password" placeholder="Create a strong password" icon="lock" />
+            <Field label="Password" type="password" placeholder="Create a strong password" icon="lock"
+              value={password} onChange={e => setPassword(e.target.value)} disabled={loading} />
+
+            {error && (
+              <div style={{ padding: "10px 14px", borderRadius: 8, background: "var(--coral-tint)", color: "var(--coral)", fontSize: 13.5, fontWeight: 500 }}>
+                {error}
+              </div>
+            )}
 
             {/* Submit */}
             <button
               className="btn btn-signal btn-lg"
-              style={{ width: "100%", marginTop: 4 }}
-              onClick={() => router.push("/attorney/onboard")}
+              style={{ width: "100%", marginTop: 4, opacity: loading ? 0.7 : 1 }}
+              disabled={loading}
+              onClick={async () => {
+                setError("");
+                if (!name || !email || !password) { setError("Please fill in all required fields."); return; }
+                setLoading(true);
+                try {
+                  await register(email, name, password, "attorney");
+                  router.push("/verify-email");
+                } catch (err: unknown) {
+                  setError(err instanceof Error ? err.message : "Registration failed. Please try again.");
+                } finally {
+                  setLoading(false);
+                }
+              }}
             >
-              Create account &amp; continue
-              <Icon name="arrowR" size={17} color="#fff" />
+              {loading ? "Creating account..." : "Create account & continue"}
+              {!loading && <Icon name="arrowR" size={17} color="#fff" />}
             </button>
           </div>
 

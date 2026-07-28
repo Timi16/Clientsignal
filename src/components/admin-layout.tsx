@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { Icon } from "@/components/icons";
 import { Logo, Avatar } from "@/components/ui";
+import { useRequireAuth } from "@/lib/use-require-auth";
+import { useAuth } from "@/lib/auth-context";
 
 const NAV = [
   { label: "Overview", icon: "grid", href: "/admin" },
@@ -27,6 +29,13 @@ export default function AdminLayout({
 }) {
   const router = useRouter();
   const path = usePathname();
+  const { user, loading: authLoading } = useRequireAuth("admin");
+  const { logout } = useAuth();
+  const userName = user?.name || "Admin";
+
+  if (authLoading || !user) {
+    return <div style={{ display: "grid", placeItems: "center", height: "100vh", color: "var(--text-3)" }}>Loading...</div>;
+  }
 
   return (
     <div className="app-grid" style={{ display: "grid", gridTemplateColumns: "248px 1fr", minHeight: "100vh" }}>
@@ -146,7 +155,7 @@ export default function AdminLayout({
             marginTop: 8,
           }}
         >
-          <Avatar name="Alex Reed" size={36} />
+          <Avatar name={userName} size={36} />
           <div className="side-label" style={{ flex: 1, minWidth: 0 }}>
             <div className="row" style={{ gap: 6 }}>
               <span
@@ -159,13 +168,16 @@ export default function AdminLayout({
                   whiteSpace: "nowrap",
                 }}
               >
-                Alex Reed
+                {userName}
               </span>
             </div>
             <span style={{ color: "rgba(234,240,249,0.45)", fontSize: 12 }}>
               Operations admin
             </span>
           </div>
+          <button onClick={async () => { await logout(); router.push("/admin/login"); }} title="Log out" style={{ color: "rgba(234,240,249,0.5)" }}>
+            <Icon name="logout" size={16} />
+          </button>
         </div>
       </aside>
 

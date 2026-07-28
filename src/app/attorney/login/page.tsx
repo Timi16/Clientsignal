@@ -1,9 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Logo, Avatar, Verified, Field } from "@/components/ui";
 import { Icon } from "@/components/icons";
+import { useAuth } from "@/lib/auth-context";
 
 /* ---------- AuthShell: shared left brand panel for attorney/admin ---------- */
 function AuthBrandPanel({ variant = "attorney" }: { variant?: "attorney" | "internal" }) {
@@ -163,6 +165,11 @@ function StatItem({ value, label }: { value: string; label: string }) {
 
 export default function AttorneyLogin() {
   const router = useRouter();
+  const { login } = useAuth();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   return (
     <div
@@ -237,8 +244,16 @@ export default function AttorneyLogin() {
           <div
             style={{ display: "flex", flexDirection: "column", gap: 20 }}
           >
-            <Field label="Email address" type="email" placeholder="you@firm.com" icon="mail" />
-            <Field label="Password" type="password" placeholder="Enter your password" icon="lock" />
+            <Field label="Email address" type="email" placeholder="you@firm.com" icon="mail"
+              value={email} onChange={e => setEmail(e.target.value)} disabled={loading} />
+            <Field label="Password" type="password" placeholder="Enter your password" icon="lock"
+              value={password} onChange={e => setPassword(e.target.value)} disabled={loading} />
+
+            {error && (
+              <div style={{ padding: "10px 14px", borderRadius: 8, background: "var(--coral-tint)", color: "var(--coral)", fontSize: 13.5, fontWeight: 500 }}>
+                {error}
+              </div>
+            )}
 
             {/* Remember + forgot */}
             <div
@@ -277,11 +292,26 @@ export default function AttorneyLogin() {
             {/* Log in button */}
             <button
               className="btn btn-signal btn-lg"
-              style={{ width: "100%", marginTop: 4 }}
-              onClick={() => router.push("/attorney/dashboard")}
+              style={{ width: "100%", marginTop: 4, opacity: loading ? 0.7 : 1 }}
+              disabled={loading}
+              onClick={async () => {
+                setError("");
+                if (!email || !password) { setError("Please fill in all fields."); return; }
+                setLoading(true);
+                try {
+                  const user = await login(email, password);
+                  if (user.role === "attorney") router.push("/attorney/dashboard");
+                  else if (user.role === "client") router.push("/client/dashboard");
+                  else router.push("/admin");
+                } catch (err: unknown) {
+                  setError(err instanceof Error ? err.message : "Invalid email or password.");
+                } finally {
+                  setLoading(false);
+                }
+              }}
             >
-              Log in
-              <Icon name="arrowR" size={17} color="#fff" />
+              {loading ? "Logging in..." : "Log in"}
+              {!loading && <Icon name="arrowR" size={17} color="#fff" />}
             </button>
           </div>
 

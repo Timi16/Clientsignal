@@ -60,6 +60,10 @@ export async function resendVerification() {
   return post("/auth/resend-verification");
 }
 
+export async function verifyEmail(token: string) {
+  return get<{ message: string }>("/auth/verify-email", { params: { token } });
+}
+
 export function currentUser(): User | null {
   const u = getUser();
   return u as User | null;

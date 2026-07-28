@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { Icon } from "@/components/icons";
 import { Logo, Mark, ScoreRing, Verified, Avatar, CaseTag, LField, inpStyle } from "@/components/ui";
 import { CASE_TYPES, INTAKE_CONFIG } from "@/lib/data";
+import * as leadsApi from "@/lib/api/leads";
+import { useAuth } from "@/lib/auth-context";
 
 type UploadedDoc = { name: string; size: string };
 type IntakeData = {
@@ -51,10 +53,12 @@ const PRACTICE_PROMPTS: Record<string, { signals: string[]; docs: string[]; scor
   },
 };
 
-function IntakeDone({ data, score, urgency }: { data: IntakeData; score: number; urgency: number }) {
+function IntakeDone({ data, score, urgency, lead }: { data: IntakeData; score: number; urgency: number; lead?: leadsApi.Lead | null }) {
   const router = useRouter();
   const [phase, setPhase] = useState(0);
-  const leadId = 4472 + ((score + urgency + data.desc.length) % 9);
+  const displayScore = lead?.qualityScore ?? score;
+  const displayUrgency = lead?.urgencyScore ?? urgency;
+  const leadId = lead?.id ?? String(4472 + ((score + urgency + data.desc.length) % 9));
   useEffect(() => {
     const t1 = setTimeout(() => setPhase(1), 1400);
     const t2 = setTimeout(() => setPhase(2), 2800);
@@ -95,8 +99,8 @@ function IntakeDone({ data, score, urgency }: { data: IntakeData; score: number;
             <span className="mono" style={{ fontSize: 12, color: "var(--text-3)" }}>LD-{leadId}</span>
           </div>
           <div className="row" style={{ gap: 26, justifyContent: "center", marginBottom: 22 }}>
-            <div className="stack" style={{ alignItems: "center", gap: 7 }}><ScoreRing value={score} size={84} stroke={7} /><span style={{ fontSize: 12.5, color: "var(--text-2)" }}>Quality</span></div>
-            <div className="stack" style={{ alignItems: "center", gap: 7 }}><ScoreRing value={urgency} size={84} stroke={7} color={urgency > 80 ? "var(--coral)" : "var(--amber)"} /><span style={{ fontSize: 12.5, color: "var(--text-2)" }}>Urgency</span></div>
+            <div className="stack" style={{ alignItems: "center", gap: 7 }}><ScoreRing value={displayScore} size={84} stroke={7} /><span style={{ fontSize: 12.5, color: "var(--text-2)" }}>Quality</span></div>
+            <div className="stack" style={{ alignItems: "center", gap: 7 }}><ScoreRing value={displayUrgency} size={84} stroke={7} color={displayUrgency > 80 ? "var(--coral)" : "var(--amber)"} /><span style={{ fontSize: 12.5, color: "var(--text-2)" }}>Urgency</span></div>
           </div>
           <div className="stack" style={{ gap: 11 }}>
             {([["Case type", CASE_TYPES[data.type]?.label], ["Matter", data.sub], ["Location", `${data.city || "—"}${data.state ? ", " + data.state : ""}`], ["Documents", `${data.docs?.length || 0} attached`]] as [string, string][]).map(([k, v]) => (
@@ -134,13 +138,28 @@ function IntakeDone({ data, score, urgency }: { data: IntakeData; score: number;
 
 export default function IntakeForm({ inDashboard = false }: { inDashboard?: boolean }) {
   const router = useRouter();
+  const { user } = useAuth();
   const exitTo = inDashboard ? "/client/cases" : "/";
   const [step, setStep] = useState(0);
   const [data, setData] = useState<IntakeData>({ type: "", sub: "", desc: "", city: "", state: "", name: "", email: "", phone: "", when: "", urgent: "", consent: false, docs: [] });
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [leadResult, setLeadResult] = useState<leadsApi.Lead | null>(null);
   const set = <K extends keyof IntakeData>(k: K, v: IntakeData[K]) => setData(d => ({ ...d, [k]: v }));
   const cfg = INTAKE_CONFIG[data.type];
   const prompts = PRACTICE_PROMPTS[data.type];
   const steps = ["Case type", "Details", "Your story", "Documents", "Contact"];
+
+  // Pre-fill name/email from logged-in user when entering step 4
+  useEffect(() => {
+    if (step === 4 && user) {
+      setData(d => ({
+        ...d,
+        name: d.name || user.name || "",
+        email: d.email || user.email || "",
+      }));
+    }
+  }, [step, user]);
 
   const canNext = () => {
     if (step === 0) return !!data.type;
@@ -173,7 +192,7 @@ export default function IntakeForm({ inDashboard = false }: { inDashboard?: bool
   const score = Math.min(98, 55 + (data.desc.length > 80 ? 18 : 8) + (data.docs?.length || 0) * 5 + (data.urgent ? 10 : 0) + (data.consent ? 6 : 0));
   const urgency = data.urgent === "yes" ? 88 : 60;
 
-  if (step === 5) return <IntakeDone data={data} score={score} urgency={urgency} />;
+  if (step === 5) return <IntakeDone data={data} score={score} urgency={urgency} lead={leadResult} />;
 
   return (
     <div className="thin-scroll" style={{ height: "100vh", overflowY: "auto", background: "var(--paper)" }}>
@@ -362,6 +381,14 @@ export default function IntakeForm({ inDashboard = false }: { inDashboard?: bool
           </div>
         )}
 
+        {/* error message */}
+        {submitError && (
+          <div className="row rise" style={{ gap: 10, padding: 14, borderRadius: 12, background: "var(--coral-tint, #fef2f2)", border: "1px solid var(--coral, #ef4444)", marginTop: 16 }}>
+            <span style={{ color: "var(--coral, #ef4444)", flex: "none" }}><Icon name="bell" size={18} /></span>
+            <span style={{ fontSize: 14, color: "var(--coral, #ef4444)", fontWeight: 500 }}>{submitError}</span>
+          </div>
+        )}
+
         {/* nav buttons */}
         <div className="row between" style={{ margin: "40px 0 24px", flexWrap: "wrap", gap: 14 }}>
           <button className="btn btn-ghost" onClick={() => step === 0 ? router.push(exitTo) : setStep(step - 1)}>
@@ -373,9 +400,37 @@ export default function IntakeForm({ inDashboard = false }: { inDashboard?: bool
                 <Icon name="bell" size={15} /> {missing()}
               </span>
             )}
-            <button className="btn btn-signal btn-lg" disabled={!canNext()} style={{ opacity: canNext() ? 1 : 0.45, cursor: canNext() ? "pointer" : "not-allowed" }}
-              onClick={() => canNext() && setStep(step + 1)}>
-              {step === 4 ? "Submit inquiry" : "Continue"} <Icon name="arrowR" size={17} />
+            <button className="btn btn-signal btn-lg" disabled={!canNext() || submitting} style={{ opacity: canNext() && !submitting ? 1 : 0.45, cursor: canNext() && !submitting ? "pointer" : "not-allowed" }}
+              onClick={async () => {
+                if (!canNext() || submitting) return;
+                if (step === 4) {
+                  setSubmitting(true);
+                  setSubmitError(null);
+                  try {
+                    const res = await leadsApi.submitIntake({
+                      practiceArea: data.type,
+                      subType: data.sub,
+                      description: data.desc,
+                      city: data.city,
+                      state: data.state,
+                      urgent: data.urgent === "yes",
+                      consent: data.consent,
+                      phone: data.phone,
+                      channel: "web-intake",
+                    });
+                    setLeadResult(res.lead);
+                    setStep(5);
+                  } catch (err: unknown) {
+                    const msg = err instanceof Error ? err.message : "Something went wrong. Please try again.";
+                    setSubmitError(msg);
+                  } finally {
+                    setSubmitting(false);
+                  }
+                } else {
+                  setStep(step + 1);
+                }
+              }}>
+              {submitting ? "Submitting…" : step === 4 ? "Submit inquiry" : "Continue"} {!submitting && <Icon name="arrowR" size={17} />}
             </button>
           </div>
         </div>

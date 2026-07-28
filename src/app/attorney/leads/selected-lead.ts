@@ -1,8 +1,8 @@
-import { Lead, LEADS } from "@/lib/data";
+import { Lead } from "@/lib/api/leads";
 
-let _selected: Lead = LEADS[0];
+let _selected: Lead | null = null;
 
-export function getSelectedLead(): Lead {
+export function getSelectedLead(): Lead | null {
   return _selected;
 }
 

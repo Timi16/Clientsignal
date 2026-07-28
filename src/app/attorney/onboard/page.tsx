@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { Icon } from "@/components/icons";
 import { Logo, Field, LField, inpStyle } from "@/components/ui";
 import { CASE_TYPES } from "@/lib/data";
+import * as attorneysApi from "@/lib/api/attorneys";
+import { useAuth } from "@/lib/auth-context";
 
 const STEPS = [
   { label: "Firm profile", icon: "building" },
@@ -31,6 +33,7 @@ const US_STATES = [
 
 export default function OnboardPage() {
   const router = useRouter();
+  const { user } = useAuth();
   const [step, setStep] = useState(0);
   const [done, setDone] = useState<number[]>([]);
   const [areas, setAreas] = useState<string[]>([]);
@@ -38,12 +41,41 @@ export default function OnboardPage() {
   const [volume, setVolume] = useState("5-15");
   const [maxBudget, setMaxBudget] = useState("$500");
 
-  const next = () => {
+  // Form fields for API submission
+  const [firmName, setFirmName] = useState("");
+  const [bio, setBio] = useState("");
+  const [city, setCity] = useState("");
+  const [yearsExp, setYearsExp] = useState("");
+  const [barNumber, setBarNumber] = useState("");
+
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+
+  const next = async () => {
+    setError("");
     setDone((prev) => (prev.includes(step) ? prev : [...prev, step]));
     if (step < STEPS.length - 1) {
       setStep(step + 1);
     } else {
-      router.push("/attorney/verify-status");
+      // Final submit — call the API
+      setSubmitting(true);
+      try {
+        await attorneysApi.onboard({
+          barNumber,
+          bio,
+          yearsExperience: parseInt(yearsExp, 10) || 0,
+          city,
+          state: states[0] || "",
+          firmName,
+          specialties: areas,
+        });
+        router.push("/attorney/verify-status");
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : "Something went wrong. Please try again.";
+        setError(message);
+      } finally {
+        setSubmitting(false);
+      }
     }
   };
 
@@ -172,16 +204,22 @@ export default function OnboardPage() {
           {step === 0 && (
             <div className="stack rise" style={{ gap: 20 }}>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
-                <Field label="Full name" placeholder="Sarah Mitchell" icon="user" />
-                <Field label="Email" type="email" placeholder="sarah@mitchellcole.com" icon="mail" />
-                <Field label="Firm name" placeholder="Mitchell & Cole LLP" icon="building" />
+                <Field label="Full name" placeholder="Sarah Mitchell" icon="user" defaultValue={user?.name ?? ""} />
+                <Field label="Email" type="email" placeholder="sarah@mitchellcole.com" icon="mail" defaultValue={user?.email ?? ""} />
+                <Field label="Firm name" placeholder="Mitchell & Cole LLP" icon="building" value={firmName} onChange={(e) => setFirmName(e.target.value)} />
                 <Field label="Phone" type="tel" placeholder="(512) 555-0100" icon="phone" />
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
+                <Field label="City" placeholder="Austin" icon="flag" value={city} onChange={(e) => setCity(e.target.value)} />
+                <Field label="Years of experience" type="number" placeholder="10" value={yearsExp} onChange={(e) => setYearsExp(e.target.value)} />
               </div>
               <Field label="Firm website" placeholder="https://mitchellcole.com" />
               <LField label="Firm bio">
                 <textarea
                   placeholder="Briefly describe your firm and areas of expertise..."
                   rows={4}
+                  value={bio}
+                  onChange={(e) => setBio(e.target.value)}
                   style={{ ...inpStyle, resize: "vertical" }}
                 />
               </LField>
@@ -259,7 +297,7 @@ export default function OnboardPage() {
           {step === 3 && (
             <div className="stack rise" style={{ gap: 22 }}>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
-                <Field label="Bar number" placeholder="TX #24087" icon="shield" />
+                <Field label="Bar number" placeholder="TX #24087" icon="shield" value={barNumber} onChange={(e) => setBarNumber(e.target.value)} />
                 <Field label="State of admission" placeholder="Texas" icon="flag" />
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
@@ -402,17 +440,24 @@ export default function OnboardPage() {
             </div>
           )}
 
+          {/* error message */}
+          {error && (
+            <div style={{ marginTop: 20, padding: "12px 16px", borderRadius: 10, background: "var(--red-tint, #fef2f2)", border: "1.5px solid var(--red, #ef4444)", color: "var(--red, #ef4444)", fontSize: 14, fontWeight: 500 }}>
+              {error}
+            </div>
+          )}
+
           {/* navigation */}
           <div className="row" style={{ gap: 12, marginTop: 44 }}>
             {step > 0 && (
-              <button className="btn btn-ghost" onClick={back}>
+              <button className="btn btn-ghost" onClick={back} disabled={submitting}>
                 <Icon name="chevR" size={16} style={{ transform: "rotate(180deg)" }} />
                 Back
               </button>
             )}
-            <button className="btn btn-signal" onClick={next}>
-              {step === STEPS.length - 1 ? "Submit & verify" : "Continue"}
-              <Icon name="arrowR" size={16} />
+            <button className="btn btn-signal" onClick={next} disabled={submitting} style={{ opacity: submitting ? 0.6 : 1 }}>
+              {submitting ? "Submitting..." : step === STEPS.length - 1 ? "Submit & verify" : "Continue"}
+              {!submitting && <Icon name="arrowR" size={16} />}
             </button>
           </div>
         </div>

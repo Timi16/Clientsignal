@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AppLayout from "@/components/attorney-layout";
 import { Avatar, Field } from "@/components/ui";
+import { useAuth } from "@/lib/auth-context";
+import * as attorneysApi from "@/lib/api/attorneys";
 
 const PRACTICE_AREAS = [
   "Personal Injury",
@@ -13,13 +15,101 @@ const PRACTICE_AREAS = [
 ];
 
 export default function SettingsPage() {
-  const [areas, setAreas] = useState<string[]>(["Personal Injury", "Employment Law"]);
-  const [sms, setSms] = useState(true);
-  const [email, setEmail] = useState(true);
+  const { user } = useAuth();
+
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  // Profile form state
+  const [fullName, setFullName] = useState("");
+  const [emailField, setEmailField] = useState("");
+  const [phone, setPhone] = useState("");
+  const [barNumber, setBarNumber] = useState("");
+  const [firmName, setFirmName] = useState("");
+  const [city, setCity] = useState("");
+
+  // Practice areas
+  const [areas, setAreas] = useState<string[]>([]);
+
+  // Notification preferences
+  const [sms, setSms] = useState(false);
+  const [email, setEmail] = useState(false);
   const [push, setPush] = useState(false);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const [profileRes, prefsRes] = await Promise.all([
+          attorneysApi.getProfile(),
+          attorneysApi.getPreferences(),
+        ]);
+
+        const attorney = profileRes.attorney;
+        setFullName(attorney.name || user?.name || "");
+        setEmailField(attorney.email || user?.email || "");
+        setBarNumber(attorney.barNumber || "");
+        setFirmName(attorney.firmName || "");
+        setCity([attorney.city, attorney.state].filter(Boolean).join(", "));
+        setAreas(attorney.specialties || []);
+
+        const prefs = prefsRes.preferences;
+        setSms(prefs.notificationSms);
+        setEmail(prefs.notificationEmail);
+        setPush(prefs.notificationPush);
+      } catch (err) {
+        console.error("Failed to load settings:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchData();
+  }, [user]);
 
   const toggleArea = (a: string) =>
     setAreas((prev) => (prev.includes(a) ? prev.filter((x) => x !== a) : [...prev, a]));
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const [cityPart, statePart] = city.split(",").map((s) => s.trim());
+      await attorneysApi.updateProfile({
+        city: cityPart || "",
+        state: statePart || "",
+        specialties: areas,
+      });
+    } catch (err) {
+      console.error("Failed to save profile:", err);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleTogglePreference = async (
+    key: keyof Pick<attorneysApi.AttorneyPreferences, "notificationSms" | "notificationEmail" | "notificationPush">,
+    currentValue: boolean,
+    setter: (v: boolean) => void,
+  ) => {
+    const newValue = !currentValue;
+    setter(newValue);
+    try {
+      await attorneysApi.updatePreferences({ [key]: newValue });
+    } catch (err) {
+      console.error("Failed to update preference:", err);
+      setter(currentValue); // revert on failure
+    }
+  };
+
+  if (loading) {
+    return (
+      <AppLayout>
+        <h1 style={{ fontSize: 24, fontWeight: 700, color: "var(--ink)", marginBottom: 28 }}>Settings</h1>
+        <div className="card" style={{ padding: "60px 30px", textAlign: "center" }}>
+          <span style={{ fontSize: 15, color: "var(--text-3)" }}>Loading settings...</span>
+        </div>
+      </AppLayout>
+    );
+  }
 
   return (
     <AppLayout>
@@ -29,25 +119,27 @@ export default function SettingsPage() {
       <div className="card" style={{ padding: "28px 30px", marginBottom: 24 }}>
         <h3 style={{ fontSize: 16, fontWeight: 700, color: "var(--ink)", marginBottom: 22 }}>Profile</h3>
         <div className="row" style={{ gap: 24, marginBottom: 28 }}>
-          <Avatar name="Sarah Mitchell" size={72} />
+          <Avatar name={user?.name || fullName} size={72} />
           <div className="stack" style={{ gap: 4 }}>
-            <span style={{ fontWeight: 700, fontSize: 18, color: "var(--ink)" }}>Sarah Mitchell</span>
-            <span style={{ fontSize: 14, color: "var(--text-3)" }}>Mitchell & Cole LLP</span>
+            <span style={{ fontWeight: 700, fontSize: 18, color: "var(--ink)" }}>{user?.name || fullName}</span>
+            <span style={{ fontSize: 14, color: "var(--text-3)" }}>{firmName}</span>
             <button style={{ fontSize: 13, fontWeight: 600, color: "var(--signal)", marginTop: 4 }}>
               Change photo
             </button>
           </div>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
-          <Field label="Full name" placeholder="Sarah Mitchell" defaultValue="Sarah Mitchell" />
-          <Field label="Email" type="email" placeholder="sarah@mitchellcole.com" defaultValue="sarah@mitchellcole.com" />
-          <Field label="Phone" type="tel" placeholder="(512) 555-0100" defaultValue="(512) 555-0100" />
-          <Field label="Bar number" placeholder="TX #24087" defaultValue="TX #24087" />
-          <Field label="Firm name" placeholder="Mitchell & Cole LLP" defaultValue="Mitchell & Cole LLP" />
-          <Field label="City" placeholder="Austin, TX" defaultValue="Austin, TX" />
+          <Field label="Full name" placeholder="Full name" value={fullName} onChange={(e) => setFullName(e.target.value)} />
+          <Field label="Email" type="email" placeholder="Email" value={emailField} onChange={(e) => setEmailField(e.target.value)} />
+          <Field label="Phone" type="tel" placeholder="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} />
+          <Field label="Bar number" placeholder="Bar number" value={barNumber} onChange={(e) => setBarNumber(e.target.value)} />
+          <Field label="Firm name" placeholder="Firm name" value={firmName} onChange={(e) => setFirmName(e.target.value)} />
+          <Field label="City" placeholder="City, State" value={city} onChange={(e) => setCity(e.target.value)} />
         </div>
         <div style={{ marginTop: 22 }}>
-          <button className="btn btn-signal btn-sm">Save changes</button>
+          <button className="btn btn-signal btn-sm" onClick={handleSave} disabled={saving}>
+            {saving ? "Saving..." : "Save changes"}
+          </button>
         </div>
       </div>
 
@@ -91,17 +183,17 @@ export default function SettingsPage() {
         </p>
         <div className="stack" style={{ gap: 16 }}>
           {([
-            { label: "SMS", desc: "Get a text for every new lead", val: sms, set: setSms },
-            { label: "Email", desc: "Receive an email summary", val: email, set: setEmail },
-            { label: "Push notification", desc: "Browser push alerts", val: push, set: setPush },
-          ] as const).map((t) => (
+            { label: "SMS", desc: "Get a text for every new lead", val: sms, set: setSms, key: "notificationSms" as const },
+            { label: "Email", desc: "Receive an email summary", val: email, set: setEmail, key: "notificationEmail" as const },
+            { label: "Push notification", desc: "Browser push alerts", val: push, set: setPush, key: "notificationPush" as const },
+          ]).map((t) => (
             <div key={t.label} className="row between" style={{ padding: "14px 0", borderBottom: "1px solid var(--line)" }}>
               <div>
                 <div style={{ fontWeight: 650, fontSize: 14.5, color: "var(--ink)" }}>{t.label}</div>
                 <div style={{ fontSize: 13, color: "var(--text-3)" }}>{t.desc}</div>
               </div>
               <button
-                onClick={() => t.set(!t.val)}
+                onClick={() => handleTogglePreference(t.key, t.val, t.set)}
                 style={{
                   width: 48,
                   height: 28,

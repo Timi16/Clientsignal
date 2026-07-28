@@ -27,7 +27,7 @@ export class MailService {
     this.resend = new Resend(this.config.getOrThrow<string>('RESEND_API_KEY'));
     this.defaultFrom = this.config.get<string>(
       'MAIL_FROM',
-      'ClientSignal <noreply@clientsignal.com>',
+      'ClientSignal <admin@clientssignal.com>',
     );
   }
 

@@ -23,26 +23,41 @@ const GRPC_TO_HTTP: Record<number, number> = {
   16: HttpStatus.UNAUTHORIZED,          // UNAUTHENTICATED
 };
 
-@Catch(RpcException)
+@Catch()
 export class RpcExceptionFilter implements ExceptionFilter {
-  catch(exception: RpcException, host: ArgumentsHost) {
+  catch(exception: any, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
 
-    const error = exception.getError();
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
     let message = 'Internal server error';
 
-    if (typeof error === 'string') {
-      message = error;
-      status = this.guessHttpStatus(error);
-    } else if (typeof error === 'object' && error !== null) {
-      const errObj = error as Record<string, any>;
-      message = errObj.message || errObj.details || message;
-      if (errObj.code !== undefined && GRPC_TO_HTTP[errObj.code] !== undefined) {
+    if (exception instanceof RpcException) {
+      const error = exception.getError();
+      if (typeof error === 'string') {
+        message = error;
+        status = this.guessHttpStatus(error);
+      } else if (typeof error === 'object' && error !== null) {
+        const errObj = error as Record<string, any>;
+        message = errObj.message || errObj.details || message;
+        if (errObj.code !== undefined && GRPC_TO_HTTP[errObj.code] !== undefined) {
+          status = GRPC_TO_HTTP[errObj.code];
+        } else {
+          status = this.guessHttpStatus(message);
+        }
+      }
+    } else if (exception && typeof exception === 'object') {
+      // gRPC errors from remote services arrive as plain Error objects
+      const errObj = exception as Record<string, any>;
+      message = errObj.details || errObj.message || message;
+      // Try to guess from message first (more specific), fall back to gRPC code
+      const guessed = this.guessHttpStatus(message);
+      if (guessed !== HttpStatus.BAD_REQUEST) {
+        status = guessed;
+      } else if (errObj.code !== undefined && GRPC_TO_HTTP[errObj.code] !== undefined) {
         status = GRPC_TO_HTTP[errObj.code];
       } else {
-        status = this.guessHttpStatus(message);
+        status = guessed;
       }
     }
 
