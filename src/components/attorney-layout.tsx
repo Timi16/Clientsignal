@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { Icon } from "@/components/icons";
@@ -8,11 +8,12 @@ import { Logo, Verified, Avatar } from "@/components/ui";
 import { useRequireAuth } from "@/lib/use-require-auth";
 import { useAuth } from "@/lib/auth-context";
 import { useSocket } from "@/lib/socket";
+import { listLeads } from "@/lib/api/leads";
 
 const NAV = [
   { label: "Dashboard", icon: "grid", href: "/attorney/dashboard" },
-  { label: "Leads", icon: "inbox", href: "/attorney/leads", badge: 2 },
-  { label: "Messages", icon: "message", href: "/attorney/messages", badge: 1 },
+  { label: "Leads", icon: "inbox", href: "/attorney/leads", badgeKey: "leads" },
+  { label: "Messages", icon: "message", href: "/attorney/messages" },
   { label: "Case notes", icon: "doc", href: "/attorney/notes" },
   { label: "Analytics", icon: "chart", href: "/attorney/analytics" },
   { label: "Intake builder", icon: "pen", href: "/attorney/builder" },
@@ -37,6 +38,14 @@ export default function AppLayout({
   const { logout } = useAuth();
   const { notifications: socketNotifications, unreadCount: socketUnread, markAllRead } = useSocket();
   const userName = user?.name || "Attorney";
+  const [badges, setBadges] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    if (!user) return;
+    listLeads({ status: "new", limit: 0 })
+      .then(res => setBadges(prev => ({ ...prev, leads: res.total ?? 0 })))
+      .catch(() => {});
+  }, [user, path]);
 
   if (authLoading || !user) {
     return <div style={{ display: "grid", placeItems: "center", height: "100vh", color: "var(--text-3)" }}>Loading...</div>;
@@ -100,7 +109,7 @@ export default function AppLayout({
               >
                 <Icon name={n.icon} size={19} />
                 <span className="side-label" style={{ flex: 1 }}>{n.label}</span>
-                {n.badge && (
+                {n.badgeKey && badges[n.badgeKey] > 0 && (
                   <span
                     style={{
                       background: "var(--signal)",
@@ -112,7 +121,7 @@ export default function AppLayout({
                       lineHeight: 1.3,
                     }}
                   >
-                    {n.badge}
+                    {badges[n.badgeKey]}
                   </span>
                 )}
               </button>

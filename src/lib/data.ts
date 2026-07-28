@@ -42,21 +42,7 @@ export const INTEGRATIONS = [
   { name: "Zapier", desc: "Connect 6,000+ apps", cat: "Automation", connected: false, color: "#FF4F00" },
 ];
 
-export const PORTRAITS: Record<string, string> = {
-  "Sarah Mitchell": "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=160&h=160&fit=crop&crop=faces",
-  "David Park": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=160&h=160&fit=crop&crop=faces",
-  "Renee Adams": "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=160&h=160&fit=crop&crop=faces",
-  "Carlos Ruiz": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=160&h=160&fit=crop&crop=faces",
-  "Alex Reed": "https://images.unsplash.com/photo-1463453091185-61582044d556?w=160&h=160&fit=crop&crop=faces",
-  "Marcus Webb": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=160&h=160&fit=crop&crop=faces",
-  "Priya Nair": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=160&h=160&fit=crop&crop=faces",
-  "Dana Okafor": "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=160&h=160&fit=crop&crop=faces",
-  "Tom Reyes": "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=160&h=160&fit=crop&crop=faces",
-  "Helen Cho": "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=160&h=160&fit=crop&crop=faces",
-  "Greg Saunders": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=160&h=160&fit=crop&crop=faces",
-  "Elena Reyes": "https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=160&h=160&fit=crop&crop=faces",
-  "David Okonkwo": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=160&h=160&fit=crop&crop=faces",
-};
+export const PORTRAITS: Record<string, string> = {};
 
 export const TESTIMONIALS = [
   { name: "Sarah Mitchell", role: "Partner · Mitchell & Cole LLP", photo: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=600&h=750&fit=crop&crop=faces", quote: "We respond to matched leads in under four minutes. ClientSignal paid for itself in the first week — the lead quality is simply better.", area: "Personal Injury", stars: 5 },

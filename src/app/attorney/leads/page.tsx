@@ -144,7 +144,7 @@ export default function LeadsPage() {
                   key={l.id}
                   onClick={() => {
                     setSelectedLead(l);
-                    router.push("/attorney/leads/detail");
+                    router.push(`/attorney/leads/detail?id=${l.id}`);
                   }}
                   style={{ borderBottom: "1px solid var(--line)", cursor: "pointer", transition: "background .12s" }}
                   onMouseEnter={(e) =>

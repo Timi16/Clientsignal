@@ -1,20 +1,44 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AppLayout from "@/components/attorney-layout";
 import { Icon } from "@/components/icons";
 import { Avatar, ScoreRing, CaseTag } from "@/components/ui";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { getSelectedLead } from "../selected-lead";
-import { claimLead, viewLead } from "@/lib/api/leads";
+import { claimLead, viewLead, getLead, Lead } from "@/lib/api/leads";
 
 export default function LeadDetailPage() {
   const router = useRouter();
-  const lead = getSelectedLead();
+  const searchParams = useSearchParams();
+  const leadId = searchParams.get("id");
+  const cachedLead = getSelectedLead();
+
+  const [lead, setLead] = useState<Lead | null>(cachedLead);
+  const [loading, setLoading] = useState(!cachedLead);
   const [claimed, setClaimed] = useState(false);
   const [claiming, setClaiming] = useState(false);
   const [claimError, setClaimError] = useState("");
   const [claimedPhone, setClaimedPhone] = useState("");
+
+  useEffect(() => {
+    if (cachedLead) { setLead(cachedLead); setLoading(false); return; }
+    if (!leadId) { setLoading(false); return; }
+    getLead(leadId)
+      .then(res => setLead(res.lead))
+      .catch(() => setLead(null))
+      .finally(() => setLoading(false));
+  }, [leadId]);
+
+  if (loading) {
+    return (
+      <AppLayout>
+        <div style={{ padding: 40, textAlign: "center", color: "var(--text-3)", fontSize: 14 }}>
+          Loading lead...
+        </div>
+      </AppLayout>
+    );
+  }
 
   if (!lead) {
     return (

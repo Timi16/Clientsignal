@@ -44,6 +44,7 @@ message ListLeadsRequest {
   string sort_order = 8;
   string city = 9;
   string state = 10;
+  repeated string attorney_specialties = 11;
 }
 
 message ViewLeadRequest {
