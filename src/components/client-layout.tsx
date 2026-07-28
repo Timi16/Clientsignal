@@ -1,64 +1,17 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
+import { useContext, useState, ReactNode } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { Icon } from "@/components/icons";
 import { Logo, Avatar } from "@/components/ui";
 import { CASE_STATUS, CASE_TYPES } from "@/lib/data";
-import { useRequireAuth } from "@/lib/use-require-auth";
 import { useAuth } from "@/lib/auth-context";
-import * as casesApi from "@/lib/api/cases";
-import * as messagesApi from "@/lib/api/messages";
+import { ClientCaseContext } from "@/lib/client-case-context";
+export type { ActiveCaseData, ActiveAttorney } from "@/lib/client-case-context";
+import type { ActiveCaseData } from "@/lib/client-case-context";
 
-/* ---------- Types ---------- */
-export interface ActiveCaseData {
-  id: string;
-  practiceArea: string;
-  matter: string;
-  city: string;
-  state: string;
-  openedAt: string;
-  status: string;
-  stage: number;
-  strengthScore: number;
-  summary: string;
-  attorneyId: string;
-  docs: casesApi.CaseDocument[];
-  unreadCount: number;
-}
-
-export interface ActiveAttorney {
-  id: string;
-  name: string;
-  firmName: string;
-  yearsExperience: number;
-  barNumber: string;
-  trustRating: string;
-  responseTimeAvg: string;
-  specialties: string[];
-  bio: string;
-}
-
-/* ---------- Context ---------- */
-interface ClientCaseContextValue {
-  cases: ActiveCaseData[];
-  activeCase: ActiveCaseData | null;
-  attorney: ActiveAttorney | null;
-  setActiveId: (id: string) => void;
-  loading: boolean;
-  refreshCases: () => Promise<void>;
-}
-
-const ClientCaseContext = createContext<ClientCaseContextValue>({
-  cases: [],
-  activeCase: null,
-  attorney: null,
-  setActiveId: () => {},
-  loading: true,
-  refreshCases: async () => {},
-});
-
+/* ---------- Hook ---------- */
 export function useActiveCase() {
   const ctx = useContext(ClientCaseContext);
   return {
@@ -148,90 +101,11 @@ export default function ClientLayout({
   const pathname = usePathname();
   const [caseDropOpen, setCaseDropOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
-  const { user, loading: authLoading } = useRequireAuth("client");
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
 
-  // Data state
-  const [cases, setCases] = useState<ActiveCaseData[]>([]);
-  const [activeCaseId, setActiveCaseId] = useState<string>("");
-  const [attorney, setAttorney] = useState<ActiveAttorney | null>(null);
-  const [dataLoading, setDataLoading] = useState(true);
+  const { cases, activeCase, attorney, setActiveId } = useActiveCase();
 
   const userName = user?.name || "User";
-
-  // Fetch cases from API
-  const fetchCases = useCallback(async () => {
-    try {
-      const [casesRes, unreadRes] = await Promise.all([
-        casesApi.listCases({ limit: 50 }),
-        messagesApi.getUnreadCount().catch(() => ({ count: 0 })),
-      ]);
-
-      const caseList: ActiveCaseData[] = await Promise.all(
-        casesRes.cases.map(async (c) => {
-          const docsRes = await casesApi.listDocuments(c.id).catch(() => ({ documents: [] }));
-          // Get unread count per thread for this case
-          let unreadCount = 0;
-          try {
-            const threads = await messagesApi.listThreads();
-            const caseThread = threads.threads.find(t => t.caseId === c.id);
-            if (caseThread) unreadCount = caseThread.unreadCount;
-          } catch { /* no threads yet */ }
-
-          return {
-            id: c.id,
-            practiceArea: c.practiceArea,
-            matter: c.matter,
-            city: c.city ? `${c.city}, ${c.state}` : c.state || "",
-            state: c.state,
-            openedAt: c.openedAt,
-            status: c.status,
-            stage: c.stage,
-            strengthScore: c.strengthScore,
-            summary: c.summary || "",
-            attorneyId: c.attorneyId,
-            docs: docsRes.documents,
-            unreadCount,
-          };
-        })
-      );
-
-      setCases(caseList);
-      if (caseList.length > 0 && !activeCaseId) {
-        setActiveCaseId(caseList[0].id);
-      }
-    } catch {
-      // API not available — show empty state
-      setCases([]);
-    } finally {
-      setDataLoading(false);
-    }
-  }, [activeCaseId]);
-
-  useEffect(() => {
-    if (!authLoading && user) {
-      fetchCases();
-    }
-  }, [authLoading, user, fetchCases]);
-
-  // Fetch attorney when active case changes
-  const activeCase = cases.find(c => c.id === activeCaseId) || cases[0] || null;
-
-  useEffect(() => {
-    if (!activeCase?.attorneyId || !activeCase?.id) {
-      setAttorney(null);
-      return;
-    }
-    casesApi.getCaseAttorney(activeCase.id)
-      .then(res => {
-        setAttorney(res.attorney);
-      })
-      .catch(() => setAttorney(null));
-  }, [activeCase?.attorneyId, activeCase?.id]);
-
-  const setActiveId = useCallback((id: string) => {
-    setActiveCaseId(id);
-  }, []);
 
   const caseStatus = activeCase ? (CASE_STATUS[activeCase.status] || CASE_STATUS.pending) : CASE_STATUS.pending;
   const caseType = activeCase ? (CASE_TYPES[activeCase.practiceArea] || { label: activeCase.practiceArea, color: "var(--text-2)", tint: "var(--pine-tint)" }) : null;
@@ -267,368 +141,335 @@ export default function ClientLayout({
 
   const headerTitle = titleOverride || TITLES[pathname] || "Dashboard";
 
-  if (authLoading || !user || dataLoading) {
-    return (
-      <div style={{ display: "grid", placeItems: "center", height: "100vh", background: "var(--paper)" }}>
-        <div className="rise" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 24, textAlign: "center" }}>
-          <Logo size={30} />
-          <div style={{ position: "relative", width: 56, height: 56 }}>
-            <svg width="56" height="56" viewBox="0 0 56 56" style={{ animation: "cs-spin 1.2s ease-in-out infinite" }}>
-              <circle cx="28" cy="28" r="23" fill="none" stroke="var(--line)" strokeWidth="3.5" />
-              <circle cx="28" cy="28" r="23" fill="none" stroke="var(--signal)" strokeWidth="3.5" strokeLinecap="round" strokeDasharray="110" strokeDashoffset="80" />
-            </svg>
-          </div>
-          <div>
-            <p style={{ fontSize: 15, fontWeight: 600, color: "var(--ink)", marginBottom: 4 }}>Loading your dashboard</p>
-            <p style={{ fontSize: 13, color: "var(--text-3)" }}>Setting things up for you...</p>
-          </div>
-          <style>{`@keyframes cs-spin { to { transform: rotate(360deg) } }`}</style>
-        </div>
-      </div>
-    );
-  }
-
-  // Context value
-  const ctxValue: ClientCaseContextValue = {
-    cases,
-    activeCase,
-    attorney,
-    setActiveId,
-    loading: dataLoading,
-    refreshCases: fetchCases,
-  };
-
   return (
-    <ClientCaseContext.Provider value={ctxValue}>
-      <div className="app-grid" style={{ display: "grid", gridTemplateColumns: "256px 1fr", minHeight: "100vh" }}>
-        {/* ---- Sidebar ---- */}
-        <aside
-          className="app-side thin-scroll"
-          style={{
-            background: "#fff",
-            borderRight: "1px solid var(--line)",
-            display: "flex",
-            flexDirection: "column",
-            height: "100vh",
-            position: "sticky",
-            top: 0,
-            overflow: "auto",
-          }}
-        >
-          <Link href="/" aria-label="Go to home" style={{ padding: "22px 22px 18px", display: "flex" }}>
-            <Logo size={28} />
-          </Link>
+    <div className="app-grid" style={{ display: "grid", gridTemplateColumns: "256px 1fr", minHeight: "100vh" }}>
+      {/* ---- Sidebar ---- */}
+      <aside
+        className="app-side thin-scroll"
+        style={{
+          background: "#fff",
+          borderRight: "1px solid var(--line)",
+          display: "flex",
+          flexDirection: "column",
+          height: "100vh",
+          position: "sticky",
+          top: 0,
+          overflow: "auto",
+        }}
+      >
+        <Link href="/" aria-label="Go to home" style={{ padding: "22px 22px 18px", display: "flex" }}>
+          <Logo size={28} />
+        </Link>
 
-          {/* Case selector card */}
-          {activeCase ? (
-            <div style={{ padding: "0 16px", marginBottom: 8 }}>
-              <button
-                onClick={() => setCaseDropOpen(!caseDropOpen)}
+        {/* Case selector card */}
+        {activeCase ? (
+          <div style={{ padding: "0 16px", marginBottom: 8 }}>
+            <button
+              onClick={() => setCaseDropOpen(!caseDropOpen)}
+              style={{
+                width: "100%",
+                background: "var(--pine)",
+                borderRadius: 14,
+                padding: "14px 16px",
+                display: "flex",
+                flexDirection: "column",
+                gap: 8,
+                textAlign: "left",
+                position: "relative",
+              }}
+            >
+              <div className="row" style={{ gap: 8, width: "100%" }}>
+                <span style={{ width: 8, height: 8, borderRadius: "50%", background: caseStatus.dot, flex: "none" }} />
+                <span className="side-label" style={{ fontSize: 13, fontWeight: 600, color: "#fff", flex: 1 }}>
+                  {activeCase.id}
+                </span>
+                <Icon name="chevD" size={16} color="rgba(255,255,255,0.5)" />
+              </div>
+              <div className="side-label" style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{ fontSize: 12, color: "rgba(255,255,255,0.6)" }}>
+                  {caseType?.label}
+                </span>
+              </div>
+              <div className="side-label">
+                <span
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 600,
+                    color: caseStatus.color,
+                    background: "rgba(255,255,255,0.1)",
+                    padding: "3px 9px",
+                    borderRadius: 99,
+                  }}
+                >
+                  {caseStatus.label}
+                </span>
+              </div>
+            </button>
+
+            {caseDropOpen && (
+              <div
                 style={{
-                  width: "100%",
-                  background: "var(--pine)",
-                  borderRadius: 14,
-                  padding: "14px 16px",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 8,
-                  textAlign: "left",
-                  position: "relative",
+                  marginTop: 6,
+                  background: "#fff",
+                  border: "1px solid var(--line)",
+                  borderRadius: 12,
+                  boxShadow: "var(--sh-md)",
+                  overflow: "hidden",
                 }}
               >
-                <div className="row" style={{ gap: 8, width: "100%" }}>
-                  <span style={{ width: 8, height: 8, borderRadius: "50%", background: caseStatus.dot, flex: "none" }} />
-                  <span className="side-label" style={{ fontSize: 13, fontWeight: 600, color: "#fff", flex: 1 }}>
-                    {activeCase.id}
-                  </span>
-                  <Icon name="chevD" size={16} color="rgba(255,255,255,0.5)" />
-                </div>
-                <div className="side-label" style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ fontSize: 12, color: "rgba(255,255,255,0.6)" }}>
-                    {caseType?.label}
-                  </span>
-                </div>
-                <div className="side-label">
-                  <span
-                    style={{
-                      fontSize: 11,
-                      fontWeight: 600,
-                      color: caseStatus.color,
-                      background: "rgba(255,255,255,0.1)",
-                      padding: "3px 9px",
-                      borderRadius: 99,
-                    }}
-                  >
-                    {caseStatus.label}
-                  </span>
-                </div>
-              </button>
-
-              {caseDropOpen && (
-                <div
-                  style={{
-                    marginTop: 6,
-                    background: "#fff",
-                    border: "1px solid var(--line)",
-                    borderRadius: 12,
-                    boxShadow: "var(--sh-md)",
-                    overflow: "hidden",
-                  }}
-                >
-                  {cases.map(c => {
-                    const st = CASE_STATUS[c.status] || CASE_STATUS.pending;
-                    const ct = CASE_TYPES[c.practiceArea] || { label: c.practiceArea };
-                    return (
-                      <button
-                        key={c.id}
-                        className="dd-item"
-                        onClick={() => {
-                          setActiveId(c.id);
-                          setCaseDropOpen(false);
-                        }}
-                        style={{
-                          width: "100%",
-                          padding: "10px 14px",
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 10,
-                          textAlign: "left",
-                          background: c.id === activeCase.id ? "var(--paper)" : "transparent",
-                        }}
-                      >
-                        <span style={{ width: 7, height: 7, borderRadius: "50%", background: st.dot, flex: "none" }} />
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontSize: 13, fontWeight: 600, color: "var(--ink)" }}>{c.id}</div>
-                          <div style={{ fontSize: 11.5, color: "var(--text-3)" }}>{ct?.label}</div>
-                        </div>
-                        <span
-                          style={{
-                            fontSize: 10.5,
-                            fontWeight: 600,
-                            color: st.color,
-                            background: st.tint,
-                            padding: "2px 8px",
-                            borderRadius: 99,
-                          }}
-                        >
-                          {st.label}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          ) : (
-            <div style={{ padding: "0 16px", marginBottom: 8 }}>
-              <div style={{ background: "var(--pine)", borderRadius: 14, padding: "20px 16px", textAlign: "center" }}>
-                <span style={{ fontSize: 13, color: "rgba(255,255,255,0.6)" }}>No cases yet</span>
-              </div>
-            </div>
-          )}
-
-          {/* Nav */}
-          <nav style={{ flex: 1, padding: "12px 12px 0" }}>
-            {NAV.map(item => {
-              const active = pathname === item.href;
-              const badge = item.badgeKey ? badges[item.badgeKey] : 0;
-              return (
-                <button
-                  key={item.href}
-                  onClick={() => router.push(item.href)}
-                  style={{
-                    width: "100%",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 12,
-                    padding: "10px 14px",
-                    borderRadius: 10,
-                    fontSize: 14,
-                    fontWeight: active ? 600 : 500,
-                    color: active ? "var(--signal)" : "var(--text-2)",
-                    background: active ? "var(--signal-tint)" : "transparent",
-                    transition: "background .15s, color .15s",
-                    marginBottom: 2,
-                  }}
-                  onMouseEnter={e => {
-                    if (!active) (e.currentTarget as HTMLElement).style.background = "var(--paper)";
-                  }}
-                  onMouseLeave={e => {
-                    if (!active) (e.currentTarget as HTMLElement).style.background = "transparent";
-                  }}
-                >
-                  <Icon name={item.icon} size={19} color={active ? "var(--signal)" : "var(--text-3)"} />
-                  <span className="side-label" style={{ flex: 1, textAlign: "left" }}>{item.label}</span>
-                  {badge > 0 && (
-                    <span
-                      className="side-label"
+                {cases.map(c => {
+                  const st = CASE_STATUS[c.status] || CASE_STATUS.pending;
+                  const ct = CASE_TYPES[c.practiceArea] || { label: c.practiceArea };
+                  return (
+                    <button
+                      key={c.id}
+                      className="dd-item"
+                      onClick={() => {
+                        setActiveId(c.id);
+                        setCaseDropOpen(false);
+                      }}
                       style={{
-                        background: "var(--coral)",
-                        color: "#fff",
-                        fontSize: 11,
-                        fontWeight: 700,
-                        width: 20,
-                        height: 20,
-                        borderRadius: "50%",
-                        display: "grid",
-                        placeItems: "center",
+                        width: "100%",
+                        padding: "10px 14px",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 10,
+                        textAlign: "left",
+                        background: c.id === activeCase.id ? "var(--paper)" : "transparent",
                       }}
                     >
-                      {badge}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </nav>
-
-          {/* User section */}
-          <div
-            style={{
-              padding: "16px",
-              borderTop: "1px solid var(--line)",
-              display: "flex",
-              alignItems: "center",
-              gap: 12,
-            }}
-          >
-            <Avatar name={userName} size={36} />
-            <div className="side-label" style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 13.5, fontWeight: 600, color: "var(--ink)" }}>{userName}</div>
-              <div style={{ fontSize: 12, color: "var(--text-3)" }}>{user.email}</div>
-            </div>
-            <button
-              onClick={async () => { await logout(); router.push("/client/login"); }}
-              title="Log out"
-              style={{ color: "var(--text-3)" }}
-            >
-              <Icon name="logout" size={18} />
-            </button>
+                      <span style={{ width: 7, height: 7, borderRadius: "50%", background: st.dot, flex: "none" }} />
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: 13, fontWeight: 600, color: "var(--ink)" }}>{c.id}</div>
+                        <div style={{ fontSize: 11.5, color: "var(--text-3)" }}>{ct?.label}</div>
+                      </div>
+                      <span
+                        style={{
+                          fontSize: 10.5,
+                          fontWeight: 600,
+                          color: st.color,
+                          background: st.tint,
+                          padding: "2px 8px",
+                          borderRadius: 99,
+                        }}
+                      >
+                        {st.label}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
-        </aside>
+        ) : (
+          <div style={{ padding: "0 16px", marginBottom: 8 }}>
+            <div style={{ background: "var(--pine)", borderRadius: 14, padding: "20px 16px", textAlign: "center" }}>
+              <span style={{ fontSize: 13, color: "rgba(255,255,255,0.6)" }}>No cases yet</span>
+            </div>
+          </div>
+        )}
 
-        {/* ---- Main ---- */}
-        <main
-          className="thin-scroll"
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            height: "100vh",
-            overflow: "auto",
-          }}
-        >
-          <header
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              padding: "18px 32px",
-              borderBottom: "1px solid var(--line)",
-              background: "#fff",
-              position: "sticky",
-              top: 0,
-              zIndex: 20,
-            }}
-          >
-            <h1 style={{ fontSize: 20, fontWeight: 700, color: "var(--ink)" }}>{headerTitle}</h1>
-            <div className="row" style={{ gap: 14, position: "relative" }}>
-              {action}
+        {/* Nav */}
+        <nav style={{ flex: 1, padding: "12px 12px 0" }}>
+          {NAV.map(item => {
+            const active = pathname === item.href;
+            const badge = item.badgeKey ? badges[item.badgeKey] : 0;
+            return (
               <button
-                onClick={() => setNotificationsOpen(open => !open)}
-                aria-label="Show notifications"
+                key={item.href}
+                onClick={() => router.push(item.href)}
                 style={{
-                  width: 38,
-                  height: 38,
+                  width: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 12,
+                  padding: "10px 14px",
                   borderRadius: 10,
-                  border: "1px solid var(--line)",
-                  display: "grid",
-                  placeItems: "center",
-                  color: "var(--text-2)",
-                  position: "relative",
+                  fontSize: 14,
+                  fontWeight: active ? 600 : 500,
+                  color: active ? "var(--signal)" : "var(--text-2)",
+                  background: active ? "var(--signal-tint)" : "transparent",
+                  transition: "background .15s, color .15s",
+                  marginBottom: 2,
+                }}
+                onMouseEnter={e => {
+                  if (!active) (e.currentTarget as HTMLElement).style.background = "var(--paper)";
+                }}
+                onMouseLeave={e => {
+                  if (!active) (e.currentTarget as HTMLElement).style.background = "transparent";
                 }}
               >
-                <Icon name="bell" size={18} />
-                {notificationCount > 0 && (
+                <Icon name={item.icon} size={19} color={active ? "var(--signal)" : "var(--text-3)"} />
+                <span className="side-label" style={{ flex: 1, textAlign: "left" }}>{item.label}</span>
+                {badge > 0 && (
                   <span
+                    className="side-label"
                     style={{
-                      position: "absolute",
-                      top: 4,
-                      right: 4,
-                      minWidth: 16,
-                      height: 16,
-                      borderRadius: 999,
                       background: "var(--coral)",
-                      border: "2px solid #fff",
                       color: "#fff",
-                      fontSize: 9,
+                      fontSize: 11,
                       fontWeight: 700,
+                      width: 20,
+                      height: 20,
+                      borderRadius: "50%",
                       display: "grid",
                       placeItems: "center",
-                      lineHeight: 1,
                     }}
                   >
-                    {notificationCount}
+                    {badge}
                   </span>
                 )}
               </button>
+            );
+          })}
+        </nav>
 
-              {notificationsOpen && (
-                <div
-                  className="card"
+        {/* User section */}
+        <div
+          style={{
+            padding: "16px",
+            borderTop: "1px solid var(--line)",
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+          }}
+        >
+          <Avatar name={userName} size={36} />
+          <div className="side-label" style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 13.5, fontWeight: 600, color: "var(--ink)" }}>{userName}</div>
+            <div style={{ fontSize: 12, color: "var(--text-3)" }}>{user?.email}</div>
+          </div>
+          <button
+            onClick={async () => { await logout(); router.push("/client/login"); }}
+            title="Log out"
+            style={{ color: "var(--text-3)" }}
+          >
+            <Icon name="logout" size={18} />
+          </button>
+        </div>
+      </aside>
+
+      {/* ---- Main ---- */}
+      <main
+        className="thin-scroll"
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          height: "100vh",
+          overflow: "auto",
+        }}
+      >
+        <header
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "18px 32px",
+            borderBottom: "1px solid var(--line)",
+            background: "#fff",
+            position: "sticky",
+            top: 0,
+            zIndex: 20,
+          }}
+        >
+          <h1 style={{ fontSize: 20, fontWeight: 700, color: "var(--ink)" }}>{headerTitle}</h1>
+          <div className="row" style={{ gap: 14, position: "relative" }}>
+            {action}
+            <button
+              onClick={() => setNotificationsOpen(open => !open)}
+              aria-label="Show notifications"
+              style={{
+                width: 38,
+                height: 38,
+                borderRadius: 10,
+                border: "1px solid var(--line)",
+                display: "grid",
+                placeItems: "center",
+                color: "var(--text-2)",
+                position: "relative",
+              }}
+            >
+              <Icon name="bell" size={18} />
+              {notificationCount > 0 && (
+                <span
                   style={{
                     position: "absolute",
-                    top: 48,
-                    right: 0,
-                    width: 360,
-                    padding: 8,
-                    boxShadow: "var(--sh-lg)",
-                    zIndex: 40,
+                    top: 4,
+                    right: 4,
+                    minWidth: 16,
+                    height: 16,
+                    borderRadius: 999,
+                    background: "var(--coral)",
+                    border: "2px solid #fff",
+                    color: "#fff",
+                    fontSize: 9,
+                    fontWeight: 700,
+                    display: "grid",
+                    placeItems: "center",
+                    lineHeight: 1,
                   }}
                 >
-                  <div className="row between" style={{ padding: "10px 12px 12px", borderBottom: "1px solid var(--line)" }}>
-                    <strong style={{ fontSize: 14 }}>Notifications</strong>
-                    {activeCase && <span className="pill" style={{ background: "var(--blue-tint)", color: "var(--signal)", fontSize: 11 }}>{activeCase.id}</span>}
-                  </div>
-                  <div className="stack" style={{ gap: 4, paddingTop: 6 }}>
-                    {notifications.map(n => (
-                      <button
-                        key={n.title + n.body}
-                        onClick={() => {
-                          setNotificationsOpen(false);
-                          router.push(n.href);
-                        }}
-                        style={{
-                          width: "100%",
-                          padding: "12px",
-                          borderRadius: 10,
-                          display: "flex",
-                          gap: 12,
-                          alignItems: "flex-start",
-                          textAlign: "left",
-                        }}
-                        onMouseEnter={e => (e.currentTarget.style.background = "var(--paper)")}
-                        onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
-                      >
-                        <span style={{ width: 34, height: 34, borderRadius: 9, background: "var(--paper-2)", color: n.color, display: "grid", placeItems: "center", flex: "none" }}>
-                          <Icon name={n.icon} size={16} />
-                        </span>
-                        <span className="stack" style={{ gap: 2, flex: 1 }}>
-                          <strong style={{ fontSize: 13.5, color: "var(--ink)" }}>{n.title}</strong>
-                          <span style={{ fontSize: 12.5, color: "var(--text-3)", lineHeight: 1.4 }}>{n.body}</span>
-                        </span>
-                        <Icon name="arrowR" size={14} color="var(--text-3)" />
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                  {notificationCount}
+                </span>
               )}
-            </div>
-          </header>
+            </button>
 
-          <div style={{ flex: 1, padding: "28px 32px 40px" }}>{children}</div>
-        </main>
-      </div>
-    </ClientCaseContext.Provider>
+            {notificationsOpen && (
+              <div
+                className="card"
+                style={{
+                  position: "absolute",
+                  top: 48,
+                  right: 0,
+                  width: 360,
+                  padding: 8,
+                  boxShadow: "var(--sh-lg)",
+                  zIndex: 40,
+                }}
+              >
+                <div className="row between" style={{ padding: "10px 12px 12px", borderBottom: "1px solid var(--line)" }}>
+                  <strong style={{ fontSize: 14 }}>Notifications</strong>
+                  {activeCase && <span className="pill" style={{ background: "var(--blue-tint)", color: "var(--signal)", fontSize: 11 }}>{activeCase.id}</span>}
+                </div>
+                <div className="stack" style={{ gap: 4, paddingTop: 6 }}>
+                  {notifications.map(n => (
+                    <button
+                      key={n.title + n.body}
+                      onClick={() => {
+                        setNotificationsOpen(false);
+                        router.push(n.href);
+                      }}
+                      style={{
+                        width: "100%",
+                        padding: "12px",
+                        borderRadius: 10,
+                        display: "flex",
+                        gap: 12,
+                        alignItems: "flex-start",
+                        textAlign: "left",
+                      }}
+                      onMouseEnter={e => (e.currentTarget.style.background = "var(--paper)")}
+                      onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                    >
+                      <span style={{ width: 34, height: 34, borderRadius: 9, background: "var(--paper-2)", color: n.color, display: "grid", placeItems: "center", flex: "none" }}>
+                        <Icon name={n.icon} size={16} />
+                      </span>
+                      <span className="stack" style={{ gap: 2, flex: 1 }}>
+                        <strong style={{ fontSize: 13.5, color: "var(--ink)" }}>{n.title}</strong>
+                        <span style={{ fontSize: 12.5, color: "var(--text-3)", lineHeight: 1.4 }}>{n.body}</span>
+                      </span>
+                      <Icon name="arrowR" size={14} color="var(--text-3)" />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </header>
+
+        <div style={{ flex: 1, padding: "28px 32px 40px" }}>{children}</div>
+      </main>
+    </div>
   );
 }
 

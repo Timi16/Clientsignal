@@ -14,6 +14,8 @@ export function useRequireAuth(requiredRole?: "client" | "attorney" | "admin") {
 
   useEffect(() => {
     if (loading) return;
+    // If no role required, skip all redirects (public pages)
+    if (!requiredRole) return;
     if (!user) {
       const loginPath = requiredRole === "admin" ? "/admin/login"
         : requiredRole === "attorney" ? "/attorney/login"
