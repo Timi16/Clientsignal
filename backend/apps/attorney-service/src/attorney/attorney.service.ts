@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { and, count as countFn, eq, inArray, isNull, sql } from 'drizzle-orm';
@@ -9,6 +9,7 @@ import {
 } from '../database/schema';
 import { NatsSubjects, Services } from '@cs/common';
 import type { AttorneyOnboardedEvent, AttorneyVerifiedEvent, AttorneyRejectedEvent } from '@cs/common';
+import { VerificationAiService } from './verification-ai.service';
 
 const DEFAULT_INTEGRATIONS = [
   { name: 'Clio', description: 'Sync leads to your Clio Grow pipeline', category: 'CRM', color: '#1E64D7' },
@@ -21,10 +22,13 @@ const DEFAULT_INTEGRATIONS = [
 
 @Injectable()
 export class AttorneyService {
+  private readonly logger = new Logger(AttorneyService.name);
+
   constructor(
     private readonly database: DatabaseService,
     private readonly config: ConfigService,
     @Inject(Services.NATS) private readonly natsClient: ClientProxy,
+    private readonly verificationAi: VerificationAiService,
   ) {}
 
   async createProfile(data: {
@@ -79,10 +83,60 @@ export class AttorneyService {
       attorneyId: attorney.id,
     });
 
-    // Create verification record with 24h SLA
+    // ── AI-Powered Real-Time Verification ──────────────────
+    // Gather existing bar numbers for duplicate check
+    const existingBars = await this.database.db
+      .select({ barNumber: attorneys.barNumber })
+      .from(attorneys)
+      .where(sql`${attorneys.id} != ${attorney.id}`);
+
+    const verificationResult = await this.verificationAi.verify({
+      name: data.firmName ? '' : '', // name comes from auth service, not available here
+      barNumber: data.barNumber,
+      bio: data.bio,
+      yearsExperience: data.yearsExperience,
+      city: data.city,
+      state: data.state,
+      firmName: data.firmName,
+      specialties: data.specialties,
+      email: '',
+      existingBarNumbers: existingBars.map(b => b.barNumber),
+      documentMetadata: (data as any).documentMetadata,
+    });
+
+    this.logger.log(
+      `Verification result for attorney ${attorney.id}: ` +
+      `decision=${verificationResult.decision} trust=${verificationResult.trustRating} ` +
+      `method=${verificationResult.method}`,
+    );
+
+    // Update attorney status based on AI decision
+    const statusMap = { approve: 'approved', review: 'review', reject: 'rejected' } as const;
+    await this.database.db.update(attorneys)
+      .set({
+        status: statusMap[verificationResult.decision] as any,
+        trustRating: verificationResult.trustRating as any,
+        updatedAt: new Date(),
+      })
+      .where(eq(attorneys.id, attorney.id));
+
+    // Store verification record with full AI analysis
     await this.database.db.insert(verifications).values({
       attorneyId: attorney.id,
-      slaDeadline: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      decision: verificationResult.decision === 'approve' ? 'approve'
+        : verificationResult.decision === 'reject' ? 'reject'
+        : undefined,
+      checklistJson: JSON.stringify({
+        systemChecks: verificationResult.systemChecks,
+        aiAnalysis: verificationResult.aiAnalysis,
+        method: verificationResult.method,
+        model: verificationResult.model,
+      }),
+      reason: verificationResult.aiAnalysis?.reasoning || verificationResult.systemChecks.failures.join('; '),
+      decidedAt: verificationResult.decision !== 'review' ? new Date() : undefined,
+      slaDeadline: verificationResult.decision === 'review'
+        ? new Date(Date.now() + 24 * 60 * 60 * 1000) // 24h SLA for manual review
+        : undefined,
     });
 
     const event: AttorneyOnboardedEvent = {
@@ -95,7 +149,47 @@ export class AttorneyService {
     };
     this.natsClient.emit(NatsSubjects.ATTORNEY_ONBOARDED, event);
 
-    return { attorney: await this.toAttorneyMessage(attorney) };
+    // Emit verified/rejected events for auto-decided profiles
+    if (verificationResult.decision === 'approve') {
+      const verifiedEvent: AttorneyVerifiedEvent = {
+        attorneyId: attorney.id,
+        userId: data.userId,
+        name: '',
+        email: '',
+        adminUserId: 'ai-verification',
+        trustRating: verificationResult.trustRating as any,
+      };
+      this.natsClient.emit(NatsSubjects.ATTORNEY_VERIFIED, verifiedEvent);
+    } else if (verificationResult.decision === 'reject') {
+      const rejectedEvent: AttorneyRejectedEvent = {
+        attorneyId: attorney.id,
+        userId: data.userId,
+        name: '',
+        email: '',
+        adminUserId: 'ai-verification',
+        reason: verificationResult.aiAnalysis?.reasoning || 'Failed automated verification checks',
+      };
+      this.natsClient.emit(NatsSubjects.ATTORNEY_REJECTED, rejectedEvent);
+    }
+
+    // Re-fetch attorney with updated status
+    const [updatedAttorney] = await this.database.db.select().from(attorneys)
+      .where(eq(attorneys.id, attorney.id)).limit(1);
+
+    return {
+      attorney: await this.toAttorneyMessage(updatedAttorney || attorney),
+      verification: {
+        decision: verificationResult.decision,
+        trustRating: verificationResult.trustRating,
+        method: verificationResult.method,
+        reasoning: verificationResult.aiAnalysis?.reasoning || undefined,
+        legitimacyScore: verificationResult.aiAnalysis?.legitimacy,
+        consistencyScore: verificationResult.aiAnalysis?.consistency,
+        riskFlags: verificationResult.aiAnalysis?.riskFlags || [],
+        documentFlags: verificationResult.aiAnalysis?.documentFlags || [],
+        systemCheckFailures: verificationResult.systemChecks.failures,
+      },
+    };
   }
 
   async updateProfile(data: {

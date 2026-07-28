@@ -70,7 +70,7 @@ const TITLES: Record<string, string> = {
 /* ---------- Badge counts ---------- */
 function getBadges(c: ActiveCaseData | null) {
   if (!c) return { docs: 0, msgs: 0 };
-  const reqDocs = c.docs.filter(d => d.status === "requested" || d.status === "missing").length;
+  const reqDocs = (c.docs || []).filter(d => d.status === "requested" || d.status === "missing").length;
   return { docs: reqDocs, msgs: c.unreadCount };
 }
 
@@ -122,7 +122,7 @@ export default function ClientLayout({
       color: "var(--signal)",
       href: "/client/messages",
     }] : []),
-    ...(activeCase.docs
+    ...((activeCase.docs || [])
       .filter(d => d.status === "requested" || d.status === "missing")
       .slice(0, 2)
       .map(d => ({

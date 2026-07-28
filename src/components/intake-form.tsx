@@ -8,8 +8,11 @@ import { Logo, Mark, ScoreRing, Verified, Avatar, CaseTag, LField, inpStyle } fr
 import { CASE_TYPES, INTAKE_CONFIG } from "@/lib/data";
 import * as leadsApi from "@/lib/api/leads";
 import { useAuth } from "@/lib/auth-context";
+import { US_STATES, US_CITIES } from "@/lib/us-locations";
 
-type UploadedDoc = { name: string; size: string };
+const INTAKE_STORAGE_KEY = "cs_intake_draft";
+
+type UploadedDoc = { name: string; size: string; file?: File };
 type IntakeData = {
   type: string;
   sub: string;
@@ -153,6 +156,22 @@ export default function IntakeForm({ inDashboard = false }: { inDashboard?: bool
   const prompts = PRACTICE_PROMPTS[data.type];
   const steps = ["Case type", "Details", "Your story", "Documents", "Contact"];
 
+  // Restore saved form data after login redirect
+  useEffect(() => {
+    try {
+      const saved = sessionStorage.getItem(INTAKE_STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved) as Partial<IntakeData> & { savedStep?: number };
+        sessionStorage.removeItem(INTAKE_STORAGE_KEY);
+        const { savedStep, ...formData } = parsed;
+        setData(d => ({ ...d, ...formData, docs: [] }));
+        if (typeof savedStep === "number" && savedStep >= 0 && savedStep <= 4) {
+          setStep(savedStep);
+        }
+      }
+    } catch { /* ignore corrupt data */ }
+  }, []);
+
   // Pre-fill name/email from logged-in user when entering step 4
   useEffect(() => {
     if (step === 4 && user) {
@@ -167,7 +186,7 @@ export default function IntakeForm({ inDashboard = false }: { inDashboard?: bool
   const canNext = () => {
     if (step === 0) return !!data.type;
     if (step === 1) return !!data.sub;
-    if (step === 2) return data.desc.trim().length >= 20 && data.city.trim();
+    if (step === 2) return data.desc.trim().length >= 20 && !!data.state && !!data.city;
     if (step === 4) return data.name && data.email && data.phone && data.consent;
     return true;
   };
@@ -178,7 +197,8 @@ export default function IntakeForm({ inDashboard = false }: { inDashboard?: bool
     if (step === 2) {
       const need: string[] = [];
       if (data.desc.trim().length < 20) need.push("a short description");
-      if (!data.city.trim()) need.push("your city");
+      if (!data.state) need.push("your state");
+      if (!data.city) need.push("your city");
       return need.length ? "Add " + need.join(" & ") : "";
     }
     if (step === 4) {
@@ -278,8 +298,31 @@ export default function IntakeForm({ inDashboard = false }: { inDashboard?: bool
               <span className="mono" style={{ fontSize: 12, color: "var(--text-3)" }}>{data.desc.length} chars</span>
             </div>
             <div className="row" style={{ gap: 12 }}>
-              <div style={{ flex: 2 }}><LField label="City"><input value={data.city} onChange={e => set("city", e.target.value)} placeholder="Austin" style={inpStyle} /></LField></div>
-              <div style={{ flex: 1 }}><LField label="State"><input value={data.state} onChange={e => set("state", e.target.value)} placeholder="TX" style={inpStyle} /></LField></div>
+              <div style={{ flex: 1 }}>
+                <LField label="State">
+                  <select
+                    value={data.state}
+                    onChange={e => { set("state", e.target.value); set("city", ""); }}
+                    style={{ ...inpStyle, cursor: "pointer", appearance: "none", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 14px center", paddingRight: 36 }}
+                  >
+                    <option value="">Select state</option>
+                    {US_STATES.map(s => <option key={s.code} value={s.code}>{s.name}</option>)}
+                  </select>
+                </LField>
+              </div>
+              <div style={{ flex: 2 }}>
+                <LField label="City">
+                  <select
+                    value={data.city}
+                    onChange={e => set("city", e.target.value)}
+                    disabled={!data.state}
+                    style={{ ...inpStyle, cursor: data.state ? "pointer" : "not-allowed", opacity: data.state ? 1 : 0.5, appearance: "none", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 14px center", paddingRight: 36 }}
+                  >
+                    <option value="">{data.state ? "Select city" : "Pick a state first"}</option>
+                    {(US_CITIES[data.state] || []).map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                </LField>
+              </div>
             </div>
             <LField label={cfg.urgent}>
               <div className="row" style={{ gap: 10 }}>
@@ -316,18 +359,36 @@ export default function IntakeForm({ inDashboard = false }: { inDashboard?: bool
               <h1 className="display" style={{ fontSize: "clamp(28px,4.2vw,40px)", marginBottom: 10 }}>Add supporting documents.</h1>
               <p style={{ color: "var(--text-2)", fontSize: 15.5 }}>Optional — but documents raise your match quality and help attorneys respond faster.</p>
             </div>
-            <button onClick={() => {
-              const names = prompts?.docs?.length ? prompts.docs : ["Police report", "ER intake", "Photos", "Contract", "Notice"];
-              const label = names[(data.docs?.length || 0) % names.length].replaceAll(" ", "_").replaceAll("/", "_");
-              set("docs", [...(data.docs || []), { name: `${label}.pdf`, size: (Math.random() * 3 + 0.4).toFixed(1) + " MB" }]);
-            }}
-              style={{ border: "2px dashed var(--line-2)", borderRadius: 16, padding: "36px 20px", background: "var(--card)", cursor: "pointer", transition: "border-color .2s" }}>
+            <label
+              style={{ border: "2px dashed var(--line-2)", borderRadius: 16, padding: "36px 20px", background: "var(--card)", cursor: "pointer", transition: "border-color .2s", display: "block" }}
+              onDragOver={e => { e.preventDefault(); e.currentTarget.style.borderColor = "var(--pine)"; }}
+              onDragLeave={e => { e.currentTarget.style.borderColor = ""; }}
+              onDrop={e => {
+                e.preventDefault();
+                e.currentTarget.style.borderColor = "";
+                const files = Array.from(e.dataTransfer.files);
+                const newDocs = files.map(f => ({ name: f.name, size: (f.size / (1024 * 1024)).toFixed(1) + " MB", file: f }));
+                set("docs", [...(data.docs || []), ...newDocs]);
+              }}
+            >
+              <input
+                type="file"
+                multiple
+                accept=".pdf,.jpg,.jpeg,.png,.zip,.doc,.docx"
+                style={{ display: "none" }}
+                onChange={e => {
+                  const files = Array.from(e.target.files || []);
+                  const newDocs = files.map(f => ({ name: f.name, size: (f.size / (1024 * 1024)).toFixed(1) + " MB", file: f }));
+                  set("docs", [...(data.docs || []), ...newDocs]);
+                  e.target.value = "";
+                }}
+              />
               <div className="stack" style={{ alignItems: "center", gap: 10 }}>
                 <span style={{ color: "var(--pine)" }}><Icon name="upload" size={30} /></span>
-                <strong style={{ fontSize: 16 }}>Click to upload</strong>
-                <span style={{ fontSize: 13.5, color: "var(--text-3)" }}>PDF, JPG, PNG or ZIP · encrypted at rest</span>
+                <strong style={{ fontSize: 16 }}>Click to upload or drag and drop</strong>
+                <span style={{ fontSize: 13.5, color: "var(--text-3)" }}>PDF, JPG, PNG, ZIP or DOC · encrypted at rest</span>
               </div>
-            </button>
+            </label>
             {prompts && (
               <div className="card" style={{ padding: 18 }}>
                 <strong style={{ display: "block", fontSize: 14.5, marginBottom: 12 }}>Recommended uploads for {CASE_TYPES[data.type]?.label}</strong>
@@ -344,7 +405,7 @@ export default function IntakeForm({ inDashboard = false }: { inDashboard?: bool
                   <div key={i} className="row between card" style={{ padding: "13px 16px" }}>
                     <div className="row" style={{ gap: 12 }}>
                       <span style={{ color: "var(--pine)" }}><Icon name="doc" size={20} /></span>
-                      <div className="stack"><strong style={{ fontSize: 14 }}>{d.name}</strong><span className="mono" style={{ fontSize: 11.5, color: "var(--text-3)" }}>{d.size} · uploaded</span></div>
+                      <div className="stack"><strong style={{ fontSize: 14 }}>{d.name}</strong><span className="mono" style={{ fontSize: 11.5, color: "var(--text-3)" }}>{d.size} · ready</span></div>
                     </div>
                     <button onClick={() => set("docs", data.docs.filter((_d, j) => j !== i))} style={{ color: "var(--text-3)" }}><Icon name="x" size={18} /></button>
                   </div>
@@ -407,6 +468,16 @@ export default function IntakeForm({ inDashboard = false }: { inDashboard?: bool
               onClick={async () => {
                 if (!canNext() || submitting) return;
                 if (step === 4) {
+                  // Check if user is logged in before submitting
+                  if (!user) {
+                    // Save form data so we can restore it after login
+                    try {
+                      const { docs, ...saveable } = data;
+                      sessionStorage.setItem(INTAKE_STORAGE_KEY, JSON.stringify({ ...saveable, savedStep: 4 }));
+                    } catch { /* storage full — proceed anyway */ }
+                    router.push("/client/login?returnTo=/client/intake");
+                    return;
+                  }
                   setSubmitting(true);
                   setSubmitError(null);
                   try {
@@ -423,6 +494,29 @@ export default function IntakeForm({ inDashboard = false }: { inDashboard?: bool
                     });
                     setLeadResult(res.lead);
                     setMatchedAttorneyResult(res.matchedAttorney || null);
+
+                    // Upload files to S3 via presigned URLs
+                    const fileDocs = data.docs.filter(d => d.file);
+                    if (fileDocs.length > 0 && res.lead?.id) {
+                      await Promise.all(fileDocs.map(async (doc) => {
+                        if (!doc.file) return;
+                        try {
+                          const { url } = await leadsApi.getLeadUploadUrl(
+                            res.lead.id,
+                            doc.file.name,
+                            doc.file.type || "application/octet-stream",
+                          );
+                          await fetch(url, {
+                            method: "PUT",
+                            body: doc.file,
+                            headers: { "Content-Type": doc.file.type || "application/octet-stream" },
+                          });
+                        } catch {
+                          // Upload failed for this file — continue with others
+                        }
+                      }));
+                    }
+
                     setStep(5);
                   } catch (err: unknown) {
                     const msg = err instanceof Error ? err.message : "Something went wrong. Please try again.";

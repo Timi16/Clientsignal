@@ -25,8 +25,9 @@ export default function ClientDashboard() {
   }
 
   const st = CASE_STATUS[c.status] || CASE_STATUS.pending;
-  const docsNeeded = c.docs.filter(d => d.status !== "done");
-  const docsDone = c.docs.filter(d => d.status === "done").length;
+  const docs = c.docs || [];
+  const docsNeeded = docs.filter(d => d.status !== "done");
+  const docsDone = docs.filter(d => d.status === "done").length;
   const opened = formatOpened(c.openedAt);
   const caseType = CASE_TYPES[c.practiceArea] || { label: c.practiceArea, color: "var(--text-2)", tint: "var(--pine-tint)" };
 
@@ -63,7 +64,7 @@ export default function ClientDashboard() {
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 16, marginBottom: 22 }} className="stat-grid">
         {[
           ["Attorney", atty ? atty.name : "Matching", atty ? atty.responseTimeAvg + " reply" : "In progress", "user", "var(--signal)"],
-          ["Documents", `${docsDone}/${c.docs.length} added`, docsNeeded.length ? `${docsNeeded.length} still needed` : "Complete", "doc", docsNeeded.length ? "var(--amber)" : "var(--verified)"],
+          ["Documents", `${docsDone}/${docs.length} added`, docsNeeded.length ? `${docsNeeded.length} still needed` : "Complete", "doc", docsNeeded.length ? "var(--amber)" : "var(--verified)"],
           ["Next action", primaryStep.cta, primaryStep.t, primaryStep.icon, primaryStep.hot ? "var(--signal)" : "var(--pine)"],
           ["Case strength", `${c.strengthScore}%`, c.strengthScore >= 80 ? "Strong details" : "Add more detail", "zap", c.strengthScore >= 80 ? "var(--verified)" : "var(--amber)"],
         ].map(([label, value, detail, icon, color]) => (

@@ -2,13 +2,15 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Logo, Field } from "@/components/ui";
 import { Icon } from "@/components/icons";
 import { useAuth } from "@/lib/auth-context";
 
 export default function ClientSignup() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const returnTo = searchParams.get("returnTo");
   const { register } = useAuth();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -222,7 +224,7 @@ export default function ClientSignup() {
                 setLoading(true);
                 try {
                   await register(email, name, password, "client");
-                  router.push("/verify-email");
+                  router.push(returnTo || "/verify-email");
                 } catch (err: unknown) {
                   setError(err instanceof Error ? err.message : "Registration failed. Please try again.");
                 } finally {

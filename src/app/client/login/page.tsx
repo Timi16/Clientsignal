@@ -2,13 +2,15 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Logo, Field } from "@/components/ui";
 import { Icon } from "@/components/icons";
 import { useAuth } from "@/lib/auth-context";
 
 export default function ClientLogin() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const returnTo = searchParams.get("returnTo");
   const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -197,7 +199,8 @@ export default function ClientLogin() {
                 setLoading(true);
                 try {
                   const user = await login(email, password);
-                  if (user.role === "client") router.push("/client/dashboard");
+                  if (returnTo && user.role === "client") router.push(returnTo);
+                  else if (user.role === "client") router.push("/client/dashboard");
                   else if (user.role === "attorney") router.push("/attorney/dashboard");
                   else router.push("/admin");
                 } catch (err: unknown) {
@@ -231,7 +234,7 @@ export default function ClientLogin() {
             }}
           >
             <button
-              onClick={() => router.push("/client/signup")}
+              onClick={() => router.push(returnTo ? `/client/signup?returnTo=${encodeURIComponent(returnTo)}` : "/client/signup")}
               style={{
                 color: "var(--signal)",
                 fontWeight: 600,

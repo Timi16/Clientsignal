@@ -52,7 +52,7 @@ export default function ClientRootLayout({ children }: { children: ReactNode }) 
             strengthScore: c.strengthScore,
             summary: c.summary || "",
             attorneyId: c.attorneyId,
-            docs: docsRes.documents,
+            docs: docsRes.documents || [],
             unreadCount,
           };
         })
@@ -70,14 +70,20 @@ export default function ClientRootLayout({ children }: { children: ReactNode }) 
     }
   }, []);
 
-  // Fetch once when user is ready (skip for public pages)
+  // Fetch when user is ready and on every navigation to a non-public client page
   useEffect(() => {
-    if (isPublic) return;
-    if (!authLoading && user && !fetched.current) {
+    if (isPublic || authLoading || !user) return;
+    if (!fetched.current) {
       fetched.current = true;
       fetchCases();
     }
   }, [isPublic, authLoading, user, fetchCases]);
+
+  // Re-fetch cases when navigating between client pages (e.g. intake → dashboard)
+  useEffect(() => {
+    if (isPublic || authLoading || !user || !fetched.current) return;
+    fetchCases();
+  }, [pathname]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const activeCase = cases.find(c => c.id === activeCaseId) || cases[0] || null;
 

@@ -57,7 +57,7 @@ export default function ClientCases() {
                       {c.attorneyId ? <span style={{ fontSize: 13, color: "var(--text-2)" }}>Attorney assigned</span> : <span className="row gap-1" style={{ fontSize: 13, color: "var(--amber)", fontWeight: 600 }}><span className="pulse-dot" style={{ background: "var(--amber)" }} /> Matching...</span>}
                     </div>
                     <div className="row" style={{ gap: 16 }}>
-                      <span className="row gap-1" style={{ fontSize: 12.5, color: "var(--text-3)" }}><Icon name="doc" size={14} /> {c.docs.filter(d => d.status === "done").length}/{c.docs.length} docs</span>
+                      <span className="row gap-1" style={{ fontSize: 12.5, color: "var(--text-3)" }}><Icon name="doc" size={14} /> {(c.docs || []).filter(d => d.status === "done").length}/{(c.docs || []).length} docs</span>
                       <span className="row gap-1" style={{ fontSize: 12.5, color: "var(--signal)", fontWeight: 600 }}>Open <Icon name="arrowR" size={14} /></span>
                     </div>
                   </div>

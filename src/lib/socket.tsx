@@ -45,7 +45,7 @@ function makeId() {
 }
 
 export function SocketProvider({ children }: { children: ReactNode }) {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const socketRef = useRef<Socket | null>(null);
   const [connected, setConnected] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -60,8 +60,8 @@ export function SocketProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    // Only connect when user is authenticated
-    if (!user) {
+    // Only connect when user is fully authenticated (not during initial loading)
+    if (authLoading || !user) {
       if (socketRef.current) {
         socketRef.current.disconnect();
         socketRef.current = null;
@@ -77,8 +77,8 @@ export function SocketProvider({ children }: { children: ReactNode }) {
       auth: { token },
       transports: ["websocket", "polling"],
       reconnection: true,
-      reconnectionDelay: 2000,
-      reconnectionAttempts: 10,
+      reconnectionDelay: 3000,
+      reconnectionAttempts: 5,
     });
 
     socketRef.current = socket;
@@ -171,7 +171,7 @@ export function SocketProvider({ children }: { children: ReactNode }) {
       socketRef.current = null;
       setConnected(false);
     };
-  }, [user, addNotification]);
+  }, [user, authLoading, addNotification]);
 
   const markAllRead = useCallback(() => {
     setNotifications(prev => prev.map(n => ({ ...n, read: true })));
