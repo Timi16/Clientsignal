@@ -282,7 +282,7 @@ Return ONLY the JSON object, no markdown, no explanation outside the JSON.`;
     existingBarNumbers: string[];
     documentMetadata?: { fileName: string; mimeType: string; sizeBytes: number }[];
   }): Promise<VerificationResult> {
-    // Layer 1
+    // Layer 1: System Checks
     const systemChecks = this.runSystemChecks({
       barNumber: data.barNumber,
       state: data.state,
@@ -300,33 +300,83 @@ Return ONLY the JSON object, no markdown, no explanation outside the JSON.`;
         method: 'ai-reject',
         systemChecks,
         aiAnalysis: null,
+        barLookup: null,
         decidedAt: new Date().toISOString(),
         model: 'system-checks-only',
       };
     }
 
-    // Layer 2
-    const aiAnalysis = await this.runAiAnalysis({
-      name: data.name,
-      barNumber: data.barNumber,
-      bio: data.bio,
-      yearsExperience: data.yearsExperience,
-      city: data.city,
-      state: data.state,
-      firmName: data.firmName,
-      specialties: data.specialties,
-      documentMetadata: data.documentMetadata,
-    });
+    // Layer 2: Run AI analysis + bar lookup in parallel for speed
+    const [aiAnalysis, barLookupResult] = await Promise.all([
+      this.runAiAnalysis({
+        name: data.name,
+        barNumber: data.barNumber,
+        bio: data.bio,
+        yearsExperience: data.yearsExperience,
+        city: data.city,
+        state: data.state,
+        firmName: data.firmName,
+        specialties: data.specialties,
+        documentMetadata: data.documentMetadata,
+      }),
+      data.state
+        ? this.barLookup.verifyBarNumber(data.barNumber, data.state).catch((err) => {
+            this.logger.warn(`Bar lookup failed: ${err.message}`);
+            return null;
+          })
+        : Promise.resolve(null),
+    ]);
 
-    // Layer 3: Combine results
+    // Log bar lookup result
+    if (barLookupResult) {
+      this.logger.log(
+        `Bar lookup for ${data.state} #${data.barNumber}: ${barLookupResult.status}` +
+        (barLookupResult.attorneyName ? ` (${barLookupResult.attorneyName})` : ''),
+      );
+    }
+
+    // Layer 3: Decision Logic — combine system checks + AI + bar lookup
+    const barVerified = barLookupResult?.status === 'verified';
+    const barSuspended = barLookupResult?.status === 'suspended';
+    const barNotFound = barLookupResult?.status === 'not_found';
+    const barUnavailable = !barLookupResult || barLookupResult.status === 'error' || barLookupResult.status === 'unsupported';
+
+    // Hard reject: bar is suspended/disbarred
+    if (barSuspended) {
+      return {
+        decision: 'reject',
+        trustRating: 'red',
+        method: 'ai-reject',
+        systemChecks,
+        aiAnalysis,
+        barLookup: barLookupResult,
+        decidedAt: new Date().toISOString(),
+        model: aiAnalysis ? 'llama-3.3-70b-versatile' : 'system-checks-only',
+      };
+    }
+
+    // Bar not found — flag for review regardless of AI score
+    if (barNotFound) {
+      return {
+        decision: 'review',
+        trustRating: 'yellow',
+        method: 'ai-review',
+        systemChecks,
+        aiAnalysis,
+        barLookup: barLookupResult,
+        decidedAt: new Date().toISOString(),
+        model: aiAnalysis ? 'llama-3.3-70b-versatile' : 'system-checks-only',
+      };
+    }
+
     if (!systemChecks.allPassed && !aiAnalysis) {
-      // System checks failed and no AI available — flag for review
       return {
         decision: 'review',
         trustRating: 'yellow',
         method: 'ai-review',
         systemChecks,
         aiAnalysis: null,
+        barLookup: barLookupResult,
         decidedAt: new Date().toISOString(),
         model: 'system-checks-only',
       };
@@ -346,12 +396,14 @@ Return ONLY the JSON object, no markdown, no explanation outside the JSON.`;
           method: 'ai-reject',
           systemChecks,
           aiAnalysis,
+          barLookup: barLookupResult,
           decidedAt: new Date().toISOString(),
           model: 'llama-3.3-70b-versatile',
         };
       }
 
-      // Auto-approve: high scores, no flags, system checks pass
+      // Auto-approve: high AI scores + system checks pass
+      // Bar verified = green trust, bar unavailable = yellow trust
       if (
         systemChecks.allPassed &&
         aiAnalysis.legitimacy >= 70 &&
@@ -362,10 +414,11 @@ Return ONLY the JSON object, no markdown, no explanation outside the JSON.`;
       ) {
         return {
           decision: 'approve',
-          trustRating: 'green',
+          trustRating: barVerified ? 'green' : 'yellow',
           method: 'ai-auto',
           systemChecks,
           aiAnalysis,
+          barLookup: barLookupResult,
           decidedAt: new Date().toISOString(),
           model: 'llama-3.3-70b-versatile',
         };
@@ -378,19 +431,21 @@ Return ONLY the JSON object, no markdown, no explanation outside the JSON.`;
         method: 'ai-review',
         systemChecks,
         aiAnalysis,
+        barLookup: barLookupResult,
         decidedAt: new Date().toISOString(),
         model: 'llama-3.3-70b-versatile',
       };
     }
 
-    // No AI available, system checks passed — approve with yellow trust
+    // No AI available, system checks passed
     if (systemChecks.allPassed) {
       return {
-        decision: 'approve',
-        trustRating: 'yellow',
-        method: 'ai-auto',
+        decision: barVerified ? 'approve' : 'review',
+        trustRating: barVerified ? 'green' : 'yellow',
+        method: barVerified ? 'ai-auto' : 'ai-review',
         systemChecks,
         aiAnalysis: null,
+        barLookup: barLookupResult,
         decidedAt: new Date().toISOString(),
         model: 'system-checks-only',
       };
@@ -402,6 +457,7 @@ Return ONLY the JSON object, no markdown, no explanation outside the JSON.`;
       method: 'ai-review',
       systemChecks,
       aiAnalysis: null,
+      barLookup: barLookupResult,
       decidedAt: new Date().toISOString(),
       model: 'system-checks-only',
     };

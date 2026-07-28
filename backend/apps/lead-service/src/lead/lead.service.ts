@@ -98,7 +98,9 @@ export class LeadService {
     };
     this.natsClient.emit(NatsSubjects.LEAD_SCORED, scoredEvent);
 
-    // 4. Attempt matching
+    // 4. Broadcast model — lead is visible to ALL matching attorneys
+    // No exclusive match at creation; attorneys compete to claim
+    // Still find best match for notifications / case creation
     const match = await this.matching.findBestMatch({
       practiceArea: data.practiceArea,
       city: data.city || '',
@@ -106,12 +108,6 @@ export class LeadService {
     });
 
     if (match) {
-      await this.database.db.update(leads)
-        .set({ matchedAttorneyId: match.attorneyId, updatedAt: new Date() })
-        .where(eq(leads.id, lead.id));
-
-      lead.matchedAttorneyId = match.attorneyId;
-
       // Fetch any uploaded documents to include in the event
       const docs = await this.database.db.select().from(leadDocuments)
         .where(eq(leadDocuments.leadId, lead.id));
@@ -160,6 +156,7 @@ export class LeadService {
 
   async listLeads(data: {
     attorneyId?: string;
+    attorneySpecialties?: string[];
     status?: string;
     practiceArea?: string;
     limit?: number;
@@ -175,7 +172,24 @@ export class LeadService {
     const conditions: any[] = [];
 
     if (data.attorneyId) {
-      conditions.push(eq(leads.matchedAttorneyId, data.attorneyId));
+      // Broadcast model: show leads that are either:
+      // (a) unclaimed AND match the attorney's specialties, OR
+      // (b) already claimed/matched to this attorney
+      const specialties = data.attorneySpecialties?.length
+        ? data.attorneySpecialties
+        : [];
+
+      if (specialties.length) {
+        conditions.push(
+          sql`(
+            (${leads.status} IN ('new', 'viewed') AND ${leads.practiceArea} IN (${sql.join(specialties.map(s => sql`${s}`), sql`, `)}))
+            OR ${leads.matchedAttorneyId} = ${data.attorneyId}
+          )`,
+        );
+      } else {
+        // No specialties known — fall back to showing only their matched leads
+        conditions.push(eq(leads.matchedAttorneyId, data.attorneyId));
+      }
     }
     if (data.status) {
       conditions.push(eq(leads.status, data.status as any));

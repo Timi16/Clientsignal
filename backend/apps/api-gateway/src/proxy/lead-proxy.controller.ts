@@ -91,18 +91,21 @@ export class LeadProxyController implements OnModuleInit {
     @Query('state') state?: string,
   ) {
     let attorneyId = '';
+    let attorneySpecialties: string[] = [];
 
-    // If the user is an attorney, resolve their attorney ID
+    // If the user is an attorney, resolve their attorney ID and specialties
     if (user.role === 'attorney') {
       const attorney = await lastValueFrom(
         this.attorneyService.getAttorneyByUserId({ userId: user.id }),
       );
       attorneyId = attorney.attorney.id;
+      attorneySpecialties = attorney.attorney.specialties || [];
     }
 
     return lastValueFrom(
       this.leadService.listLeads({
         attorneyId,
+        attorneySpecialties,
         status: status || '',
         practiceArea: practiceArea || '',
         limit: limit ? parseInt(limit, 10) : 50,

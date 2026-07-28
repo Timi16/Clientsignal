@@ -129,6 +129,7 @@ export class AttorneyService {
       checklistJson: JSON.stringify({
         systemChecks: verificationResult.systemChecks,
         aiAnalysis: verificationResult.aiAnalysis,
+        barLookup: verificationResult.barLookup,
         method: verificationResult.method,
         model: verificationResult.model,
       }),
@@ -188,6 +189,13 @@ export class AttorneyService {
         riskFlags: verificationResult.aiAnalysis?.riskFlags || [],
         documentFlags: verificationResult.aiAnalysis?.documentFlags || [],
         systemCheckFailures: verificationResult.systemChecks.failures,
+        barLookup: verificationResult.barLookup ? {
+          status: verificationResult.barLookup.status,
+          attorneyName: verificationResult.barLookup.attorneyName,
+          barStatus: verificationResult.barLookup.barStatus,
+          state: verificationResult.barLookup.state,
+          source: verificationResult.barLookup.source,
+        } : null,
       },
     };
   }

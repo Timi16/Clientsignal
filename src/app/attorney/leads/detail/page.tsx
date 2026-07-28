@@ -6,11 +6,15 @@ import { Icon } from "@/components/icons";
 import { Avatar, ScoreRing, CaseTag } from "@/components/ui";
 import { useRouter } from "next/navigation";
 import { getSelectedLead } from "../selected-lead";
+import { claimLead, viewLead } from "@/lib/api/leads";
 
 export default function LeadDetailPage() {
   const router = useRouter();
   const lead = getSelectedLead();
   const [claimed, setClaimed] = useState(false);
+  const [claiming, setClaiming] = useState(false);
+  const [claimError, setClaimError] = useState("");
+  const [claimedPhone, setClaimedPhone] = useState("");
 
   if (!lead) {
     return (
@@ -117,28 +121,7 @@ export default function LeadDetailPage() {
         {/* right column */}
         <div className="stack" style={{ gap: 20 }}>
           {/* claim / claimed */}
-          {!claimed ? (
-            <div className="card" style={{ padding: "28px 26px", background: "var(--pine)", color: "#fff", border: "none" }}>
-              <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 8 }}>Respond & claim</h3>
-              <p style={{ fontSize: 13.5, color: "rgba(234,240,249,0.65)", marginBottom: 22, lineHeight: 1.6 }}>
-                Claiming this lead will reveal the client&apos;s contact info and lock it exclusively to you.
-              </p>
-              <div style={{ marginBottom: 20 }}>
-                <span className="mono" style={{ fontSize: 26, fontWeight: 700, color: "var(--gold-soft)" }}>
-                  {lead.estimatedValue || "—"}
-                </span>
-                <span style={{ fontSize: 13, color: "rgba(234,240,249,0.5)", marginLeft: 8 }}>est. value</span>
-              </div>
-              <button
-                className="btn btn-gold"
-                style={{ width: "100%" }}
-                onClick={() => setClaimed(true)}
-              >
-                <Icon name="bolt" size={18} />
-                Respond & claim lead
-              </button>
-            </div>
-          ) : (
+          {lead.status === "claimed" || claimed ? (
             <div className="card" style={{ padding: "28px 26px" }}>
               <div className="row" style={{ gap: 8, marginBottom: 16 }}>
                 <span style={{ width: 28, height: 28, borderRadius: "50%", background: "var(--verified-tint)", display: "grid", placeItems: "center" }}>
@@ -152,7 +135,7 @@ export default function LeadDetailPage() {
                   <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text-3)", marginBottom: 4, textTransform: "uppercase", letterSpacing: "0.08em" }}>Phone</div>
                   <div className="row" style={{ gap: 8 }}>
                     <Icon name="phone" size={16} color="var(--signal)" />
-                    <span style={{ fontWeight: 600, fontSize: 15, color: "var(--ink)" }}>{lead.phone}</span>
+                    <span style={{ fontWeight: 600, fontSize: 15, color: "var(--ink)" }}>{claimedPhone || lead.phone || "—"}</span>
                   </div>
                 </div>
                 <div>
@@ -173,6 +156,50 @@ export default function LeadDetailPage() {
               >
                 <Icon name="message" size={18} />
                 Send a message
+              </button>
+            </div>
+          ) : (
+            <div className="card" style={{ padding: "28px 26px", background: "var(--pine)", color: "#fff", border: "none" }}>
+              <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 8 }}>Respond & claim</h3>
+              <p style={{ fontSize: 13.5, color: "rgba(234,240,249,0.65)", marginBottom: 22, lineHeight: 1.6 }}>
+                This lead is available to all matching attorneys. Claim it to lock it exclusively to you and reveal client contact info.
+              </p>
+              <div style={{ marginBottom: 20 }}>
+                <span className="mono" style={{ fontSize: 26, fontWeight: 700, color: "var(--gold-soft)" }}>
+                  {lead.estimatedValue || "—"}
+                </span>
+                <span style={{ fontSize: 13, color: "rgba(234,240,249,0.5)", marginLeft: 8 }}>est. value</span>
+              </div>
+              {claimError && (
+                <div style={{ padding: "10px 14px", borderRadius: 8, background: "rgba(255,90,90,0.15)", color: "#fff", fontSize: 13, marginBottom: 14 }}>
+                  {claimError}
+                </div>
+              )}
+              <button
+                className="btn btn-gold"
+                style={{ width: "100%", opacity: claiming ? 0.7 : 1 }}
+                disabled={claiming}
+                onClick={async () => {
+                  setClaiming(true);
+                  setClaimError("");
+                  try {
+                    const res = await claimLead(lead.id);
+                    setClaimed(true);
+                    setClaimedPhone(res.phone || "");
+                  } catch (err: any) {
+                    const msg = err?.message || err?.data?.message || "Failed to claim";
+                    if (msg.toLowerCase().includes("already claimed")) {
+                      setClaimError("This lead was already claimed by another attorney.");
+                    } else {
+                      setClaimError(msg);
+                    }
+                  } finally {
+                    setClaiming(false);
+                  }
+                }}
+              >
+                <Icon name="bolt" size={18} />
+                {claiming ? "Claiming..." : "Respond & claim lead"}
               </button>
             </div>
           )}
