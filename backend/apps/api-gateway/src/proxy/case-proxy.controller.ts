@@ -40,6 +40,11 @@ interface CaseServiceGrpc {
 
 interface AttorneyServiceGrpc {
   getAttorneyByUserId(data: any): Observable<any>;
+  getAttorney(data: any): Observable<any>;
+}
+
+interface AuthServiceGrpc {
+  getUser(data: any): Observable<any>;
 }
 
 @Controller('cases')
@@ -49,10 +54,12 @@ interface AttorneyServiceGrpc {
 export class CaseProxyController implements OnModuleInit {
   private caseService!: CaseServiceGrpc;
   private attorneyService!: AttorneyServiceGrpc;
+  private authService!: AuthServiceGrpc;
 
   constructor(
     @Inject(Services.CASE) private readonly caseClient: ClientGrpc,
     @Inject(Services.ATTORNEY) private readonly attorneyClient: ClientGrpc,
+    @Inject(Services.AUTH) private readonly authClient: ClientGrpc,
   ) {}
 
   onModuleInit() {
@@ -60,6 +67,8 @@ export class CaseProxyController implements OnModuleInit {
       this.caseClient.getService<CaseServiceGrpc>('CaseService');
     this.attorneyService =
       this.attorneyClient.getService<AttorneyServiceGrpc>('AttorneyService');
+    this.authService =
+      this.authClient.getService<AuthServiceGrpc>('AuthService');
   }
 
   @Get()
@@ -106,6 +115,54 @@ export class CaseProxyController implements OnModuleInit {
     return lastValueFrom(
       this.caseService.getCase({ id }),
     );
+  }
+
+  @Get(':id/attorney')
+  async getCaseAttorney(@Param('id') id: string) {
+    // 1. Get the case to find attorneyId
+    const caseRes = await lastValueFrom(
+      this.caseService.getCase({ id }),
+    );
+    const caseData = caseRes.case;
+    if (!caseData?.attorneyId) {
+      return { attorney: null };
+    }
+
+    // 2. Get attorney profile from attorney-service
+    const attyRes = await lastValueFrom(
+      this.attorneyService.getAttorney({ id: caseData.attorneyId }),
+    );
+    const atty = attyRes.attorney;
+
+    // 3. Get attorney's user name/email from auth-service
+    let name = '';
+    let email = '';
+    if (atty.userId) {
+      try {
+        const userRes = await lastValueFrom(
+          this.authService.getUser({ id: atty.userId }),
+        );
+        name = userRes.user?.name || '';
+        email = userRes.user?.email || '';
+      } catch { /* user not found — use empty */ }
+    }
+
+    return {
+      attorney: {
+        id: atty.id,
+        name,
+        email,
+        firmName: atty.firmName || '',
+        yearsExperience: atty.yearsExperience || 0,
+        barNumber: atty.barNumber || '',
+        trustRating: atty.trustRating || '',
+        responseTimeAvg: atty.responseTimeAvg || '—',
+        specialties: atty.specialties || [],
+        bio: atty.bio || '',
+        city: atty.city || '',
+        state: atty.state || '',
+      },
+    };
   }
 
   @Put(':id/stage')

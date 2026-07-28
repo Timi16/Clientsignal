@@ -130,7 +130,15 @@ export class LeadService {
       this.natsClient.emit(NatsSubjects.LEAD_MATCHED, matchedEvent);
     }
 
-    return { lead: this.toLeadMessage(lead) };
+    return {
+      lead: this.toLeadMessage(lead),
+      matchedAttorney: match ? {
+        name: match.attorneyName,
+        firmName: match.firmName,
+        yearsExperience: match.yearsExperience,
+        responseTimeAvg: match.responseTimeAvg,
+      } : null,
+    };
   }
 
   async getLead(data: { id: string }) {

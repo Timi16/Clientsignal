@@ -23,11 +23,6 @@ export function useRequireAuth(requiredRole?: "client" | "attorney" | "admin") {
       router.replace(loginPath);
       return;
     }
-    // Redirect unverified users to verification page (skip for admins)
-    if (!user.emailVerifiedAt && user.role !== "admin") {
-      router.replace("/verify-email");
-      return;
-    }
     if (requiredRole && user.role !== requiredRole) {
       const redirectPath = user.role === "admin" ? "/admin"
         : user.role === "attorney" ? "/attorney/dashboard"

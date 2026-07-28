@@ -27,7 +27,15 @@ export class MatchingService implements OnModuleInit {
     practiceArea: string;
     city: string;
     state: string;
-  }): Promise<{ attorneyId: string; attorneyUserId: string; attorneyName: string; attorneyEmail: string } | null> {
+  }): Promise<{
+    attorneyId: string;
+    attorneyUserId: string;
+    attorneyName: string;
+    attorneyEmail: string;
+    firmName: string;
+    yearsExperience: number;
+    responseTimeAvg: string;
+  } | null> {
     try {
       const result = await firstValueFrom(
         this.attorneyGrpc.findMatchingAttorneys({
@@ -46,6 +54,9 @@ export class MatchingService implements OnModuleInit {
         attorneyUserId: best.userId,
         attorneyName: best.name || '',
         attorneyEmail: best.email || '',
+        firmName: best.firmName || '',
+        yearsExperience: best.yearsExperience || 0,
+        responseTimeAvg: best.responseTimeAvg || '—',
       };
     } catch {
       return null;

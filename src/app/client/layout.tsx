@@ -7,7 +7,7 @@ import { useRequireAuth } from "@/lib/use-require-auth";
 import * as casesApi from "@/lib/api/cases";
 import * as messagesApi from "@/lib/api/messages";
 import { ClientCaseContext } from "@/lib/client-case-context";
-import type { ActiveCaseData } from "@/lib/client-case-context";
+import type { ActiveCaseData, ActiveAttorney, ClientCaseContextValue } from "@/lib/client-case-context";
 
 const PUBLIC_PATHS = ["/client/login", "/client/signup", "/client/intake"];
 
@@ -21,11 +21,7 @@ export default function ClientRootLayout({ children }: { children: ReactNode }) 
   const [dataLoading, setDataLoading] = useState(true);
   const fetched = useRef(false);
 
-  // Auth — always call the hook (React rules) but skip redirect for public pages
   const { user, loading: authLoading } = useRequireAuth(isPublic ? undefined : "client");
-
-  // Public pages (login, signup, intake) — render directly, no data fetch
-  if (isPublic) return <>{children}</>;
 
   const fetchCases = useCallback(async () => {
     try {
@@ -74,18 +70,19 @@ export default function ClientRootLayout({ children }: { children: ReactNode }) 
     }
   }, []);
 
-  // Fetch once when user is ready
+  // Fetch once when user is ready (skip for public pages)
   useEffect(() => {
+    if (isPublic) return;
     if (!authLoading && user && !fetched.current) {
       fetched.current = true;
       fetchCases();
     }
-  }, [authLoading, user, fetchCases]);
+  }, [isPublic, authLoading, user, fetchCases]);
 
-  // Fetch attorney when active case changes
   const activeCase = cases.find(c => c.id === activeCaseId) || cases[0] || null;
 
   useEffect(() => {
+    if (isPublic) return;
     if (!activeCase?.attorneyId || !activeCase?.id) {
       setAttorney(null);
       return;
@@ -93,11 +90,14 @@ export default function ClientRootLayout({ children }: { children: ReactNode }) 
     casesApi.getCaseAttorney(activeCase.id)
       .then(res => setAttorney(res.attorney))
       .catch(() => setAttorney(null));
-  }, [activeCase?.attorneyId, activeCase?.id]);
+  }, [isPublic, activeCase?.attorneyId, activeCase?.id]);
 
   const setActiveId = useCallback((id: string) => {
     setActiveCaseId(id);
   }, []);
+
+  // Public pages — just render children, no context needed
+  if (isPublic) return <>{children}</>;
 
   // Show initial load screen only on first ever load
   if (authLoading || !user || (dataLoading && !fetched.current)) {
