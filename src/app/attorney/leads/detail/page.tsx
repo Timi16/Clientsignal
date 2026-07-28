@@ -87,11 +87,11 @@ export default function LeadDetailPage() {
           <div className="card" style={{ padding: "24px 26px" }}>
             <h3 style={{ fontSize: 15, fontWeight: 700, color: "var(--ink)", marginBottom: 18 }}>
               <Icon name="file" size={17} style={{ display: "inline", verticalAlign: "-3px", marginRight: 8 }} />
-              Documents ({lead.docCount})
+              Documents ({lead.docCount || 0})
             </h3>
-            {lead.docCount > 0 ? (
+            {(lead.docCount || 0) > 0 ? (
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 12 }}>
-                {Array.from({ length: lead.docCount }).map((_, i) => (
+                {Array.from({ length: lead.docCount || 0 }).map((_, i) => (
                   <div
                     key={i}
                     style={{

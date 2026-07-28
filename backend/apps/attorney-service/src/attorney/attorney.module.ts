@@ -4,6 +4,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import { AttorneyController } from './attorney.controller';
 import { AttorneyService } from './attorney.service';
 import { VerificationAiService } from './verification-ai.service';
+import { BarLookupService } from './bar-lookup.service';
 import { Services } from '@cs/common';
 
 @Module({
@@ -23,7 +24,7 @@ import { Services } from '@cs/common';
     ]),
   ],
   controllers: [AttorneyController],
-  providers: [AttorneyService, VerificationAiService],
+  providers: [AttorneyService, VerificationAiService, BarLookupService],
   exports: [AttorneyService],
 })
 export class AttorneyModule {}

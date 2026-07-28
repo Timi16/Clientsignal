@@ -1,0 +1,705 @@
+{
+  "_meta": {
+    "description": "US State Bar Association attorney lookup URLs for bar number verification",
+    "lastUpdated": "2026-07-27",
+    "notes": [
+      "lookup_type: 'GET_DIRECT' = direct URL with bar number in path/query, 'POST_FORM' = requires form POST, 'GET_QUERY' = GET with query parameters, 'API' = JSON API endpoint",
+      "Many state bars use Cloudflare/bot protection - a headless browser (Puppeteer/Playwright) may be required",
+      "Florida and NJ return 403 to curl but work in browsers - likely bot protection",
+      "Some states use third-party platforms (Fastcase, eLicensing, etc.)",
+      "Always check robots.txt and Terms of Service before scraping"
+    ]
+  },
+  "AL": {
+    "state": "Alabama",
+    "organization": "Alabama State Bar",
+    "searchUrl": "https://www.alabar.org/membership/find-a-member/",
+    "lookupType": "GET_QUERY",
+    "urlPattern": "https://www.alabar.org/membership/find-a-member/?s={barNumber}",
+    "formFields": null,
+    "directBarLookup": false,
+    "notes": "Search by name or bar number via query parameter. WordPress-based site."
+  },
+  "AK": {
+    "state": "Alaska",
+    "organization": "Alaska Bar Association",
+    "searchUrl": "https://www.alaskabar.org/for-the-public/attorney-directory/",
+    "lookupType": "GET_QUERY",
+    "urlPattern": null,
+    "formFields": {
+      "method": "GET",
+      "fields": ["name"]
+    },
+    "directBarLookup": false,
+    "notes": "Search primarily by name. Small bar - may need to search by name and cross-reference bar number."
+  },
+  "AZ": {
+    "state": "Arizona",
+    "organization": "State Bar of Arizona",
+    "searchUrl": "https://azbar.legalserviceslink.com/",
+    "lookupType": "GET_QUERY",
+    "urlPattern": null,
+    "formFields": {
+      "method": "GET",
+      "fields": ["q"]
+    },
+    "directBarLookup": false,
+    "alternateUrl": "https://www.azbar.org/for-the-public/find-a-lawyer/",
+    "notes": "Uses LegalServicesLink for public directory. Bar number verification available through court records at azcourts.gov."
+  },
+  "AR": {
+    "state": "Arkansas",
+    "organization": "Arkansas Judiciary",
+    "searchUrl": "https://www.arcourts.gov/professional-licensing/attorney-search",
+    "lookupType": "POST_FORM",
+    "urlPattern": null,
+    "formFields": {
+      "method": "POST",
+      "action": "https://www.arcourts.gov/professional-licensing/attorney-search",
+      "fields": ["bar_number", "last_name", "first_name", "city"]
+    },
+    "directBarLookup": false,
+    "notes": "Managed by Arkansas courts, not bar association. Supports bar number search via form POST."
+  },
+  "CA": {
+    "state": "California",
+    "organization": "State Bar of California",
+    "searchUrl": "https://apps.calbar.ca.gov/attorney/LicenseeSearch/QuickSearch",
+    "lookupType": "GET_DIRECT",
+    "urlPattern": "https://apps.calbar.ca.gov/attorney/Licensee/Detail/{barNumber}",
+    "formFields": null,
+    "directBarLookup": true,
+    "notes": "Direct lookup by bar number in URL path. Returns attorney profile with status, address, discipline history. One of the easiest to scrape. Also supports search at /attorney/LicenseeSearch/QuickSearch."
+  },
+  "CO": {
+    "state": "Colorado",
+    "organization": "Colorado Supreme Court / Colorado Bar Association",
+    "searchUrl": "https://www.coloradosupremecourt.com/Search/AttorneySearch.asp",
+    "lookupType": "POST_FORM",
+    "urlPattern": null,
+    "formFields": {
+      "method": "POST",
+      "action": "https://www.coloradosupremecourt.com/Search/AttorneySearchResults.asp",
+      "fields": ["AttorneyNumber", "LastName", "FirstName", "City"]
+    },
+    "directBarLookup": false,
+    "notes": "Colorado Supreme Court attorney search. Supports attorney number in POST form. Returns 403 to some user agents - may need browser headers."
+  },
+  "CT": {
+    "state": "Connecticut",
+    "organization": "Connecticut Judicial Branch",
+    "searchUrl": "https://www.jud.ct.gov/attorneyfirminquiry/AttorneyFirmInquiry.aspx",
+    "lookupType": "POST_FORM",
+    "urlPattern": null,
+    "formFields": {
+      "method": "POST",
+      "action": "https://www.jud.ct.gov/attorneyfirminquiry/AttorneyFirmInquiry.aspx",
+      "fields": ["JurisNumber", "LastName", "FirstName"],
+      "aspnetViewState": true
+    },
+    "directBarLookup": false,
+    "notes": "ASP.NET WebForms site - requires __VIEWSTATE and __EVENTVALIDATION tokens from initial GET. Uses 'Juris Number' as their bar number identifier."
+  },
+  "DE": {
+    "state": "Delaware",
+    "organization": "Delaware State Bar Association",
+    "searchUrl": "https://courts.delaware.gov/decbar/",
+    "lookupType": "POST_FORM",
+    "urlPattern": null,
+    "formFields": {
+      "method": "POST",
+      "action": "https://courts.delaware.gov/decbar/",
+      "fields": ["last_name", "first_name", "bar_id"]
+    },
+    "directBarLookup": false,
+    "notes": "Delaware Courts website. Search by bar ID number via form POST."
+  },
+  "DC": {
+    "state": "District of Columbia",
+    "organization": "District of Columbia Bar",
+    "searchUrl": "https://my.dcbar.org/memberdirectory",
+    "lookupType": "GET_QUERY",
+    "urlPattern": "https://my.dcbar.org/memberdirectory?searchType=barNumber&barNumber={barNumber}",
+    "formFields": {
+      "method": "GET",
+      "fields": ["searchType", "barNumber", "lastName", "firstName"]
+    },
+    "directBarLookup": true,
+    "notes": "DC Bar member directory at my.dcbar.org. Supports bar number search via query parameter."
+  },
+  "FL": {
+    "state": "Florida",
+    "organization": "The Florida Bar",
+    "searchUrl": "https://www.floridabar.org/directories/find-mbr/",
+    "lookupType": "GET_QUERY",
+    "urlPattern": "https://www.floridabar.org/directories/find-mbr/?lName=&fName=&num={barNumber}",
+    "formFields": {
+      "method": "GET",
+      "fields": ["lName", "fName", "num"]
+    },
+    "directBarLookup": true,
+    "notes": "Direct bar number lookup via 'num' query parameter. Returns 403 to curl/simple HTTP clients - requires browser-like headers or headless browser. Cloudflare protected."
+  },
+  "GA": {
+    "state": "Georgia",
+    "organization": "State Bar of Georgia",
+    "searchUrl": "https://www.gabar.org/MemberSearchResults.cfm",
+    "lookupType": "POST_FORM",
+    "urlPattern": null,
+    "formFields": {
+      "method": "POST",
+      "action": "https://www.gabar.org/MemberSearchResults.cfm",
+      "fields": ["BarNumber", "LastName", "FirstName", "City"]
+    },
+    "directBarLookup": false,
+    "notes": "ColdFusion-based site. Supports bar number search in form POST."
+  },
+  "HI": {
+    "state": "Hawaii",
+    "organization": "Hawaii State Bar Association",
+    "searchUrl": "https://hsba.org/find-a-lawyer",
+    "lookupType": "GET_QUERY",
+    "urlPattern": null,
+    "formFields": {
+      "method": "GET",
+      "action": "https://hsba.org/find-a-lawyer",
+      "fields": ["query"]
+    },
+    "directBarLookup": false,
+    "notes": "HSBA uses Sail AMX platform (modern SPA with Livewire/Alpine.js). HTTP 200 confirmed. Search by name via query field. Uses Algolia search backend. Also check Hawaii Supreme Court at courts.state.hi.us for official records."
+  },
+  "ID": {
+    "state": "Idaho",
+    "organization": "Idaho State Bar",
+    "searchUrl": "https://isb.idaho.gov/licensing/member-search/",
+    "lookupType": "GET_QUERY",
+    "urlPattern": "https://isb.idaho.gov/licensing/member-search/?bar_num={barNumber}",
+    "formFields": {
+      "method": "GET",
+      "fields": ["bar_num", "lname", "fname"]
+    },
+    "directBarLookup": true,
+    "notes": "WordPress site with direct bar number query parameter support."
+  },
+  "IL": {
+    "state": "Illinois",
+    "organization": "Attorney Registration and Disciplinary Commission (ARDC)",
+    "searchUrl": "https://www.iardc.org/Lawyer/Search",
+    "lookupType": "POST_FORM",
+    "urlPattern": null,
+    "formFields": {
+      "method": "POST",
+      "action": "https://www.iardc.org/Lawyer/SearchResults",
+      "fields": ["LastName", "FirstName", "IncludeFormerNames", "LastNameMatch", "Status"],
+      "csrfToken": "__RequestVerificationToken"
+    },
+    "directBarLookup": false,
+    "alternateApi": "https://www.iardc.org/Lawyer/Detail/{ardcNumber}",
+    "notes": "ARDC site requires anti-forgery token (__RequestVerificationToken). POST to /Lawyer/SearchResults. Detail pages may be accessible via /Lawyer/Detail/{ardcNumber} if you know the ARDC registration number. Search form doesn't have a visible bar number field - search by name then extract ARDC number from results."
+  },
+  "IN": {
+    "state": "Indiana",
+    "organization": "Indiana Supreme Court Roll of Attorneys",
+    "searchUrl": "https://courtapps.in.gov/rollofattorneys",
+    "lookupType": "GET_QUERY",
+    "urlPattern": "https://courtapps.in.gov/rollofattorneys/Attorney?attyNum={barNumber}",
+    "formFields": {
+      "method": "GET",
+      "fields": ["attyNum", "lastName", "firstName"]
+    },
+    "directBarLookup": true,
+    "notes": "Indiana courts Roll of Attorneys. Direct lookup by attorney number via query string."
+  },
+  "IA": {
+    "state": "Iowa",
+    "organization": "Iowa Judicial Branch",
+    "searchUrl": "https://www.iacourtcommissions.org/Bar_Admissions/Attorney_Search.asp",
+    "lookupType": "POST_FORM",
+    "urlPattern": null,
+    "formFields": {
+      "method": "POST",
+      "fields": ["BarNumber", "LastName", "FirstName"]
+    },
+    "directBarLookup": false,
+    "notes": "Iowa Court Commissions attorney search. Classic ASP site."
+  },
+  "KS": {
+    "state": "Kansas",
+    "organization": "Kansas Judicial Branch",
+    "searchUrl": "https://www.kansasjudicialcouncil.org/attorneys",
+    "lookupType": "GET_QUERY",
+    "urlPattern": null,
+    "formFields": {
+      "method": "GET",
+      "fields": ["lastName", "firstName"]
+    },
+    "directBarLookup": false,
+    "alternateUrl": "https://www.kscourts.org/Cases-Opinions/Attorney-Search",
+    "notes": "Kansas courts provide attorney search. May also check Kansas Bar Association at ksbar.org."
+  },
+  "KY": {
+    "state": "Kentucky",
+    "organization": "Kentucky Bar Association",
+    "searchUrl": "https://www.kybar.org/For-Public/Find-a-Lawyer",
+    "lookupType": "POST_FORM",
+    "urlPattern": null,
+    "formFields": {
+      "method": "POST",
+      "fields": ["bar_number", "last_name", "first_name"],
+      "aspnetViewState": true
+    },
+    "directBarLookup": false,
+    "notes": "Kentucky Bar Association find-a-lawyer page. HTTP 200 confirmed. DNN (DotNetNuke) platform - requires ViewState. Also check Kentucky Supreme Court at kycourts.gov for official licensing records."
+  },
+  "LA": {
+    "state": "Louisiana",
+    "organization": "Louisiana State Bar Association",
+    "searchUrl": "https://www.lsba.org/MD321654/MembershipDirectory.aspx",
+    "lookupType": "POST_FORM",
+    "urlPattern": null,
+    "formFields": {
+      "method": "POST",
+      "fields": ["BarNumber", "LastName", "FirstName"],
+      "aspnetViewState": true
+    },
+    "directBarLookup": false,
+    "notes": "ASP.NET WebForms site (iMIS platform). HTTP 200 confirmed at /MD321654/MembershipDirectory.aspx. Requires ViewState tokens. Supports bar roll number search."
+  },
+  "ME": {
+    "state": "Maine",
+    "organization": "Maine Board of Overseers of the Bar",
+    "searchUrl": "https://apps.web.maine.gov/cgi-bin/online/maine_bar/attorney_directory.pl",
+    "lookupType": "POST_FORM",
+    "urlPattern": null,
+    "formFields": {
+      "method": "POST",
+      "action": "https://apps.web.maine.gov/cgi-bin/online/maine_bar/attorney_directory.pl",
+      "fields": ["fname", "mname", "lname", "bar_number", "city", "state", "zip", "county"]
+    },
+    "directBarLookup": false,
+    "notes": "Maine.gov official attorney directory (CGI/Perl). HTTP 200 confirmed. Bar numbers are 6 digits with leading zeros (e.g., 009999). Supports bar number search via POST form."
+  },
+  "MD": {
+    "state": "Maryland",
+    "organization": "Maryland Judiciary",
+    "searchUrl": "https://www.mdcourts.gov/attysearch",
+    "lookupType": "GET_QUERY",
+    "urlPattern": null,
+    "formFields": {
+      "method": "GET",
+      "fields": ["search"]
+    },
+    "directBarLookup": false,
+    "alternateUrl": "https://jportal.mdcourts.gov/aisattorneyportal",
+    "notes": "Maryland Judiciary attorney listing/search. HTTP 200 confirmed. Also see Attorney Information System (AIS) portal at jportal.mdcourts.gov. Maryland uses longer bar numbers (up to 10 digits)."
+  },
+  "MA": {
+    "state": "Massachusetts",
+    "organization": "Massachusetts Board of Bar Overseers",
+    "searchUrl": "https://www.massbbo.org/s/",
+    "lookupType": "GET_QUERY",
+    "urlPattern": null,
+    "formFields": {
+      "method": "GET",
+      "fields": ["search"]
+    },
+    "directBarLookup": false,
+    "notes": "Board of Bar Overseers. Redirects to Salesforce-based site at massbbo.org/s/. BBO number is their version of bar number. May need to navigate SPA to find search functionality."
+  },
+  "MI": {
+    "state": "Michigan",
+    "organization": "State Bar of Michigan",
+    "searchUrl": "https://www.zeekbeek.com/SBM",
+    "lookupType": "GET_QUERY",
+    "urlPattern": "https://www.zeekbeek.com/SBM/searchresult?pNumber={barNumber}",
+    "formFields": {
+      "method": "GET",
+      "fields": ["pNumber", "lastName", "firstName"]
+    },
+    "directBarLookup": true,
+    "notes": "Michigan uses ZeekBeek platform for member directory. Bar numbers may be prefixed with 'P'. Direct lookup via pNumber query parameter."
+  },
+  "MN": {
+    "state": "Minnesota",
+    "organization": "Minnesota Judicial Branch",
+    "searchUrl": "https://www.mncourts.gov/Find-an-Attorney.aspx",
+    "lookupType": "POST_FORM",
+    "urlPattern": null,
+    "formFields": {
+      "method": "POST",
+      "fields": ["BarNumber", "LastName", "FirstName"],
+      "aspnetViewState": true
+    },
+    "directBarLookup": false,
+    "notes": "Minnesota courts attorney search. ASP.NET site - requires ViewState. Returns 403 to some clients - may need headless browser."
+  },
+  "MS": {
+    "state": "Mississippi",
+    "organization": "The Mississippi Bar",
+    "searchUrl": "https://www.msbar.org/for-the-public/lawyer-directory/",
+    "lookupType": "GET_QUERY",
+    "urlPattern": null,
+    "formFields": {
+      "method": "GET",
+      "fields": ["search"]
+    },
+    "directBarLookup": false,
+    "notes": "Mississippi Bar lawyer directory. Search by name primarily."
+  },
+  "MO": {
+    "state": "Missouri",
+    "organization": "Missouri Bar / Missouri Courts",
+    "searchUrl": "https://www.courts.mo.gov/cnet/attorneySearch.do",
+    "lookupType": "POST_FORM",
+    "urlPattern": "https://www.courts.mo.gov/cnet/attorneySearch.do?barNumber={barNumber}",
+    "formFields": {
+      "method": "POST",
+      "action": "https://www.courts.mo.gov/cnet/attorneySearch.do",
+      "fields": ["barNumber", "lastName", "firstName"]
+    },
+    "directBarLookup": true,
+    "notes": "Missouri courts Case.net attorney search. Supports bar number as POST field or GET query parameter."
+  },
+  "MT": {
+    "state": "Montana",
+    "organization": "State Bar of Montana",
+    "searchUrl": "https://www.montanabar.org/search/custom.asp?id=2406",
+    "lookupType": "POST_FORM",
+    "urlPattern": null,
+    "formFields": {
+      "method": "POST",
+      "fields": ["bar_number", "last_name", "first_name"]
+    },
+    "directBarLookup": false,
+    "notes": "Montana Bar Association custom search form."
+  },
+  "NE": {
+    "state": "Nebraska",
+    "organization": "Nebraska State Bar Association",
+    "searchUrl": "https://www.nebar.com/search/custom.asp?id=2016",
+    "lookupType": "POST_FORM",
+    "urlPattern": null,
+    "formFields": {
+      "method": "POST",
+      "fields": ["bar_number", "last_name", "first_name"]
+    },
+    "directBarLookup": false,
+    "alternateUrl": "https://supremecourt.nebraska.gov/administration/attorney-services/attorney-search",
+    "notes": "Nebraska Bar Association or Supreme Court attorney search."
+  },
+  "NV": {
+    "state": "Nevada",
+    "organization": "State Bar of Nevada",
+    "searchUrl": "https://www.nvbar.org/find-a-lawyer/",
+    "lookupType": "GET_QUERY",
+    "urlPattern": "https://www.nvbar.org/find-a-lawyer/?s={barNumber}",
+    "formFields": {
+      "method": "GET",
+      "fields": ["s"]
+    },
+    "directBarLookup": false,
+    "notes": "Nevada Bar find-a-lawyer page. Search by name. Bar number verification may need supplementary check."
+  },
+  "NH": {
+    "state": "New Hampshire",
+    "organization": "New Hampshire Bar Association",
+    "searchUrl": "https://www.nhbar.org/find-a-lawyer",
+    "lookupType": "GET_QUERY",
+    "urlPattern": null,
+    "formFields": {
+      "method": "GET",
+      "fields": ["search"]
+    },
+    "directBarLookup": false,
+    "notes": "NH Bar find-a-lawyer. Primarily name-based search."
+  },
+  "NJ": {
+    "state": "New Jersey",
+    "organization": "New Jersey Courts",
+    "searchUrl": "https://www.njcourts.gov/attorneys/attorney-search",
+    "lookupType": "GET_QUERY",
+    "urlPattern": "https://www.njcourts.gov/attorneys/attorney-search?barId={barNumber}",
+    "formFields": {
+      "method": "GET",
+      "fields": ["barId", "lastName", "firstName"]
+    },
+    "directBarLookup": true,
+    "notes": "New Jersey Courts attorney search. Returns 403 to simple HTTP clients - Cloudflare protected. Requires browser-like headers or headless browser."
+  },
+  "NM": {
+    "state": "New Mexico",
+    "organization": "State Bar of New Mexico",
+    "searchUrl": "https://www.sbnm.org/For-Public/Find-an-Attorney",
+    "lookupType": "GET_QUERY",
+    "urlPattern": null,
+    "formFields": {
+      "method": "GET",
+      "fields": ["search"]
+    },
+    "directBarLookup": false,
+    "notes": "State Bar of New Mexico attorney search."
+  },
+  "NY": {
+    "state": "New York",
+    "organization": "New York State Unified Court System",
+    "searchUrl": "https://iapps.courts.state.ny.us/attorneyservices/search",
+    "lookupType": "POST_FORM",
+    "urlPattern": null,
+    "formFields": {
+      "method": "POST",
+      "action": "https://iapps.courts.state.ny.us/attorneyservices/search",
+      "fields": ["regNo", "firstName", "lastName", "searchType"]
+    },
+    "directBarLookup": false,
+    "alternateApi": "https://iapps.courts.state.ny.us/attorneyservices/wicket/bookmarkable/page/com.courts.attsvc.search.SearchResultPage?regNo={regNumber}",
+    "notes": "NY Unified Court System. Uses Cloudflare protection - returns 403 to curl. Registration number lookup via POST form. Uses Apache Wicket framework. The 'regNo' field corresponds to the NY registration number (not bar number per se). Also try NYSBA at nysba.org for additional search."
+  },
+  "NC": {
+    "state": "North Carolina",
+    "organization": "North Carolina State Bar",
+    "searchUrl": "https://portal.ncbar.gov/verification/search.aspx",
+    "lookupType": "POST_FORM",
+    "urlPattern": null,
+    "formFields": {
+      "method": "POST",
+      "action": "https://portal.ncbar.gov/verification/search.aspx",
+      "fields": ["BarNumber", "LastName", "FirstName"],
+      "aspnetViewState": true
+    },
+    "directBarLookup": false,
+    "notes": "NC State Bar verification portal. ASP.NET WebForms - requires ViewState tokens. HTTP 200 confirmed. Linked from ncbar.gov homepage as 'Lawyer Search'."
+  },
+  "ND": {
+    "state": "North Dakota",
+    "organization": "State Bar Association of North Dakota",
+    "searchUrl": "https://www.sband.org/page/findlawyer",
+    "lookupType": "GET_QUERY",
+    "urlPattern": null,
+    "formFields": {
+      "method": "GET",
+      "fields": ["search"]
+    },
+    "directBarLookup": false,
+    "notes": "SBAND find a lawyer page. Primarily name-based search."
+  },
+  "OH": {
+    "state": "Ohio",
+    "organization": "Supreme Court of Ohio",
+    "searchUrl": "https://www.supremecourt.ohio.gov/AttorneySearch/",
+    "lookupType": "GET_QUERY",
+    "urlPattern": "https://www.supremecourt.ohio.gov/AttorneySearch/#/search?registrationNumber={barNumber}",
+    "formFields": {
+      "method": "GET",
+      "fields": ["registrationNumber", "lastName", "firstName"]
+    },
+    "directBarLookup": true,
+    "notes": "Ohio Supreme Court attorney search. SPA (Single Page Application) - likely uses JavaScript API calls under the hood. May need to intercept API calls for reliable scraping."
+  },
+  "OK": {
+    "state": "Oklahoma",
+    "organization": "Oklahoma Bar Association",
+    "searchUrl": "https://www.okbar.org/findalawyer/",
+    "lookupType": "GET_QUERY",
+    "urlPattern": null,
+    "formFields": {
+      "method": "GET",
+      "fields": ["search"]
+    },
+    "directBarLookup": false,
+    "notes": "Oklahoma Bar Association find-a-lawyer page. HTTP 200 confirmed. Primarily name-based search."
+  },
+  "OR": {
+    "state": "Oregon",
+    "organization": "Oregon State Bar",
+    "searchUrl": "https://www.osbar.org/member-directory",
+    "lookupType": "GET_QUERY",
+    "urlPattern": "https://www.osbar.org/member-directory?barNum={barNumber}",
+    "formFields": {
+      "method": "GET",
+      "fields": ["barNum", "lastName", "firstName"]
+    },
+    "directBarLookup": true,
+    "notes": "Oregon State Bar member directory. Supports bar number query parameter. HTTP 200 confirmed."
+  },
+  "PA": {
+    "state": "Pennsylvania",
+    "organization": "Pennsylvania Disciplinary Board",
+    "searchUrl": "https://www.padisciplinaryboard.org/for-the-public/find-attorney",
+    "lookupType": "POST_FORM",
+    "urlPattern": null,
+    "formFields": {
+      "method": "POST",
+      "fields": ["attorneyId", "lastName", "firstName"]
+    },
+    "directBarLookup": false,
+    "alternateUrl": "https://ujsportal.pacourts.us/AttorneySearch",
+    "notes": "PA Disciplinary Board attorney search. Also check UJS Portal at pacourts.us. May timeout from some networks."
+  },
+  "RI": {
+    "state": "Rhode Island",
+    "organization": "Rhode Island Judiciary",
+    "searchUrl": "https://www.courts.ri.gov/AttorneyResources/Pages/AttorneyDirectory.aspx",
+    "lookupType": "POST_FORM",
+    "urlPattern": null,
+    "formFields": {
+      "method": "POST",
+      "fields": ["BarNumber", "LastName", "FirstName"],
+      "aspnetViewState": true
+    },
+    "directBarLookup": false,
+    "notes": "Rhode Island Judiciary attorney directory. ASP.NET WebForms - requires ViewState tokens."
+  },
+  "SC": {
+    "state": "South Carolina",
+    "organization": "South Carolina Bar",
+    "searchUrl": "https://www.scbar.org/lawyers-and-judges-listing/",
+    "lookupType": "GET_QUERY",
+    "urlPattern": null,
+    "formFields": {
+      "method": "GET",
+      "fields": ["search"]
+    },
+    "directBarLookup": false,
+    "alternateUrl": "https://www.sccourts.org/attorneys/",
+    "notes": "SC Bar or SC Courts attorney listing. SC Supreme Court also maintains attorney records."
+  },
+  "SD": {
+    "state": "South Dakota",
+    "organization": "State Bar of South Dakota",
+    "searchUrl": "https://www.statebarofsouthdakota.com/page/attorney-directory",
+    "lookupType": "GET_QUERY",
+    "urlPattern": null,
+    "formFields": {
+      "method": "GET",
+      "fields": ["search"]
+    },
+    "directBarLookup": false,
+    "notes": "State Bar of South Dakota attorney directory. Small bar - primarily name-based search."
+  },
+  "TN": {
+    "state": "Tennessee",
+    "organization": "Tennessee Board of Professional Responsibility",
+    "searchUrl": "https://www.tbpr.org/for-the-public/online-attorney-directory",
+    "lookupType": "GET_QUERY",
+    "urlPattern": null,
+    "formFields": {
+      "method": "GET",
+      "fields": ["query"]
+    },
+    "directBarLookup": false,
+    "alternateUrl": "https://www.tbpr.org/for-legal-professionals/attorney-license-information",
+    "notes": "Tennessee Board of Professional Responsibility online attorney directory. HTTP 200 confirmed. Uses Ruby on Rails with authenticity_token. Search by name. BPR Number is their bar number identifier."
+  },
+  "TX": {
+    "state": "Texas",
+    "organization": "State Bar of Texas",
+    "searchUrl": "https://www.texasbar.com/AM/Template.cfm?Section=Find_A_Lawyer&Template=/CustomSource/MemberDirectory/Search_Form_Client_Main.cfm&Find=0",
+    "lookupType": "POST_FORM",
+    "urlPattern": null,
+    "formFields": {
+      "method": "POST",
+      "action": "https://www.texasbar.com/AM/Template.cfm?Section=Find_A_Lawyer&Template=/CustomSource/MemberDirectory/Result_form_client.cfm",
+      "fields": ["Firstname", "LastName", "CompanyName", "Submitted", "PracticeArea"]
+    },
+    "directBarLookup": false,
+    "alternateApi": "https://www.texasbar.com/AM/Template.cfm?Section=Find_A_Lawyer&Template=/CustomSource/MemberDirectory/MemberDirectoryDetail.cfm&ContactID={contactId}",
+    "notes": "Texas Bar ColdFusion-based. POST form with name search. Individual profiles accessed via ContactID parameter (not bar number directly). Bar numbers are 8 digits. To look up by bar number, may need to search by name first or use undocumented parameters. HTTP 200 confirmed."
+  },
+  "UT": {
+    "state": "Utah",
+    "organization": "Utah State Bar",
+    "searchUrl": "https://www.utahbar.org/member-services/member-directory/",
+    "lookupType": "GET_QUERY",
+    "urlPattern": null,
+    "formFields": {
+      "method": "GET",
+      "fields": ["search"]
+    },
+    "directBarLookup": false,
+    "alternateUrl": "https://services.utahbar.org/Member-Directory",
+    "notes": "Utah State Bar member directory. Also check services.utahbar.org."
+  },
+  "VT": {
+    "state": "Vermont",
+    "organization": "Vermont Judiciary",
+    "searchUrl": "https://www.vermontjudiciary.org/attorneys",
+    "lookupType": "GET_QUERY",
+    "urlPattern": null,
+    "formFields": {
+      "method": "GET",
+      "fields": ["search"]
+    },
+    "directBarLookup": false,
+    "notes": "Vermont Judiciary attorney search. Small bar - limited search capabilities."
+  },
+  "VA": {
+    "state": "Virginia",
+    "organization": "Virginia State Bar",
+    "searchUrl": "https://vsb.org/Shared_Content/Directory/va-lawyer-directory.aspx",
+    "lookupType": "POST_FORM",
+    "urlPattern": null,
+    "formFields": {
+      "method": "POST",
+      "action": "https://vsb.org/Shared_Content/Directory/va-lawyer-directory.aspx",
+      "fields": ["__VIEWSTATE", "__VIEWSTATEGENERATOR", "__EVENTTARGET", "__EVENTARGUMENT", "__RequestVerificationToken"],
+      "aspnetViewState": true
+    },
+    "directBarLookup": false,
+    "notes": "Virginia State Bar lawyer directory. ASP.NET WebForms site (Personify/iMIS platform) - requires ViewState, RequestVerificationToken. HTTP 200 confirmed. Complex form with many hidden fields."
+  },
+  "WA": {
+    "state": "Washington",
+    "organization": "Washington State Bar Association (WSBA)",
+    "searchUrl": "https://www.mywsba.org/LawyerDirectory/LawyerSearch.aspx",
+    "lookupType": "POST_FORM",
+    "urlPattern": null,
+    "formFields": {
+      "method": "POST",
+      "fields": ["BarNumber", "LastName", "FirstName"],
+      "aspnetViewState": true
+    },
+    "directBarLookup": false,
+    "alternateUrl": "https://www.wsba.org/for-the-public/find-legal-help",
+    "notes": "WSBA lawyer directory at mywsba.org. ASP.NET WebForms site. wsba.org/for-the-public/find-legal-help returns 200 and links to the actual search. Supports bar number search via POST."
+  },
+  "WV": {
+    "state": "West Virginia",
+    "organization": "West Virginia State Bar",
+    "searchUrl": "https://www.wvbar.org/find-an-attorney/",
+    "lookupType": "GET_QUERY",
+    "urlPattern": null,
+    "formFields": {
+      "method": "GET",
+      "fields": ["search"]
+    },
+    "directBarLookup": false,
+    "notes": "WV State Bar attorney search. Also check WV Supreme Court at courtswv.gov."
+  },
+  "WI": {
+    "state": "Wisconsin",
+    "organization": "State Bar of Wisconsin",
+    "searchUrl": "https://www.wisbar.org/formembers/Pages/Find-a-Lawyer.aspx",
+    "lookupType": "GET_QUERY",
+    "urlPattern": null,
+    "formFields": {
+      "method": "GET",
+      "fields": ["search"]
+    },
+    "directBarLookup": false,
+    "alternateUrl": "https://www.wicourts.gov/services/attorney/lawyersearch.htm",
+    "notes": "State Bar of Wisconsin or Wisconsin Courts attorney search. Wisconsin courts site may provide more reliable programmatic access."
+  },
+  "WY": {
+    "state": "Wyoming",
+    "organization": "Wyoming State Bar",
+    "searchUrl": "https://www.wyomingbar.org/for-the-public/lawyer-referral-service/find-a-lawyer/",
+    "lookupType": "GET_QUERY",
+    "urlPattern": null,
+    "formFields": {
+      "method": "GET",
+      "fields": ["search"]
+    },
+    "directBarLookup": false,
+    "notes": "Wyoming State Bar find-a-lawyer. Small bar - primarily name-based search."
+  }
+}

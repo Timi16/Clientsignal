@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Groq from 'groq-sdk';
+import { BarLookupService, BarLookupResult } from './bar-lookup.service';
 
 /* ── US Bar Number Patterns (state → regex) ─────────────────── */
 const BAR_PATTERNS: Record<string, RegExp> = {
@@ -91,6 +92,7 @@ export interface VerificationResult {
   method: 'ai-auto' | 'ai-review' | 'ai-reject';
   systemChecks: SystemCheckResult;
   aiAnalysis: AiAnalysisResult | null;
+  barLookup: BarLookupResult | null;
   decidedAt: string;
   model: string;
 }
@@ -100,7 +102,10 @@ export class VerificationAiService {
   private readonly logger = new Logger(VerificationAiService.name);
   private groq: Groq | null = null;
 
-  constructor(private readonly config: ConfigService) {
+  constructor(
+    private readonly config: ConfigService,
+    private readonly barLookup: BarLookupService,
+  ) {
     const apiKey = this.config.get<string>('GROQ_API_KEY');
     if (apiKey) {
       this.groq = new Groq({ apiKey });
