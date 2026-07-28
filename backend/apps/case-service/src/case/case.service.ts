@@ -1,17 +1,38 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { ClientProxy, RpcException } from '@nestjs/microservices';
+import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
+import { ClientGrpc, ClientProxy, RpcException } from '@nestjs/microservices';
+import { Observable, lastValueFrom } from 'rxjs';
 import { eq, and, count as countFn, ilike, desc, asc, sql } from 'drizzle-orm';
 import { DatabaseService } from '../database/database.service';
 import { cases, caseDocuments, caseNotes, Case, CaseDocument } from '../database/schema';
 import { NatsSubjects, Services, createPresignedUploadUrl, createPresignedDownloadUrl } from '@cs/common';
 import type { CaseCreatedEvent, CaseStageUpdatedEvent, DocumentRequestedEvent } from '@cs/common';
 
+interface AuthServiceGrpc {
+  getUser(data: { id: string }): Observable<{ user: { name: string; email: string } }>;
+}
+
 @Injectable()
-export class CaseService {
+export class CaseService implements OnModuleInit {
+  private authService!: AuthServiceGrpc;
+
   constructor(
     private readonly database: DatabaseService,
     @Inject(Services.NATS) private readonly natsClient: ClientProxy,
+    @Inject(Services.AUTH) private readonly authClient: ClientGrpc,
   ) {}
+
+  onModuleInit() {
+    this.authService = this.authClient.getService<AuthServiceGrpc>('AuthService');
+  }
+
+  private async lookupUser(userId: string): Promise<{ name: string; email: string }> {
+    try {
+      const res = await lastValueFrom(this.authService.getUser({ id: userId }));
+      return { name: res.user?.name || '', email: res.user?.email || '' };
+    } catch {
+      return { name: '', email: '' };
+    }
+  }
 
   async getCase(data: { id: string }) {
     const [caseRecord] = await this.database.db.select().from(cases)
@@ -83,11 +104,12 @@ export class CaseService {
       .where(eq(cases.id, data.caseId))
       .returning();
 
+    const client = await this.lookupUser(updated.clientUserId);
     const event: CaseStageUpdatedEvent = {
       caseId: data.caseId,
       clientUserId: updated.clientUserId,
-      clientEmail: '',
-      clientName: '',
+      clientEmail: client.email,
+      clientName: client.name,
       previousStage,
       newStage: data.stage,
       status: updated.status,
@@ -213,12 +235,13 @@ export class CaseService {
       .where(eq(cases.id, data.caseId)).limit(1);
 
     if (caseRecord) {
+      const client = await this.lookupUser(caseRecord.clientUserId);
       const event: DocumentRequestedEvent = {
         caseId: data.caseId,
         documentName: data.documentName,
         clientUserId: caseRecord.clientUserId,
-        clientEmail: '',
-        clientName: '',
+        clientEmail: client.email,
+        clientName: client.name,
         attorneyName: data.attorneyName || '',
       };
       this.natsClient.emit(NatsSubjects.DOCUMENT_REQUESTED, event);
@@ -293,6 +316,8 @@ export class CaseService {
     practiceArea: string;
     summary: string;
     city: string;
+    state?: string;
+    documents?: { fileKey: string; fileName: string; mimeType?: string }[];
   }) {
     // Check for duplicate
     const [existing] = await this.database.db.select().from(cases)
@@ -307,10 +332,26 @@ export class CaseService {
       practiceArea: data.practiceArea as any,
       matter: data.practiceArea,
       city: data.city,
+      state: data.state,
       status: 'matched',
       stage: 1,
       summary: data.summary,
     }).returning();
+
+    // Copy lead documents to case documents
+    if (data.documents?.length) {
+      await this.database.db.insert(caseDocuments).values(
+        data.documents.map(doc => ({
+          caseId: caseRecord.id,
+          fileKey: doc.fileKey,
+          fileName: doc.fileName,
+          mimeType: doc.mimeType,
+          status: doc.fileKey ? 'done' as const : 'requested' as const,
+          required: false,
+          uploadedAt: doc.fileKey ? new Date() : undefined,
+        })),
+      );
+    }
 
     const event: CaseCreatedEvent = {
       caseId: caseRecord.id,

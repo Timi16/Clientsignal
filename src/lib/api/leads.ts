@@ -54,6 +54,13 @@ export async function getLead(id: string): Promise<{ lead: Lead }> {
   return get<{ lead: Lead }>(`/leads/${id}`);
 }
 
+export interface MatchedAttorney {
+  name: string;
+  firmName: string;
+  yearsExperience: number;
+  responseTimeAvg: string;
+}
+
 export async function submitIntake(data: {
   practiceArea: string;
   subType?: string;
@@ -64,8 +71,8 @@ export async function submitIntake(data: {
   consent: boolean;
   phone?: string;
   channel?: string;
-}): Promise<{ lead: Lead }> {
-  return post<{ lead: Lead }>("/leads/intake", { body: data });
+}): Promise<{ lead: Lead; matchedAttorney: MatchedAttorney | null }> {
+  return post<{ lead: Lead; matchedAttorney: MatchedAttorney | null }>("/leads/intake", { body: data });
 }
 
 export async function viewLead(id: string) {

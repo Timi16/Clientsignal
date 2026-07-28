@@ -107,8 +107,16 @@ message LeadMessage {
   string created_at = 18;
 }
 
+message MatchedAttorneyInfo {
+  string name = 1;
+  string firm_name = 2;
+  int32 years_experience = 3;
+  string response_time_avg = 4;
+}
+
 message LeadResponse {
   LeadMessage lead = 1;
+  MatchedAttorneyInfo matched_attorney = 2;
 }
 
 message LeadsResponse {

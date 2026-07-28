@@ -81,6 +81,12 @@ export interface LeadScoredEvent {
   estimatedValue: string;
 }
 
+export interface LeadDocument {
+  fileKey: string;
+  fileName: string;
+  mimeType?: string;
+}
+
 export interface LeadMatchedEvent {
   leadId: string;
   clientUserId: string;
@@ -95,6 +101,8 @@ export interface LeadMatchedEvent {
   urgencyScore: number;
   summary: string;
   city: string;
+  state?: string;
+  documents?: LeadDocument[];
 }
 
 export interface LeadViewedEvent {

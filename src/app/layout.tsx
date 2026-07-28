@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { I18nProvider } from "@/lib/i18n";
 import { AuthProvider } from "@/lib/auth-context";
+import { SocketProvider } from "@/lib/socket";
 import { LanguageSelectorPopup } from "@/components/language-selector";
 
 export const metadata: Metadata = {
@@ -27,10 +28,12 @@ export default function RootLayout({
       </head>
       <body className="h-full">
         <AuthProvider>
-          <I18nProvider>
-            {children}
-            <LanguageSelectorPopup />
-          </I18nProvider>
+          <SocketProvider>
+            <I18nProvider>
+              {children}
+              <LanguageSelectorPopup />
+            </I18nProvider>
+          </SocketProvider>
         </AuthProvider>
       </body>
     </html>

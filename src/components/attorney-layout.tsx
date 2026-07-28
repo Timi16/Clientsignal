@@ -1,11 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { Icon } from "@/components/icons";
 import { Logo, Verified, Avatar } from "@/components/ui";
 import { useRequireAuth } from "@/lib/use-require-auth";
 import { useAuth } from "@/lib/auth-context";
+import { useSocket } from "@/lib/socket";
 
 const NAV = [
   { label: "Dashboard", icon: "grid", href: "/attorney/dashboard" },
@@ -30,8 +32,10 @@ export default function AppLayout({
 }) {
   const router = useRouter();
   const path = usePathname();
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
   const { user, loading: authLoading } = useRequireAuth("attorney");
   const { logout } = useAuth();
+  const { notifications: socketNotifications, unreadCount: socketUnread, markAllRead } = useSocket();
   const userName = user?.name || "Attorney";
 
   if (authLoading || !user) {
@@ -195,30 +199,94 @@ export default function AppLayout({
           </div>
           <div className="row" style={{ gap: 16 }}>
             {action}
-            <button
-              style={{
-                width: 38,
-                height: 38,
-                borderRadius: 10,
-                border: "1.5px solid var(--line)",
-                display: "grid",
-                placeItems: "center",
-                position: "relative",
-              }}
-            >
-              <Icon name="bell" size={18} color="var(--text-2)" />
-              <span
+            <div style={{ position: "relative" }}>
+              <button
+                onClick={() => { setNotificationsOpen(o => !o); markAllRead(); }}
                 style={{
-                  position: "absolute",
-                  top: 7,
-                  right: 8,
-                  width: 7,
-                  height: 7,
-                  borderRadius: "50%",
-                  background: "var(--coral)",
+                  width: 38,
+                  height: 38,
+                  borderRadius: 10,
+                  border: "1.5px solid var(--line)",
+                  display: "grid",
+                  placeItems: "center",
+                  position: "relative",
                 }}
-              />
-            </button>
+              >
+                <Icon name="bell" size={18} color="var(--text-2)" />
+                {socketUnread > 0 && (
+                  <span
+                    style={{
+                      position: "absolute",
+                      top: 4,
+                      right: 4,
+                      minWidth: 16,
+                      height: 16,
+                      borderRadius: 999,
+                      background: "var(--coral)",
+                      border: "2px solid #fff",
+                      color: "#fff",
+                      fontSize: 9,
+                      fontWeight: 700,
+                      display: "grid",
+                      placeItems: "center",
+                      lineHeight: 1,
+                    }}
+                  >
+                    {socketUnread}
+                  </span>
+                )}
+              </button>
+              {notificationsOpen && (
+                <div
+                  className="card"
+                  style={{
+                    position: "absolute",
+                    top: 48,
+                    right: 0,
+                    width: 360,
+                    padding: 8,
+                    boxShadow: "var(--sh-lg)",
+                    zIndex: 40,
+                  }}
+                >
+                  <div className="row between" style={{ padding: "10px 12px 12px", borderBottom: "1px solid var(--line)" }}>
+                    <strong style={{ fontSize: 14 }}>Notifications</strong>
+                  </div>
+                  <div className="stack" style={{ gap: 4, paddingTop: 6 }}>
+                    {socketNotifications.length === 0 ? (
+                      <p style={{ padding: "16px 12px", fontSize: 13, color: "var(--text-3)", textAlign: "center" }}>Nothing here yet.</p>
+                    ) : (
+                      socketNotifications.slice(0, 8).map(n => (
+                        <button
+                          key={n.id}
+                          onClick={() => { setNotificationsOpen(false); router.push(n.href); }}
+                          style={{
+                            width: "100%",
+                            padding: "12px",
+                            borderRadius: 10,
+                            display: "flex",
+                            gap: 12,
+                            alignItems: "flex-start",
+                            textAlign: "left",
+                            background: n.read ? "transparent" : "var(--paper)",
+                          }}
+                          onMouseEnter={e => (e.currentTarget.style.background = "var(--paper)")}
+                          onMouseLeave={e => (e.currentTarget.style.background = n.read ? "transparent" : "var(--paper)")}
+                        >
+                          <span style={{ width: 34, height: 34, borderRadius: 9, background: "var(--paper-2)", color: n.color, display: "grid", placeItems: "center", flex: "none" }}>
+                            <Icon name={n.icon} size={16} />
+                          </span>
+                          <span className="stack" style={{ gap: 2, flex: 1 }}>
+                            <strong style={{ fontSize: 13.5, color: "var(--ink)" }}>{n.title}</strong>
+                            <span style={{ fontSize: 12.5, color: "var(--text-3)", lineHeight: 1.4 }}>{n.body}</span>
+                          </span>
+                        </button>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </header>
 

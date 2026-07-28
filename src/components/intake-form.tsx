@@ -53,7 +53,7 @@ const PRACTICE_PROMPTS: Record<string, { signals: string[]; docs: string[]; scor
   },
 };
 
-function IntakeDone({ data, score, urgency, lead }: { data: IntakeData; score: number; urgency: number; lead?: leadsApi.Lead | null }) {
+function IntakeDone({ data, score, urgency, lead, matchedAttorney }: { data: IntakeData; score: number; urgency: number; lead?: leadsApi.Lead | null; matchedAttorney?: leadsApi.MatchedAttorney | null }) {
   const router = useRouter();
   const [phase, setPhase] = useState(0);
   const displayScore = lead?.qualityScore ?? score;
@@ -111,20 +111,22 @@ function IntakeDone({ data, score, urgency, lead }: { data: IntakeData; score: n
           </div>
         </div>
 
-        <div className="card rise" style={{ padding: 22, marginBottom: 28, animationDelay: ".2s", background: "var(--pine)", color: "var(--on-pine)" }}>
-          <span className="eyebrow" style={{ color: "var(--gold-soft)" }}>Matched attorney</span>
-          <div className="row" style={{ gap: 14, marginTop: 14 }}>
-            <Avatar name="Sarah Mitchell" size={54} color="var(--gold-deep)" />
-            <div className="stack" style={{ gap: 4 }}>
-              <div className="row" style={{ gap: 7 }}><strong style={{ fontSize: 17 }}>Sarah Mitchell</strong><Verified size={16} /></div>
-              <span style={{ fontSize: 13.5, color: "rgba(234,240,249,0.7)" }}>Mitchell &amp; Cole LLP · 12 yrs · {CASE_TYPES[data.type]?.label}</span>
-            </div>
-            <div className="stack" style={{ marginLeft: "auto", textAlign: "right" }}>
-              <span className="mono" style={{ fontSize: 18, color: "var(--gold-soft)" }}>~4 min</span>
-              <span style={{ fontSize: 11.5, color: "rgba(234,240,249,0.6)" }}>median response</span>
+        {matchedAttorney && matchedAttorney.name && (
+          <div className="card rise" style={{ padding: 22, marginBottom: 28, animationDelay: ".2s", background: "var(--pine)", color: "var(--on-pine)" }}>
+            <span className="eyebrow" style={{ color: "var(--gold-soft)" }}>Matched attorney</span>
+            <div className="row" style={{ gap: 14, marginTop: 14 }}>
+              <Avatar name={matchedAttorney.name} size={54} color="var(--gold-deep)" />
+              <div className="stack" style={{ gap: 4 }}>
+                <div className="row" style={{ gap: 7 }}><strong style={{ fontSize: 17 }}>{matchedAttorney.name}</strong><Verified size={16} /></div>
+                <span style={{ fontSize: 13.5, color: "rgba(234,240,249,0.7)" }}>{matchedAttorney.firmName ? `${matchedAttorney.firmName} · ` : ""}{matchedAttorney.yearsExperience ? `${matchedAttorney.yearsExperience} yrs · ` : ""}{CASE_TYPES[data.type]?.label}</span>
+              </div>
+              <div className="stack" style={{ marginLeft: "auto", textAlign: "right" }}>
+                <span className="mono" style={{ fontSize: 18, color: "var(--gold-soft)" }}>{matchedAttorney.responseTimeAvg || "—"}</span>
+                <span style={{ fontSize: 11.5, color: "rgba(234,240,249,0.6)" }}>median response</span>
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         <div className="stack" style={{ gap: 12 }}>
           <button className="btn btn-signal btn-lg" onClick={() => router.push("/client/dashboard")}><Icon name="grid" size={17} /> Go to my case dashboard</button>
@@ -145,6 +147,7 @@ export default function IntakeForm({ inDashboard = false }: { inDashboard?: bool
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [leadResult, setLeadResult] = useState<leadsApi.Lead | null>(null);
+  const [matchedAttorneyResult, setMatchedAttorneyResult] = useState<leadsApi.MatchedAttorney | null>(null);
   const set = <K extends keyof IntakeData>(k: K, v: IntakeData[K]) => setData(d => ({ ...d, [k]: v }));
   const cfg = INTAKE_CONFIG[data.type];
   const prompts = PRACTICE_PROMPTS[data.type];
@@ -192,7 +195,7 @@ export default function IntakeForm({ inDashboard = false }: { inDashboard?: bool
   const score = Math.min(98, 55 + (data.desc.length > 80 ? 18 : 8) + (data.docs?.length || 0) * 5 + (data.urgent ? 10 : 0) + (data.consent ? 6 : 0));
   const urgency = data.urgent === "yes" ? 88 : 60;
 
-  if (step === 5) return <IntakeDone data={data} score={score} urgency={urgency} lead={leadResult} />;
+  if (step === 5) return <IntakeDone data={data} score={score} urgency={urgency} lead={leadResult} matchedAttorney={matchedAttorneyResult} />;
 
   return (
     <div className="thin-scroll" style={{ height: "100vh", overflowY: "auto", background: "var(--paper)" }}>
@@ -419,6 +422,7 @@ export default function IntakeForm({ inDashboard = false }: { inDashboard?: bool
                       channel: "web-intake",
                     });
                     setLeadResult(res.lead);
+                    setMatchedAttorneyResult(res.matchedAttorney || null);
                     setStep(5);
                   } catch (err: unknown) {
                     const msg = err instanceof Error ? err.message : "Something went wrong. Please try again.";

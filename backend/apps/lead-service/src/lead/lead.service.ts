@@ -112,6 +112,10 @@ export class LeadService {
 
       lead.matchedAttorneyId = match.attorneyId;
 
+      // Fetch any uploaded documents to include in the event
+      const docs = await this.database.db.select().from(leadDocuments)
+        .where(eq(leadDocuments.leadId, lead.id));
+
       const matchedEvent: LeadMatchedEvent = {
         leadId: lead.id,
         clientUserId: data.clientUserId,
@@ -126,6 +130,12 @@ export class LeadService {
         urgencyScore: scores.urgencyScore,
         summary,
         city: data.city || '',
+        state: data.state || '',
+        documents: docs.map(d => ({
+          fileKey: d.fileKey || '',
+          fileName: d.fileName,
+          mimeType: d.mimeType || undefined,
+        })),
       };
       this.natsClient.emit(NatsSubjects.LEAD_MATCHED, matchedEvent);
     }

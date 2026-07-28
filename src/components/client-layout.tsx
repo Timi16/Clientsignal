@@ -7,6 +7,7 @@ import { Icon } from "@/components/icons";
 import { Logo, Avatar } from "@/components/ui";
 import { CASE_STATUS, CASE_TYPES } from "@/lib/data";
 import { useAuth } from "@/lib/auth-context";
+import { useSocket } from "@/lib/socket";
 import { ClientCaseContext } from "@/lib/client-case-context";
 export type { ActiveCaseData, ActiveAttorney } from "@/lib/client-case-context";
 import type { ActiveCaseData } from "@/lib/client-case-context";
@@ -104,6 +105,7 @@ export default function ClientLayout({
   const { user, logout } = useAuth();
 
   const { cases, activeCase, attorney, setActiveId } = useActiveCase();
+  const { notifications: socketNotifications, unreadCount: socketUnread, markAllRead } = useSocket();
 
   const userName = user?.name || "User";
 
@@ -111,7 +113,8 @@ export default function ClientLayout({
   const caseType = activeCase ? (CASE_TYPES[activeCase.practiceArea] || { label: activeCase.practiceArea, color: "var(--text-2)", tint: "var(--pine-tint)" }) : null;
   const badges = getBadges(activeCase);
 
-  const notifications = activeCase ? [
+  // Merge case-derived notifications with real-time socket notifications
+  const caseNotifications = activeCase ? [
     ...(activeCase.unreadCount > 0 && attorney ? [{
       title: `${attorney.name.split(" ")[0]} sent a message`,
       body: `${activeCase.unreadCount} unread update on ${activeCase.id}`,
@@ -129,15 +132,18 @@ export default function ClientLayout({
         color: d.status === "requested" ? "var(--amber)" : "var(--coral)",
         href: "/client/documents",
       }))),
-    {
-      title: attorney ? `Matched with ${attorney.name}` : "Attorney matching in progress",
-      body: attorney ? `${caseType?.label} · ${attorney.firmName}` : `${caseType?.label} · searching verified attorneys`,
-      icon: attorney ? "shield" : "clock",
-      color: attorney ? "var(--verified)" : "var(--amber)",
-      href: attorney ? "/client/attorney" : "/client/timeline",
-    },
   ] : [];
-  const notificationCount = notifications.length;
+
+  const realtimeNotifications = socketNotifications.filter(n => !n.read).slice(0, 5).map(n => ({
+    title: n.title,
+    body: n.body,
+    icon: n.icon,
+    color: n.color,
+    href: n.href,
+  }));
+
+  const notifications = [...realtimeNotifications, ...caseNotifications];
+  const notificationCount = socketUnread + caseNotifications.length;
 
   const headerTitle = titleOverride || TITLES[pathname] || "Dashboard";
 
@@ -376,7 +382,7 @@ export default function ClientLayout({
           <div className="row" style={{ gap: 14, position: "relative" }}>
             {action}
             <button
-              onClick={() => setNotificationsOpen(open => !open)}
+              onClick={() => { setNotificationsOpen(open => !open); markAllRead(); }}
               aria-label="Show notifications"
               style={{
                 width: 38,
