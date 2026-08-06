@@ -163,7 +163,7 @@ export default function LeadsPage() {
                           {l.name}
                         </div>
                         <div style={{ fontSize: 12.5, color: "var(--text-3)" }}>
-                          {l.id} &middot; {l.city}{l.state ? `, ${l.state}` : ""} &middot; {formatTime(l.createdAt)}
+                          {l.city}{l.state ? `, ${l.state}` : ""} &middot; {formatTime(l.createdAt)}
                         </div>
                       </div>
                     </div>

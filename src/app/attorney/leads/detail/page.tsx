@@ -81,7 +81,7 @@ export default function LeadDetailPage() {
                   <CaseTag type={lead.practiceArea} sm />
                 </div>
                 <div style={{ fontSize: 13.5, color: "var(--text-3)" }}>
-                  {lead.id} &middot; {lead.city}{lead.state ? `, ${lead.state}` : ""} &middot; {lead.createdAt ? new Date(lead.createdAt).toLocaleDateString() : ""}
+                  {lead.city}{lead.state ? `, ${lead.state}` : ""} &middot; {lead.createdAt ? new Date(lead.createdAt).toLocaleDateString() : ""}
                 </div>
               </div>
             </div>

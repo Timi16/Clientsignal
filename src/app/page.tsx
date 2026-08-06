@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { Icon } from "@/components/icons";
-import { Verified, Avatar, Photo } from "@/components/ui";
+import { Verified, Photo } from "@/components/ui";
 import { TESTIMONIALS } from "@/lib/data";
 import { MarketingNav, Footer } from "@/components/marketing";
 import { useI18n } from "@/lib/i18n";
@@ -36,29 +36,7 @@ export default function HomePage() {
                 <button className="btn btn-ink btn-lg" onClick={() => router.push("/attorney/signup")}>{t.nav.startFreeTrial} <Icon name="arrowR" size={18} /></button>
                 <button className="btn btn-ghost btn-lg" onClick={() => router.push("/demo")}><Icon name="clock" size={17} /> {t.nav.bookADemo}</button>
               </div>
-              <div className="row rise" style={{ gap: 12, marginTop: 4, animationDelay: ".3s", alignItems: "center" }}>
-                <div className="row" style={{ marginLeft: 4 }}>
-                  {["Sarah Mitchell", "David Park", "Elena Reyes", "Carlos Ruiz"].map((n, i) => (
-                    <div key={n} style={{ marginLeft: i ? -10 : 0, border: "2px solid var(--paper)", borderRadius: "50%" }}><Avatar name={n} size={32} /></div>
-                  ))}
-                </div>
-                <div className="stack" style={{ gap: 1 }}>
-                  <div className="row" style={{ gap: 3, color: "var(--gold-deep)" }}>{"★★★★★".split("").map((s, i) => <span key={i} style={{ fontSize: 12 }}>{s}</span>)}</div>
-                </div>
-              </div>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Social proof strip */}
-      <section style={{ borderBottom: "1px solid var(--line)", padding: "22px 0", background: "var(--card)" }}>
-        <div className="wrap stack" style={{ gap: 16 }}>
-          <span className="mono" style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--text-3)", textAlign: "center" }}>{t.home.socialProof}</span>
-          <div className="row" style={{ gap: 18, flexWrap: "wrap", justifyContent: "center", alignItems: "center" }}>
-            {[["shield", t.home.stateBarVerified], ["lock", t.home.soc2], ["check", t.home.abaAligned], ["lock", t.home.encryption], ["scale", t.home.privilegeSafe]].map(([ic, txt]) => (
-              <span key={txt} className="row" style={{ gap: 8, padding: "8px 16px", borderRadius: 999, background: "var(--paper)", border: "1px solid var(--line)", fontSize: 13, fontWeight: 600, color: "var(--text-2)" }}><Icon name={ic} size={15} color="var(--pine)" /> {txt}</span>
-            ))}
           </div>
         </div>
       </section>
@@ -130,10 +108,6 @@ export default function HomePage() {
               <span className="eyebrow">{t.home.trustedBothSides}</span>
               <h2 className="display" style={{ fontSize: "clamp(30px,4.5vw,48px)" }}>{t.home.realOutcomes}</h2>
             </div>
-            <div className="row" style={{ gap: 8 }}>
-              <span className="row" style={{ gap: 3, color: "var(--gold-deep)" }}>{"★★★★★".split("").map((s, i) => <span key={i}>{s}</span>)}</span>
-              <span style={{ fontSize: 14, color: "var(--text-2)", fontWeight: 600 }}>4.9 / 5 · 1,200+ {t.home.reviews}</span>
-            </div>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 22 }} className="feat-grid">
             {TESTIMONIALS.map((tm) => (
@@ -148,7 +122,6 @@ export default function HomePage() {
                   </div>
                 </div>
                 <div style={{ padding: 20 }}>
-                  <div className="row" style={{ gap: 2, color: "var(--gold-deep)", marginBottom: 10 }}>{Array.from({ length: tm.stars }).map((_, j) => <span key={j} style={{ fontSize: 13 }}>★</span>)}</div>
                   <p className="serif" style={{ fontSize: 15.5, lineHeight: 1.55, color: "var(--ink)", fontStyle: "italic" }}>&ldquo;{tm.quote}&rdquo;</p>
                 </div>
               </div>
