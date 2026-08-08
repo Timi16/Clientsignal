@@ -99,9 +99,22 @@ export function Photo({ src, name = "?", w = "100%", h = "100%", radius = 16, ke
   const url = src || PORTRAITS[name];
   const [err, setErr] = useState(false);
   if (!url || err) {
+    const initials = name.split(" ").map(s => s[0]).slice(0, 2).join("").toUpperCase();
     return (
-      <div style={{ width: w, height: h, borderRadius: radius, background: "var(--pine)", display: "grid", placeItems: "center", color: "var(--gold-soft)", fontWeight: 700, fontSize: 28, ...style }}>
-        {name.split(" ").map(s => s[0]).slice(0, 2).join("")}
+      <div style={{
+        width: w, height: h, borderRadius: radius, position: "relative", overflow: "hidden",
+        background: "radial-gradient(120% 120% at 30% 20%, rgba(184,135,15,0.22) 0%, var(--pine) 55%)",
+        display: "grid", placeItems: "center", ...style,
+      }}>
+        <span aria-hidden style={{
+          position: "absolute", right: "-6%", bottom: "-14%", fontWeight: 800, lineHeight: 1,
+          fontSize: "clamp(90px, 42%, 240px)", color: "rgba(255,255,255,0.05)", letterSpacing: "-0.04em",
+        }}>{initials}</span>
+        <span style={{
+          width: 74, height: 74, borderRadius: "50%", display: "grid", placeItems: "center",
+          background: "rgba(255,255,255,0.08)", border: "1.5px solid rgba(184,135,15,0.4)",
+          color: "var(--gold-soft)", fontWeight: 700, fontSize: 26, letterSpacing: "-0.02em", position: "relative",
+        }}>{initials}</span>
       </div>
     );
   }

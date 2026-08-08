@@ -45,12 +45,12 @@ export const INTEGRATIONS = [
 export const PORTRAITS: Record<string, string> = {};
 
 export const TESTIMONIALS = [
-  { name: "Sarah Mitchell", role: "Partner · Mitchell & Cole LLP", photo: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=600&h=750&fit=crop&crop=faces", quote: "We respond to matched leads in under four minutes. ClientSignal paid for itself in the first week — the lead quality is simply better.", area: "Personal Injury", stars: 5 },
-  { name: "Andre Coleman", role: "Founder · Coleman Defense", photo: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=600&h=750&fit=crop&crop=faces", quote: "Every lead is verified and exclusive. I'm not fighting nine other firms for the same client anymore — it's just mine.", area: "Criminal Law", stars: 5 },
-  { name: "Claire Donovan", role: "Managing Attorney · Donovan Family Law", photo: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=600&h=750&fit=crop&crop=faces", quote: "The intake scoring tells me exactly where to spend my time. My consult-to-retainer rate is up 40% since we switched.", area: "Family Law", stars: 5 },
-  { name: "Imani Brooks", role: "Client · matched in Atlanta", photo: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=600&h=750&fit=crop&crop=faces", quote: "I described what happened once and a real, licensed attorney called me within minutes. It took the fear out of the whole thing.", area: "Employment Law", stars: 5 },
-  { name: "Thomas Reyes", role: "Partner · Reyes & Associates", photo: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=600&h=750&fit=crop&crop=faces", quote: "The CRM sync into Clio is seamless. Accepted leads land as matters automatically — zero copy-paste.", area: "Immigration", stars: 5 },
-  { name: "Jasmine Hale", role: "Solo Practitioner", photo: "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=600&h=750&fit=crop&crop=faces", quote: "As a solo, this is the marketing department I could never afford. Predictable, qualified clients every week.", area: "Employment Law", stars: 5 },
+  { name: "Sarah Mitchell", role: "Partner · Mitchell & Cole LLP", photo: "", quote: "We respond to matched leads in under four minutes. ClientSignal paid for itself in the first week — the lead quality is simply better.", area: "Personal Injury", stars: 5 },
+  { name: "Andre Coleman", role: "Founder · Coleman Defense", photo: "", quote: "Every lead is verified and exclusive. I'm not fighting nine other firms for the same client anymore — it's just mine.", area: "Criminal Law", stars: 5 },
+  { name: "Claire Donovan", role: "Managing Attorney · Donovan Family Law", photo: "", quote: "The intake scoring tells me exactly where to spend my time. My consult-to-retainer rate is up 40% since we switched.", area: "Family Law", stars: 5 },
+  { name: "Imani Brooks", role: "Client · matched in Atlanta", photo: "", quote: "I described what happened once and a real, licensed attorney called me within minutes. It took the fear out of the whole thing.", area: "Employment Law", stars: 5 },
+  { name: "Thomas Reyes", role: "Partner · Reyes & Associates", photo: "", quote: "The CRM sync into Clio is seamless. Accepted leads land as matters automatically — zero copy-paste.", area: "Immigration", stars: 5 },
+  { name: "Jasmine Hale", role: "Solo Practitioner", photo: "", quote: "As a solo, this is the marketing department I could never afford. Predictable, qualified clients every week.", area: "Employment Law", stars: 5 },
 ];
 
 export const INTAKE_CONFIG: Record<string, { q: string; opts: string[]; extra: string; urgent: string }> = {
