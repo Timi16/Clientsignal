@@ -1,4 +1,4 @@
-import { ArgumentsHost, Catch, ExceptionFilter, HttpStatus } from '@nestjs/common';
+import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { Response } from 'express';
 
@@ -31,6 +31,15 @@ export class RpcExceptionFilter implements ExceptionFilter {
 
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
     let message = 'Internal server error';
+
+    // HttpExceptions (guards, pipes, controllers) already carry the right status — pass through
+    if (exception instanceof HttpException) {
+      const res = exception.getResponse();
+      response.status(exception.getStatus()).json(
+        typeof res === 'object' ? res : { statusCode: exception.getStatus(), message: res },
+      );
+      return;
+    }
 
     if (exception instanceof RpcException) {
       const error = exception.getError();

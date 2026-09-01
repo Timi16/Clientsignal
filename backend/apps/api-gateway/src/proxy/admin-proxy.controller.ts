@@ -113,7 +113,7 @@ export class AdminProxyController implements OnModuleInit {
     );
   }
 
-  @Get('leads/qa')
+  @Get('leads')
   async adminListLeads(
     @Query('status') status?: string,
     @Query('limit') limit?: string,
@@ -143,7 +143,7 @@ export class AdminProxyController implements OnModuleInit {
     );
   }
 
-  @Get('audit-log')
+  @Get('audit-logs')
   async listAuditLogs(
     @Query('userId') userId?: string,
     @Query('limit') limit?: string,

@@ -21,7 +21,8 @@ export async function getVerificationQueue(params?: {
   const p: Record<string, string> = {};
   if (params?.limit) p.limit = String(params.limit);
   if (params?.offset) p.offset = String(params.offset);
-  return get<{ verifications: Verification[]; total: number }>("/admin/verifications", { params: p });
+  const res = await get<{ verifications?: Verification[]; total?: number }>("/admin/verifications", { params: p });
+  return { verifications: res.verifications ?? [], total: res.total ?? 0 };
 }
 
 export async function decideVerification(data: {
@@ -52,7 +53,8 @@ export async function listAttorneys(params?: {
   if (params?.status) p.status = params.status;
   if (params?.limit) p.limit = String(params.limit);
   if (params?.offset) p.offset = String(params.offset);
-  return get<{ attorneys: Attorney[]; total: number }>("/admin/attorneys", { params: p });
+  const res = await get<{ attorneys?: Attorney[]; total?: number }>("/admin/attorneys", { params: p });
+  return { attorneys: res.attorneys ?? [], total: res.total ?? 0 };
 }
 
 export async function adminListLeads(params?: {
@@ -64,7 +66,8 @@ export async function adminListLeads(params?: {
   if (params?.status) p.status = params.status;
   if (params?.limit) p.limit = String(params.limit);
   if (params?.offset) p.offset = String(params.offset);
-  return get<{ leads: Lead[]; total: number }>("/admin/leads", { params: p });
+  const res = await get<{ leads?: Lead[]; total?: number }>("/admin/leads", { params: p });
+  return { leads: res.leads ?? [], total: res.total ?? 0 };
 }
 
 export async function updateLeadQA(leadId: string, data: {
@@ -86,5 +89,6 @@ export async function listAuditLogs(params?: {
   if (params?.action) p.action = params.action;
   if (params?.limit) p.limit = String(params.limit);
   if (params?.offset) p.offset = String(params.offset);
-  return get<{ logs: unknown[]; total: number }>("/admin/audit-logs", { params: p });
+  const res = await get<{ logs?: unknown[]; total?: number }>("/admin/audit-logs", { params: p });
+  return { logs: res.logs ?? [], total: res.total ?? 0 };
 }
