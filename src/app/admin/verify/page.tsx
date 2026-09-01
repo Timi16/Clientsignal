@@ -59,9 +59,9 @@ export default function AdminVerify() {
   }
 
   const v = queue[sel];
-  const name = v.attorney?.name || v.attorney?.user?.name || "Unknown";
+  const name = v.attorney?.name || "Unknown";
   const bar = v.attorney?.barNumber || "";
-  const firm = v.attorney?.firmName || v.attorney?.firm?.name || "";
+  const firm = v.attorney?.firmName || "";
   const rating = v.attorney?.trustRating || "yellow";
   const specialties = v.attorney?.specialties || [];
   const joined = v.createdAt ? new Date(v.createdAt).toLocaleDateString("en-US", { month: "short", year: "numeric" }) : "";
@@ -98,7 +98,7 @@ export default function AdminVerify() {
       <div style={{ display: "grid", gridTemplateColumns: "330px 1fr", margin: "-32px -32px -48px", minHeight: "calc(100vh - 72px)" }}>
         <div className="thin-scroll" style={{ borderRight: "1px solid var(--line)", overflowY: "auto", background: "var(--card)" }}>
           {queue.map((q, i) => {
-            const qName = q.attorney?.name || q.attorney?.user?.name || "Unknown";
+            const qName = q.attorney?.name || "Unknown";
             const qBar = q.attorney?.barNumber || "";
             return (
               <button key={q.id} onClick={() => setSel(i)} className="row between" style={{ width: "100%", padding: "16px 18px", borderBottom: "1px solid var(--line)", textAlign: "left", background: sel === i ? "var(--pine-tint)" : "transparent" }}>

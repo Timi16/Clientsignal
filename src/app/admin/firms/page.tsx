@@ -40,8 +40,8 @@ export default function AdminFirms() {
         )}
 
         {!loading && attorneys.map((a, i) => {
-          const name = a.user?.name ?? "Unknown";
-          const firmName = a.firm?.name ?? "—";
+          const name = a.name || "Unknown";
+          const firmName = a.firmName || "—";
           const rating = RATING[a.trustRating] ?? RATING.green;
           const specialties = a.specialties ?? [];
 
