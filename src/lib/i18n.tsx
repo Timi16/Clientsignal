@@ -4,22 +4,16 @@ import { createContext, useContext, useState, useEffect, useCallback, type React
 
 import en from "./translations/en.json";
 import es from "./translations/es.json";
-import yo from "./translations/yo.json";
-import ig from "./translations/ig.json";
-import ha from "./translations/ha.json";
 
 /* ===== Types ===== */
-export type Locale = "en" | "es" | "yo" | "ig" | "ha";
+export type Locale = "en" | "es";
 type Translations = typeof en;
 
-const TRANSLATIONS: Record<Locale, Translations> = { en, es, yo, ig, ha };
+const TRANSLATIONS: Record<Locale, Translations> = { en, es };
 
 export const LANGUAGES: { code: Locale; name: string; native: string; flag: string }[] = [
   { code: "en", name: "English",  native: "English",  flag: "🇬🇧" },
   { code: "es", name: "Spanish",  native: "Español",  flag: "🇪🇸" },
-  { code: "yo", name: "Yoruba",   native: "Yorùbá",   flag: "🇳🇬" },
-  { code: "ig", name: "Igbo",     native: "Igbo",     flag: "🇳🇬" },
-  { code: "ha", name: "Hausa",    native: "Hausa",    flag: "🇳🇬" },
 ];
 
 const STORAGE_KEY = "clientsignal-lang";
