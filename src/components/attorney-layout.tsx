@@ -17,7 +17,7 @@ const NAV = [
   { label: "Case notes", icon: "doc", href: "/attorney/notes" },
   { label: "Analytics", icon: "chart", href: "/attorney/analytics" },
   { label: "Intake builder", icon: "pen", href: "/attorney/builder" },
-  { label: "Integrations", icon: "plug", href: "/attorney/integrations" },
+  { label: "Connectors", icon: "plug", href: "/attorney/integrations" },
   { label: "Billing", icon: "card", href: "/attorney/billing" },
   { label: "Settings", icon: "settings", href: "/attorney/settings" },
 ];

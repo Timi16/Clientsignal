@@ -84,7 +84,7 @@ export async function listIntegrations(): Promise<{ integrations: Integration[] 
 }
 
 export async function toggleIntegration(name: string, connected: boolean): Promise<{ integration: Integration }> {
-  return post<{ integration: Integration }>(`/attorneys/integrations/${name}/toggle`, {
+  return post<{ integration: Integration }>(`/attorneys/integrations/${encodeURIComponent(name)}/toggle`, {
     body: { connected },
   });
 }

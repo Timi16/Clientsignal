@@ -14,6 +14,7 @@ export class AuthController {
     role: string;
     ipAddress: string;
     userAgent: string;
+    termsVersion?: string;
   }) {
     return this.auth.register(data);
   }

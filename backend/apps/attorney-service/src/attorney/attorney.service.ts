@@ -462,15 +462,25 @@ export class AttorneyService {
       .where(eq(attorneyIntegrations.attorneyId, data.attorneyId));
 
     const connectedNames = new Set(rows.filter((r) => r.connected).map((r) => r.integrationName));
+    const defaultNames = new Set(DEFAULT_INTEGRATIONS.map((i) => i.name));
+
+    // The full connector catalog lives in the web app; connections to connectors
+    // outside the defaults are returned by name so their state survives a reload.
+    const extras = [...connectedNames]
+      .filter((name) => !defaultNames.has(name))
+      .map((name) => ({ name, description: '', category: '', connected: true, color: '' }));
 
     return {
-      integrations: DEFAULT_INTEGRATIONS.map((i) => ({
-        name: i.name,
-        description: i.description,
-        category: i.category,
-        connected: connectedNames.has(i.name),
-        color: i.color,
-      })),
+      integrations: [
+        ...DEFAULT_INTEGRATIONS.map((i) => ({
+          name: i.name,
+          description: i.description,
+          category: i.category,
+          connected: connectedNames.has(i.name),
+          color: i.color,
+        })),
+        ...extras,
+      ],
     };
   }
 

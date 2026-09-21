@@ -21,6 +21,7 @@ export async function register(data: {
   name: string;
   password: string;
   role: "client" | "attorney" | "admin";
+  termsVersion?: string;
 }): Promise<AuthResponse> {
   const res = await post<AuthResponse>("/auth/register", { body: data });
   setToken(res.accessToken);

@@ -56,7 +56,7 @@ export class AuthProxyController implements OnModuleInit {
   @Post('register')
   @Throttle({ default: { ttl: 60000, limit: 5 } })
   async register(
-    @Body() body: { email: string; name: string; password: string; role?: string },
+    @Body() body: { email: string; name: string; password: string; role?: string; termsVersion?: string },
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
@@ -68,6 +68,7 @@ export class AuthProxyController implements OnModuleInit {
         role: body.role || 'client',
         ipAddress: req.ip || '',
         userAgent: req.headers['user-agent'] || '',
+        termsVersion: typeof body.termsVersion === 'string' ? body.termsVersion.slice(0, 40) : '',
       }),
     );
 

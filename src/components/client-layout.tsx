@@ -53,6 +53,7 @@ const NAV = [
   { label: "Documents", icon: "doc", href: "/client/documents", badgeKey: "docs" as const },
   { label: "Messages", icon: "message", href: "/client/messages", badgeKey: "msgs" as const },
   { label: "My Attorney", icon: "user", href: "/client/attorney" },
+  { label: "Connectors", icon: "plug", href: "/client/connectors" },
   { label: "Settings", icon: "settings", href: "/client/settings" },
 ];
 
@@ -63,6 +64,7 @@ const TITLES: Record<string, string> = {
   "/client/documents": "Documents",
   "/client/messages": "Messages",
   "/client/attorney": "My Attorney",
+  "/client/connectors": "Connectors",
   "/client/settings": "Settings",
   "/client/new-case": "New Case",
 };

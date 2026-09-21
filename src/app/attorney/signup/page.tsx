@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { Logo, Avatar, Verified, Field, LField, inpStyle } from "@/components/ui";
 import { Icon } from "@/components/icons";
 import { useAuth } from "@/lib/auth-context";
+import { TermsModal } from "@/components/terms-modal";
+import { TERMS_VERSION, type LegalDoc } from "@/lib/legal";
 
 /* ---------- AuthBrandPanel (attorney variant) ---------- */
 function AuthBrandPanel() {
@@ -127,6 +129,22 @@ export default function AttorneySignup() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [termsOpen, setTermsOpen] = useState(false);
+  const [readDoc, setReadDoc] = useState<LegalDoc | null>(null);
+
+  const createAccount = async () => {
+    setError("");
+    setLoading(true);
+    try {
+      await register(email, name, password, "attorney", TERMS_VERSION);
+      router.push("/verify-email");
+    } catch (err: unknown) {
+      setTermsOpen(false);
+      setError(err instanceof Error ? err.message : "Registration failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div
@@ -244,23 +262,28 @@ export default function AttorneySignup() {
               </div>
             )}
 
+            {/* Terms notice — full acceptance happens in the popup */}
+            <p style={{ fontSize: 13, color: "var(--text-3)", lineHeight: 1.5 }}>
+              You&apos;ll be asked to review and accept our{" "}
+              <button type="button" onClick={() => setReadDoc("terms")} style={{ color: "var(--signal)", fontWeight: 600, fontSize: 13, cursor: "pointer" }}>
+                Terms of Service
+              </button>{" "}
+              and{" "}
+              <button type="button" onClick={() => setReadDoc("privacy")} style={{ color: "var(--signal)", fontWeight: 600, fontSize: 13, cursor: "pointer" }}>
+                Privacy Policy
+              </button>{" "}
+              before your account is created.
+            </p>
+
             {/* Submit */}
             <button
               className="btn btn-signal btn-lg"
               style={{ width: "100%", marginTop: 4, opacity: loading ? 0.7 : 1 }}
               disabled={loading}
-              onClick={async () => {
+              onClick={() => {
                 setError("");
                 if (!name || !email || !password) { setError("Please fill in all required fields."); return; }
-                setLoading(true);
-                try {
-                  await register(email, name, password, "attorney");
-                  router.push("/verify-email");
-                } catch (err: unknown) {
-                  setError(err instanceof Error ? err.message : "Registration failed. Please try again.");
-                } finally {
-                  setLoading(false);
-                }
+                setTermsOpen(true);
               }}
             >
               {loading ? "Creating account..." : "Create account & continue"}
@@ -291,6 +314,22 @@ export default function AttorneySignup() {
           </p>
         </div>
       </div>
+
+      {/* Terms & Conditions popup — must be accepted before the account is created */}
+      <TermsModal
+        open={termsOpen}
+        role="attorney"
+        loading={loading}
+        onClose={() => setTermsOpen(false)}
+        onAccept={createAccount}
+      />
+      <TermsModal
+        open={readDoc !== null}
+        role="attorney"
+        mode="read"
+        initialDoc={readDoc ?? "terms"}
+        onClose={() => setReadDoc(null)}
+      />
     </div>
   );
 }

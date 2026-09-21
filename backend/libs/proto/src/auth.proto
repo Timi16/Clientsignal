@@ -25,6 +25,7 @@ message RegisterRequest {
   string role = 4;
   string ip_address = 5;
   string user_agent = 6;
+  string terms_version = 7;
 }
 
 message LoginRequest {

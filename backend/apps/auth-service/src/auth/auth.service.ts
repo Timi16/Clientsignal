@@ -27,6 +27,7 @@ export class AuthService {
     role?: string;
     ipAddress?: string;
     userAgent?: string;
+    termsVersion?: string;
   }) {
     const role = (data.role as 'client' | 'attorney' | 'admin') || 'client';
     this.assertSelfRegistrableRole(role);
@@ -52,6 +53,12 @@ export class AuthService {
     }).returning();
 
     await this.audit(user.id, 'auth.register', data.ipAddress, data.userAgent);
+    if (data.termsVersion) {
+      // Clickwrap record: which version of the Terms/Privacy Policy was accepted, when, and from where
+      await this.audit(user.id, 'auth.terms_accepted', data.ipAddress, data.userAgent, {
+        termsVersion: data.termsVersion,
+      });
+    }
 
     // Generate email verification token
     const verifyToken = randomBytes(32).toString('base64url');
@@ -409,10 +416,17 @@ export class AuthService {
     }
   }
 
-  private async audit(userId: string, action: string, ipAddress?: string, userAgent?: string) {
+  private async audit(
+    userId: string,
+    action: string,
+    ipAddress?: string,
+    userAgent?: string,
+    metadata?: Record<string, unknown>,
+  ) {
     await this.database.db.insert(auditLogs).values({
       userId,
       action,
+      metadata: metadata ? JSON.stringify(metadata) : null,
       ipAddress: ipAddress || null,
       userAgent: userAgent || null,
     });

@@ -6,6 +6,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Logo, Field } from "@/components/ui";
 import { Icon } from "@/components/icons";
 import { useAuth } from "@/lib/auth-context";
+import { TermsModal } from "@/components/terms-modal";
+import { TERMS_VERSION, type LegalDoc } from "@/lib/legal";
 
 export default function ClientSignup() {
   const router = useRouter();
@@ -17,6 +19,22 @@ export default function ClientSignup() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [termsOpen, setTermsOpen] = useState(false);
+  const [readDoc, setReadDoc] = useState<LegalDoc | null>(null);
+
+  const createAccount = async () => {
+    setError("");
+    setLoading(true);
+    try {
+      await register(email, name, password, "client", TERMS_VERSION);
+      router.push(returnTo || "/verify-email");
+    } catch (err: unknown) {
+      setTermsOpen(false);
+      setError(err instanceof Error ? err.message : "Registration failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div
@@ -177,59 +195,28 @@ export default function ClientSignup() {
               </div>
             )}
 
-            {/* Terms */}
-            <label
-              className="row"
-              style={{
-                gap: 8,
-                fontSize: 13,
-                color: "var(--text-2)",
-                cursor: "pointer",
-                lineHeight: 1.4,
-                alignItems: "flex-start",
-              }}
-            >
-              <input
-                type="checkbox"
-                style={{
-                  width: 16,
-                  height: 16,
-                  borderRadius: 4,
-                  accentColor: "var(--signal)",
-                  cursor: "pointer",
-                  marginTop: 2,
-                  flexShrink: 0,
-                }}
-              />
-              <span>
-                I agree to the{" "}
-                <span style={{ color: "var(--signal)", fontWeight: 600 }}>
-                  Terms of Service
-                </span>{" "}
-                and{" "}
-                <span style={{ color: "var(--signal)", fontWeight: 600 }}>
-                  Privacy Policy
-                </span>
-              </span>
-            </label>
+            {/* Terms notice — full acceptance happens in the popup */}
+            <p style={{ fontSize: 13, color: "var(--text-3)", lineHeight: 1.5 }}>
+              You&apos;ll be asked to review and accept our{" "}
+              <button type="button" onClick={() => setReadDoc("terms")} style={{ color: "var(--signal)", fontWeight: 600, fontSize: 13, cursor: "pointer" }}>
+                Terms of Service
+              </button>{" "}
+              and{" "}
+              <button type="button" onClick={() => setReadDoc("privacy")} style={{ color: "var(--signal)", fontWeight: 600, fontSize: 13, cursor: "pointer" }}>
+                Privacy Policy
+              </button>{" "}
+              before your account is created.
+            </p>
 
             {/* Create account */}
             <button
               className="btn btn-signal btn-lg"
               style={{ width: "100%", marginTop: 4, opacity: loading ? 0.7 : 1 }}
               disabled={loading}
-              onClick={async () => {
+              onClick={() => {
                 setError("");
                 if (!name || !email || !password) { setError("Please fill in all required fields."); return; }
-                setLoading(true);
-                try {
-                  await register(email, name, password, "client");
-                  router.push(returnTo || "/verify-email");
-                } catch (err: unknown) {
-                  setError(err instanceof Error ? err.message : "Registration failed. Please try again.");
-                } finally {
-                  setLoading(false);
-                }
+                setTermsOpen(true);
               }}
             >
               {loading ? "Creating account..." : "Create account"}
@@ -260,6 +247,22 @@ export default function ClientSignup() {
           </p>
         </div>
       </div>
+
+      {/* Terms & Conditions popup — must be accepted before the account is created */}
+      <TermsModal
+        open={termsOpen}
+        role="client"
+        loading={loading}
+        onClose={() => setTermsOpen(false)}
+        onAccept={createAccount}
+      />
+      <TermsModal
+        open={readDoc !== null}
+        role="client"
+        mode="read"
+        initialDoc={readDoc ?? "terms"}
+        onClose={() => setReadDoc(null)}
+      />
     </div>
   );
 }

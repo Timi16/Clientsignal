@@ -33,15 +33,6 @@ export const ATTORNEYS: Attorney[] = [
   { name: "Carlos Ruiz", firm: "Ruiz Defense Group", bar: "AZ #029318", specialties: ["criminal"], status: "review", rating: "yellow", leads: 0, responseTime: "—", joined: "May 2026" },
 ];
 
-export const INTEGRATIONS = [
-  { name: "Clio", desc: "Sync leads to your Clio Grow pipeline", cat: "CRM", connected: true, color: "#1E64D7" },
-  { name: "MyCase", desc: "Create matters from accepted leads", cat: "CRM", connected: false, color: "#0EA5A5" },
-  { name: "Lawmatics", desc: "Trigger intake automations", cat: "Marketing", connected: false, color: "#6D4AFF" },
-  { name: "Calendly", desc: "Auto-book consults from messages", cat: "Scheduling", connected: true, color: "#1A1A1A" },
-  { name: "Twilio", desc: "Custom SMS alert routing", cat: "Comms", connected: false, color: "#E1153C" },
-  { name: "Zapier", desc: "Connect 6,000+ apps", cat: "Automation", connected: false, color: "#FF4F00" },
-];
-
 export const PORTRAITS: Record<string, string> = {};
 
 export const TESTIMONIALS = [
