@@ -80,6 +80,41 @@ const DOMAINS = {
   "Adobe Scan": "adobe.com", "Microsoft Lens": "microsoft.com", "Genius Scan": "thegrizzlylabs.com", "CamScanner": "camscanner.com",
 };
 
+/* Explicit sources for brands whose sites block icon requests.
+   png: official icon URL · si: Simple Icons slug (CC0 brand glyph, tinted with the brand colour) */
+const G = "https://ssl.gstatic.com/images/branding/product/2x";
+const OVERRIDES = {
+  "Google Drive": { png: `${G}/drive_2020q4_48dp.png` },
+  "Gmail": { png: `${G}/gmail_2020q4_48dp.png` },
+  "Google Calendar": { png: `${G}/calendar_2020q4_48dp.png` },
+  "Google Analytics": { png: `${G}/analytics_48dp.png` },
+  "Google Photos": { png: `${G}/photos_48dp.png` },
+  "Google Pay": { si: "googlepay", v: 13, color: "#4285F4" },
+  "Slack": { si: "slack", v: 11, color: "#4A154B" },
+  "Salesforce": { si: "salesforce", v: 11, color: "#00A1E0" },
+  "Dropbox": { si: "dropbox", v: 13, color: "#0061FF" },
+  "WhatsApp": { si: "whatsapp", v: 13, color: "#25D366" },
+  "Meta Ads": { si: "meta", v: 13, color: "#0467DF" },
+  "Outlook": { si: "microsoftoutlook", v: 11, color: "#0078D4" },
+  "Outlook Calendar": { si: "microsoftoutlook", v: 11, color: "#0078D4" },
+  "Gusto": { si: "gusto", v: 13, color: "#F45D48" },
+  "Yahoo Mail": { domain: "yahoo.com" },
+};
+
+async function fetchOverride(o) {
+  if (o.png) { const hit = await tryPng(o.png); return hit && { ...hit, ext: "png" }; }
+  if (o.si) {
+    const res = await get(`https://cdn.jsdelivr.net/npm/simple-icons@v${o.v}/icons/${o.si}.svg`);
+    if (!res) return null;
+    const svg = (await res.text()).replace("<svg ", `<svg fill="${o.color}" `);
+    return svg.includes("<path") ? { buf: Buffer.from(svg), w: "svg", ext: "svg" } : null;
+  }
+  return null;
+}
+
+/* Sites that serve a placeholder (spinner, blank avatar) instead of a logo — use the initials tile */
+const NO_LOGO = new Set(["CoCounsel", "InfoTrack", "Westlaw", "CLEAR", "Posh", "Acuity Scheduling"]);
+
 const UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126 Safari/537.36";
 
 /** Width of a PNG from its IHDR chunk, or 0 if the buffer isn't a PNG */
@@ -144,18 +179,22 @@ const entries = Object.entries(DOMAINS);
 
 for (let i = 0; i < entries.length; i += 4) {
   await Promise.all(entries.slice(i, i + 4).map(async ([name, domain]) => {
-    const file = path.join(OUT, `${slug(name)}.png`);
-    if (!FORCE && existsSync(file)) return report.skipped.push(name);
-    const logo = await fetchLogo(domain);
-    if (!logo) return report.failed.push(`${name} (${domain})`);
-    await writeFile(file, logo.buf);
+    if (NO_LOGO.has(name)) return;
+    const base = path.join(OUT, slug(name));
+    if (!FORCE && (existsSync(`${base}.png`) || existsSync(`${base}.svg`))) return report.skipped.push(name);
+    const o = OVERRIDES[name];
+    const logo = (o && !o.domain ? await fetchOverride(o) : null) ?? { ext: "png", ...(await fetchLogo(o?.domain ?? domain)) };
+    if (!logo.buf) return report.failed.push(`${name} (${domain})`);
+    await writeFile(`${base}.${logo.ext}`, logo.buf);
     report.ok.push(`${name} ${logo.w}px`);
   }));
 }
 
-const slugs = (await readdir(OUT)).filter(f => f.endsWith(".png")).map(f => f.slice(0, -4)).sort();
+// manifest: slug -> file extension
+const files = (await readdir(OUT)).filter(f => /\.(png|svg)$/.test(f)).sort();
+const slugs = Object.fromEntries(files.map(f => [f.slice(0, -4), f.slice(-3)]));
 await writeFile(MANIFEST, JSON.stringify(slugs, null, 2) + "\n");
 
 console.log(`downloaded ${report.ok.length}, already had ${report.skipped.length}, failed ${report.failed.length}`);
 if (report.failed.length) console.log("no usable logo (initials tile will be used):\n  " + report.failed.join("\n  "));
-console.log(`manifest: ${slugs.length} logos -> ${path.relative(ROOT, MANIFEST)}`);
+console.log(`manifest: ${files.length} logos -> ${path.relative(ROOT, MANIFEST)}`);

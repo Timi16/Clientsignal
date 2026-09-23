@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Icon } from "@/components/icons";
 import { inpStyle } from "@/components/ui";
-import { connectorCategories, type Connector } from "@/lib/connectors";
+import { connectorCategories, connectorLogo, type Connector } from "@/lib/connectors";
 
 type View = "all" | "connected" | "popular";
 
@@ -20,6 +20,22 @@ function isLight(hex: string) {
 }
 
 function ConnectorLogo({ c, size = 44 }: { c: Connector; size?: number }) {
+  const src = connectorLogo(c.name);
+  if (src) {
+    return (
+      <div
+        aria-hidden="true"
+        style={{
+          width: size, height: size, borderRadius: size * 0.27, flexShrink: 0,
+          background: "#fff", border: "1px solid var(--line)",
+          display: "grid", placeItems: "center", overflow: "hidden",
+        }}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element -- static brand icons, no optimization needed */}
+        <img src={src} alt="" width={size * 0.72} height={size * 0.72} style={{ objectFit: "contain" }} />
+      </div>
+    );
+  }
   return (
     <div
       aria-hidden="true"

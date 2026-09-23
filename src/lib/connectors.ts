@@ -2,6 +2,8 @@
    `name` is the stable identifier stored against the account, so don't rename
    an entry without migrating saved connections. */
 
+import LOGOS from "./connector-logos.json";
+
 export interface Connector {
   name: string;
   desc: string;
@@ -254,6 +256,17 @@ export const CLIENT_CONNECTORS: Connector[] = build({
     ["CamScanner", "Scan and upload documents", "#1BBF83"],
   ],
 }, CLIENT_ACCESS);
+
+/** File-name form of a connector name; keep in sync with scripts/fetch-connector-logos.mjs */
+export function connectorSlug(name: string): string {
+  return name.toLowerCase().replace(/&/g, " and ").replace(/\+/g, " plus ").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+}
+
+/** Path to the connector's logo under /public, or null when only the initials tile exists */
+export function connectorLogo(name: string): string | null {
+  const ext = (LOGOS as Record<string, string>)[connectorSlug(name)];
+  return ext ? `/connectors/${connectorSlug(name)}.${ext}` : null;
+}
 
 export function connectorCategories(list: Connector[]): string[] {
   return Array.from(new Set(list.map(c => c.cat)));
